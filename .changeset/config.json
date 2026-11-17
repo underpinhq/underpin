@@ -8,5 +8,6 @@
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
   "ignore": ["@underpin/ui"],
-  "privatePackages": { "version": false, "tag": false }
+  "privatePackages": { "version": false, "tag": false },
+  "bumpVersionsWithWorkspaceProtocolOnly": true
 }
