@@ -1,0 +1,72 @@
+{
+  "name": "@dirstack/utils",
+  "version": "3.4.0",
+  "description": "A lightweight set of utilities",
+  "keywords": [
+    "helpers",
+    "typescript",
+    "utilities",
+    "utils"
+  ],
+  "homepage": "https://github.com/dirstack/utils#readme",
+  "bugs": "https://github.com/dirstack/utils/issues",
+  "license": "MIT",
+  "author": {
+    "name": "Piotr Kulpinski",
+    "email": "piotr@kulpinski.pl",
+    "url": "https://kulpinski.pl"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dirstack/utils.git"
+  },
+  "files": [
+    "dist",
+    "src",
+    "!src/**/*.test.ts"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./*": "./dist/*/*.js",
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "test": "bun test",
+    "test:node": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "lint": "oxlint --fix .",
+    "format": "oxfmt --write .",
+    "prepare": "lefthook install || true"
+  },
+  "dependencies": {
+    "@sindresorhus/slugify": "^3.0.1"
+  },
+  "devDependencies": {
+    "@arethetypeswrong/core": "^0.18.5",
+    "@changesets/cli": "^3.0.3",
+    "@commitlint/cli": "^21.2.3",
+    "@commitlint/config-conventional": "^21.2.3",
+    "@dirstack/kodeks": "1.11.0",
+    "@types/bun": "^1.2.21",
+    "esbuild": "^0.27.3",
+    "lefthook": "^2.1.17",
+    "oxfmt": "^0.72.0",
+    "oxlint": "^1.87.0",
+    "publint": "^0.3.25",
+    "tsdown": "^0.23.0",
+    "typescript": "^5.9.3",
+    "vitest": "^5.0.3"
+  },
+  "engines": {
+    "node": ">=22.12"
+  }
+}
