@@ -1,0 +1,36 @@
+name: Release
+
+# The reusable workflows are called by path, so a release runs the workflow files of the commit
+# being released.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  version:
+    # A manual run can target any branch, so only main may version or publish.
+    if: github.ref == 'refs/heads/main'
+    permissions:
+      contents: write
+      pull-requests: write
+    uses: ./.github/workflows/public-version.yml
+    with:
+      # The changelog module is this package's own build output, so the script builds first.
+      version-command: bun run version-packages
+
+  release:
+    if: github.ref == 'refs/heads/main'
+    permissions:
+      contents: write
+      id-token: write
+    uses: ./.github/workflows/public-release.yml
+    with:
+      # CI does not run on the "Version Packages" pull request, so check again before publishing.
+      build-command: bun run lint && bun run format:check && bun run typecheck && bun run test && bun run build
+      # Runs this repository's own build, never a published version of the CLI.
+      publish-command: node dist/cli/underpin.js publish
