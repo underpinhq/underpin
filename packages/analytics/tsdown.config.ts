@@ -10,6 +10,7 @@ export default defineConfig({
     "src/client-ip/client-ip.ts",
     "src/geo/geo.ts",
     "src/favicon/favicon.ts",
+    "src/referrer/referrer.ts",
   ],
   format: "esm",
   platform: "node",

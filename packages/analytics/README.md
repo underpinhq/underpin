@@ -98,6 +98,33 @@ const favicon = await findFavicon("example.com", providers)
 
 Every provider reads the image type from the bytes and accepts PNG, ICO, GIF, JPEG and WebP up to 128 KB. An SVG can carry script, so it is never accepted. `resolveLandingHost(url)` follows a short link's redirects with guarded `HEAD` requests and returns the host it lands on, to ask a provider about. A landing site that refuses `HEAD` still counts.
 
+## `@underpin/analytics/referrer`
+
+```ts
+import { createReferrerClassifier, type ReferrerDataset } from "@underpin/analytics/referrer"
+import dataset from "./data/referers.json" with { type: "json" }
+
+const { resolveReferrer } = createReferrerClassifier(dataset as ReferrerDataset)
+
+resolveReferrer({ referrer: "https://news.ycombinator.com/item?id=1" }, { domain: "example.com" })
+// { domain: "news.ycombinator.com", source: "Hacker News", channel: "Organic Social" }
+resolveReferrer({ utm_source: "newsletter", utm_medium: "email" })
+// { domain: "", source: "newsletter", channel: "Email" }
+```
+
+It names the source of a visit (Google, Hacker News, the raw host when unknown) and a GA4-style default channel: Direct, Organic Search, Paid Search, Organic Social, Paid Social, Email, Referral, Affiliate, Display, AI or Other. `resolveReferrer` folds a self-referral, and a return from a sign-in or checkout host, to Direct. Campaign parameters and ad click ids (`gclid`, `msclkid`, `fbclid` and others) decide paid channels.
+
+**You supply the referrer list.** The usual one, Snowplow's [referer-parser](https://github.com/snowplow-referer-parser/referer-parser), is GPL-3.0, so this MIT package cannot bundle it. Download it once, commit the JSON, and refresh it every few months:
+
+```ts
+// scripts/update-referers.ts
+import { downloadReferrerDataset } from "@underpin/analytics/referrer"
+
+await Bun.write("src/data/referers.json", JSON.stringify(await downloadReferrerDataset()))
+```
+
+Keep the list's licence notice next to the file. `parseReferrerDataset(yaml)` flattens a copy you already have. The package's own layer (`REFERRER_OVERRIDES` for AI assistants, X, Bluesky and developer communities, `REFERRER_RENAMES` and `PASS_THROUGH_HOSTS`) is MIT, and each can be replaced through the options.
+
 ## License
 
 MIT
