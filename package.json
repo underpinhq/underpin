@@ -1,0 +1,15 @@
+{
+  "name": "underpin",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "type": "module",
+  "scripts": {
+    "build": "bun run --filter @underpin/ui build"
+  },
+  "devDependencies": {
+    "@dirstack/kodeks": "1.11.0"
+  },
+  "packageManager": "bun@1.4.4"
+}

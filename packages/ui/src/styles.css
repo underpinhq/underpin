@@ -1,0 +1,619 @@
+/*
+ * Inter 4 with the opsz axis: text from ~20px up takes the Display cut on its own. The files are
+ * cut from Google Fonts' source by `scripts/fonts.py` at the repo root, which keeps the
+ * alternates the theme turns on below.
+ */
+@import "./fonts.css";
+/* Geist Mono for machine strings: keys, IDs, snippets. Each subset loads only when used. */
+@import "@fontsource-variable/geist-mono";
+
+@plugin "tailwindcss-animate";
+
+/*
+ * Scan this library's own source for utility classes. `@source` resolves relative to
+ * THIS stylesheet, so the same directive works in both consumption modes:
+ *   - built:  node_modules/@underpin/ui/dist/styles.css scans the sibling dist folder (.js)
+ *   - source: @underpin/ui/src/styles.css scans the sibling src folder (.ts, .tsx)
+ * Either way the class names baked into the components (bg-canvas,
+ * text-ink-muted, the popover animation utilities, etc.) get generated.
+ * The consuming app still owns the `@import "tailwindcss"` in its own entry.
+ */
+@source "./";
+
+/*
+ * Every colour is a `light-dark()` pair, resolved by the element's `color-scheme`: unset follows
+ * the OS, `[data-theme="dark"|"light"]` forces one (see the base layer below). The set has seven
+ * groups, and every token a component uses is one of them:
+ *   - surfaces (`canvas`, `surface`, `overlay`, `well`, `field`, `knob`): opaque, one per height
+ *   - ink (`ink`, `ink-secondary`, `ink-muted`, `ink-inverse`): text and icons
+ *   - fills and edges (`fill-subtle` … `edge-solid`): backgrounds and 1px outlines
+ *   - brand (`brand`, `-ink`, `-subtle`, `-edge`, `-on`): checked controls, links, the first
+ *     chart series
+ *   - focus: the keyboard focus ring alone
+ *   - status (`success`, `warning`, `danger`, each with `-ink`, `-subtle`, `-edge`, `-on`)
+ *   - chart series, the scrim and the drops under a shadow
+ * Every coloured role takes the same suffixes: the solid, `-ink` for text on the canvas
+ * (>= 4.5:1 there), `-subtle` for a tinted fill, `-edge` for the 1px edge around that fill, `-on`
+ * for text and icons on the solid.
+ *
+ * A product built on the package sets its own look in its stylesheet, after this one's import,
+ * in its own `@theme` block or a `:root` rule: the gray as two numbers (`--gray-hue` and
+ * `--gray-chroma`, first in the theme below), and the accent as the brand tokens (`--color-brand`,
+ * `--color-brand-ink`, `--color-brand-subtle`, and `--color-brand-on` for an accent light enough
+ * to need dark text). The edge around a brand tint and the first chart series follow the brand.
+ */
+@theme {
+  --system-font:
+    ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+    "Segoe UI Symbol", "Noto Color Emoji";
+
+  /*
+   * The gray, in two numbers that the ramp and every neutral token read, so none writes a hue of
+   * its own: `--gray-hue`, and `--gray-chroma`, which scales the ramp's chroma (1 is the ladder as
+   * written, 0 a neutral gray). The default is a warm gray. Both are numbers, not colours, so a
+   * product that sets its own writes no colour literal.
+   */
+  --gray-hue: 80;
+  --gray-chroma: 1;
+
+  /*
+   * Surfaces, ink and fills are steps of one gray ramp (`--gray-1` … `--gray-12`, in the base
+   * layer), so every neutral in the interface shares one hue. Surfaces sit off the ramp on its
+   * hue: white in light, and in dark a lift of about 0.03 per height above the canvas.
+   */
+  --color-canvas: var(--gray-1);
+  --color-surface: light-dark(
+    oklch(1 0 0),
+    oklch(0.212 calc(0.003 * var(--gray-chroma)) var(--gray-hue))
+  );
+  --color-overlay: light-dark(
+    oklch(1 0 0),
+    oklch(0.24 calc(0.003 * var(--gray-chroma)) var(--gray-hue))
+  );
+  /*
+   * Below the surface: the track of a segmented control, a tab row or a switch, and a sunk state.
+   * The fill in light; in dark a step under the canvas, so the key on it is the lighter part.
+   */
+  --color-well: light-dark(
+    oklch(0.945 calc(0.004 * var(--gray-chroma)) var(--gray-hue)),
+    oklch(0.155 calc(0.003 * var(--gray-chroma)) var(--gray-hue))
+  );
+  /*
+   * The ground of a text field: white in light, the canvas in dark, so it reads as an opening
+   * in a card.
+   */
+  --color-field: light-dark(
+    oklch(1 0 0),
+    oklch(0.18 calc(0.003 * var(--gray-chroma)) var(--gray-hue))
+  );
+  /*
+   * The switch knob, off and on: white in light, and in dark mid grey on the well and near white
+   * on the brand.
+   */
+  --color-knob: light-dark(
+    oklch(1 0 0),
+    oklch(0.42 calc(0.006 * var(--gray-chroma)) var(--gray-hue))
+  );
+  --color-knob-on: light-dark(
+    oklch(1 0 0),
+    oklch(0.95 calc(0.003 * var(--gray-chroma)) var(--gray-hue))
+  );
+
+  --color-ink: var(--gray-12);
+  --color-ink-secondary: var(--gray-11);
+  --color-ink-muted: var(--gray-9);
+  /* The ink on a solid ink fill: a primary button, a tooltip, a checked neutral control. */
+  --color-ink-inverse: var(--gray-1);
+
+  /*
+   * Hover, selected and the code block, pressed. Opaque, so a fill reads the same anywhere and
+   * rows slide under a sticky one.
+   */
+  --color-fill-subtle: var(--gray-2);
+  --color-fill: var(--gray-3);
+  --color-fill-strong: var(--gray-4);
+
+  /*
+   * Hairlines. Every 1px outline is a `border` in one of these; `border` alone draws `edge`. Each
+   * is the ink in light and white in dark at a fraction, so a hairline takes its tone from what it
+   * sits on: a card, the canvas, a fill or a tinted callout. Two bordered boxes must not overlap,
+   * or the shared line doubles. The strength follows the role: `edge-subtle` a quiet divider,
+   * `edge` a card, a dialog or a divider, `edge-strong` anything operated (a field, a button, a
+   * raised key, a checkbox), `edge-solid` a control under the pointer, and `edge-float` whatever
+   * floats over the page.
+   */
+  --color-edge-subtle: light-dark(
+    color-mix(in oklab, var(--gray-ink) 7%, transparent),
+    oklch(1 0 0 / 6.5%)
+  );
+  --color-edge: light-dark(
+    color-mix(in oklab, var(--gray-ink) 10.5%, transparent),
+    oklch(1 0 0 / 9.5%)
+  );
+  --color-edge-strong: light-dark(
+    color-mix(in oklab, var(--gray-ink) 14%, transparent),
+    oklch(1 0 0 / 15%)
+  );
+  /* The edge of a control under the pointer: one step past the strong edge. */
+  --color-edge-solid: light-dark(
+    color-mix(in oklab, var(--gray-ink) 21%, transparent),
+    oklch(1 0 0 / 24%)
+  );
+  /*
+   * The edge of a menu, a select's list, a popover, a tooltip or a toast. In light it is `edge`,
+   * since the popup's shadow separates it from the page. In dark it is `edge-strong`: a black
+   * shadow barely shows on the dark page, and the popup's lighter surface weakens a translucent
+   * line, so the edge has to carry the separation alone.
+   */
+  --color-edge-float: light-dark(
+    color-mix(in oklab, var(--gray-ink) 10.5%, transparent),
+    oklch(1 0 0 / 15%)
+  );
+
+  /*
+   * The brand: the steel blue of the logo. Checked controls, links, the live ping and the first
+   * chart series take it. A product swaps the solid, `-ink`, `-subtle` and `-on` for its own
+   * accent; the edge and `--color-chart-1` follow them.
+   */
+  --color-brand: light-dark(oklch(0.52 0.11 245), oklch(0.68 0.11 245));
+  --color-brand-ink: light-dark(oklch(0.46 0.11 245), oklch(0.78 0.1 245));
+  --color-brand-subtle: light-dark(oklch(0.52 0.11 245 / 10%), oklch(0.68 0.11 245 / 16%));
+  --color-brand-edge: color-mix(in oklab, var(--color-brand-ink) 20%, transparent);
+  --color-brand-on: light-dark(oklch(1 0 0), var(--gray-ink));
+
+  /*
+   * The keyboard focus ring. A vivid blue of its own, fixed across themes, so a focused
+   * control never reads as a checked one and a product's own accent never hides focus.
+   */
+  --color-focus: light-dark(oklch(0.58 0.2 255), oklch(0.72 0.16 255));
+
+  /*
+   * Status. Every solid is dark enough in light for white and light enough in dark for the dark
+   * ink, so `-on` flips with the theme. The light solids sit at L 0.54 to 0.57 for that, darker
+   * than a bright green or amber, so the label on a solid badge reaches 4.5:1.
+   */
+  --color-success: light-dark(oklch(0.54 0.15 150), oklch(0.72 0.16 152));
+  --color-success-ink: light-dark(oklch(0.5 0.14 150), oklch(0.78 0.15 152));
+  --color-success-subtle: light-dark(oklch(0.62 0.16 150 / 10%), oklch(0.72 0.16 152 / 14%));
+  --color-success-edge: color-mix(in oklab, var(--color-success-ink) 20%, transparent);
+  --color-success-on: light-dark(oklch(1 0 0), var(--gray-ink));
+  --color-warning: light-dark(oklch(0.57 0.15 62), oklch(0.8 0.16 75));
+  --color-warning-ink: light-dark(oklch(0.54 0.16 49), oklch(0.83 0.17 85));
+  --color-warning-subtle: light-dark(oklch(0.77 0.17 70 / 14%), oklch(0.8 0.16 75 / 14%));
+  --color-warning-edge: color-mix(in oklab, var(--color-warning-ink) 20%, transparent);
+  --color-warning-on: light-dark(oklch(1 0 0), var(--gray-ink));
+  --color-danger: light-dark(oklch(0.56 0.19 25), oklch(0.7 0.19 22));
+  --color-danger-ink: light-dark(oklch(0.51 0.2 27), oklch(0.77 0.16 22));
+  --color-danger-subtle: light-dark(oklch(0.56 0.19 25 / 10%), oklch(0.7 0.19 22 / 14%));
+  --color-danger-edge: color-mix(in oklab, var(--color-danger-ink) 20%, transparent);
+  --color-danger-on: light-dark(oklch(1 0 0), var(--gray-ink));
+
+  /* Categorical chart palette: the brand first, then four hues far enough apart to read as different series. */
+  --color-chart-1: var(--color-brand);
+  --color-chart-2: light-dark(oklch(0.62 0.13 158), oklch(0.77 0.16 158));
+  --color-chart-3: light-dark(oklch(0.64 0.15 70), oklch(0.8 0.16 75));
+  --color-chart-4: light-dark(oklch(0.55 0.15 300), oklch(0.7 0.15 300));
+  --color-chart-5: light-dark(oklch(0.58 0.17 25), oklch(0.7 0.17 25));
+
+  /*
+   * The page behind a dialog or a sheet, unblurred. In light the fill at 80%: the page fades back
+   * rather than darkening, so the dialog stays the lightest surface. In dark black at 50%, since a
+   * lighter veil would lift the page above the dialog.
+   */
+  --color-scrim: light-dark(
+    oklch(0.945 calc(0.004 * var(--gray-chroma)) var(--gray-hue) / 80%),
+    oklch(0 0 0 / 50%)
+  );
+
+  /*
+   * The shadow under a raised surface and inside a sunken one. Black at both themes, stronger in
+   * dark, where a drop must stay darker than the surface it falls on. `drop` is the crisp 1px
+   * contact shadow, kept light so it does not read as a second line under the border. `drop-soft`
+   * is the short second layer under a card, and a well's inner shadow. `drop-strong` is the second
+   * layer under anything that floats over the page, and `drop-ambient` its faint long third layer.
+   */
+  --color-drop: light-dark(oklch(0 0 0 / 7%), oklch(0 0 0 / 50%));
+  --color-drop-soft: light-dark(oklch(0 0 0 / 5%), oklch(0 0 0 / 40%));
+  --color-drop-strong: light-dark(oklch(0 0 0 / 14%), oklch(0 0 0 / 50%));
+  --color-drop-ambient: light-dark(oklch(0 0 0 / 8%), oklch(0 0 0 / 40%));
+
+  /*
+   * Depth only. An outline is a `border` in an edge colour, so a state that changes one never
+   * restates the other. Anything resting on the page takes the crisp 1px drop and at most one
+   * short layer, whose negative spread keeps it under the surface: no long soft blur, which reads
+   * as a glow rather than as an object resting on the page. Only what floats over the page, a
+   * popup, a dialog or a drawer, adds one faint long layer, so it separates from a busy chart or
+   * table beneath it. `control` lifts a button, a checkbox, a radio, a switch's knob or a picker's
+   * chosen option, and a press takes it away. `well` is anything sunk into its surface, and light
+   * falls from above, so its top edge is the dark one. `card` is a resting panel and `card-hover`
+   * a clickable card under the pointer. `popup` holds a menu, select or popover over the page,
+   * `tooltip` is the same idea at caption size, `modal` a dialog or bottom sheet, and `drawer` the
+   * modal shadow cast sideways.
+   */
+  --shadow-control: 0 1px 2px var(--color-drop);
+  --shadow-well: inset 0 1px 2px var(--color-drop-soft);
+  --shadow-card: 0 1px 2px var(--color-drop), 0 3px 4px -2px var(--color-drop-soft);
+  --shadow-card-hover: 0 1px 2px var(--color-drop), 0 5px 6px -3px var(--color-drop-soft);
+  --shadow-popup:
+    0 1px 2px var(--color-drop), 0 4px 8px -4px var(--color-drop-strong),
+    0 16px 24px -8px var(--color-drop-ambient);
+  --shadow-tooltip: 0 1px 2px var(--color-drop), 0 3px 6px -3px var(--color-drop-strong);
+  --shadow-modal:
+    0 1px 2px var(--color-drop), 0 6px 8px -4px var(--color-drop-strong),
+    0 24px 48px -12px var(--color-drop-ambient);
+  --shadow-drawer:
+    1px 0 2px var(--color-drop), 6px 0 8px -4px var(--color-drop-strong),
+    24px 0 48px -12px var(--color-drop-ambient);
+
+  --tracking-micro: -0.0125em;
+
+  /*
+   * The type scale. Every size carries its line height, so `text-copy` alone is the agreed
+   * pair and a `/leading` suffix marks a deliberate exception (`text-xs/5`). Tailwind's own
+   * steps keep their pairs: xs 12/16, sm 14/20, base 16/24, xl 20/28, 2xl 24/32, 3xl 30/36,
+   * 4xl 36/40.
+   *
+   * 13px has two jobs and a line for each. `control` (13/16) is a single line inside a
+   * control: buttons, inputs, select triggers, menu items, tabs, toasts. Its whole 16px line
+   * lands a field's padding on the control scale below, 6px for sm and 8px for md. `copy`
+   * (13/20) is text to read: a description, a callout, a textarea.
+   *
+   * `2xs` (11/14) is the smallest label: an eyebrow, a chart tick, a weekday, a count.
+   * `figure` (28px, 1.3) is a headline number; `figureClasses` carries its weight and
+   * tracking, and a fluid or smaller figure keeps those and sets its own size.
+   */
+  --text-2xs: 0.6875rem;
+  --text-2xs--line-height: 0.875rem;
+  --text-control: 0.8125rem;
+  --text-control--line-height: 1rem;
+  --text-copy: 0.8125rem;
+  --text-copy--line-height: 1.25rem;
+  --text-figure: 1.75rem;
+  --text-figure--line-height: var(--leading-figure);
+  --leading-figure: 1.3;
+  --tracking-figure: -0.02em;
+
+  /*
+   * Corner radii, one step rounder than Tailwind's own. Each step is two pixels past the one
+   * below it from sm up, so a part inset into its parent nests concentric: a switch knob or a
+   * field's button 2px in takes `sm` inside `md`, and a menu row in a popup's 4px padding takes
+   * `sm` inside `lg`. A bare `rounded` is `sm`. A field, a button and a tooltip take `md`, a card
+   * and a popup `lg`, a dialog `xl`.
+   */
+  --radius: 6px;
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --radius-xl: 14px;
+
+  /*
+   * The control scale, on the 4px grid and shared by every control, so two controls of one
+   * size always line up: xs 24px (inside a row or a menu), sm 28px (card headers, toolbars),
+   * md 32px (the default), lg 36px (auth forms, a page's main action). Text runs 12, 12, 13
+   * and 14px. md is spelled `h-control` / `min-h-control` so the number lives in one place;
+   * the others are `h-6`, `h-7` and `h-9`.
+   */
+  --spacing-control: 32px;
+
+  --font-sans: "Inter Variable", var(--system-font);
+  --font-display: "Inter Variable", var(--system-font);
+  /*
+   * Inter's alternates: a one without its flag (`cv01`), a single-storey a (`cv11`) and round
+   * quotes and commas (`ss03`). Mono text resets them, so a key or a snippet keeps Geist Mono's
+   * own letters.
+   */
+  --font-sans--font-feature-settings: "cv01", "cv11", "ss03";
+  --font-display--font-feature-settings: "cv01", "cv11", "ss03";
+  --font-mono--font-feature-settings: normal;
+  /* Geist Mono, the same face the design file uses, so a key or a snippet reads alike on every
+     platform. The app loads it; the platform mono stands in until it has. */
+  --font-mono:
+    "Geist Mono Variable", ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+    "Liberation Mono", monospace;
+  /* The platform's own UI font, for the glyphs it draws better than a webfont does: ⇧ ⌘ ⌥ ⌃
+     are part of SF Pro's job on a Mac, and Inter's arrows sit light and small beside a letter. */
+  --font-system: var(--system-font);
+
+  /* The main motion curve: popups, tab pills, chart updates, step bars. */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  /* A small mark changing state in place: an icon swap, a saved tick. */
+  --ease-swap: cubic-bezier(0.2, 0, 0, 1);
+  /* A sheet or side panel, which rides the same curve as the swipe that moves it. */
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+
+  --animate-fill-bar: fill-bar 0.5s var(--ease-out-expo);
+  --animate-slide-up-and-fade: slide-up-and-fade 0.5s var(--ease-out-expo);
+  --animate-slide-down-and-fade: slide-down-and-fade 0.5s var(--ease-out-expo);
+  --animate-wipe-in: wipe-in 0.5s var(--ease-out-expo);
+
+  @keyframes slide-up-and-fade {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slide-down-and-fade {
+    from {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fill-bar {
+    from {
+      transform: scaleX(0);
+    }
+    to {
+      transform: scaleX(1);
+    }
+  }
+
+  /* Revealed from the left edge, as if drawn. */
+  @keyframes wipe-in {
+    from {
+      clip-path: inset(0 100% 0 0);
+    }
+    to {
+      clip-path: inset(0 0 0 0);
+    }
+  }
+}
+
+/*
+ * Base helpers the components depend on to render correctly, and the rules every consuming
+ * app shares: the pointer on controls and reduced motion. Kept minimal on purpose; the
+ * consuming app still supplies its body reset, its page `container` and `@import "tailwindcss"`.
+ */
+@layer base {
+  /* Theme switch: unset follows the OS, `data-theme` forces one. Drives every `light-dark()`. */
+  :root {
+    color-scheme: light dark;
+  }
+
+  [data-theme="light"] {
+    color-scheme: light;
+  }
+
+  [data-theme="dark"] {
+    color-scheme: dark;
+  }
+
+  /*
+   * The gray ramp under every neutral token. One hue, chroma rising toward the middle and falling
+   * off at both ends, so all twelve steps read as one family; dark keeps its chroma low, so the
+   * surfaces read as charcoal rather than coloured. Step 1 is the canvas and step 12 the ink in
+   * both themes: 2–4 are fills (hover, selected, pressed, spaced so each reads apart from the
+   * next), 5–8 the solid greys behind the translucent edges, 9 muted ink, 10 muted ink under the
+   * pointer, 11 secondary ink. Dark ink stops short of white, which glares on the dark canvas.
+   * Components never use a step directly; they use the token that names its job.
+   */
+  :root {
+    --gray-1: light-dark(
+      oklch(0.985 calc(0.002 * var(--gray-chroma)) var(--gray-hue)),
+      oklch(0.18 calc(0.003 * var(--gray-chroma)) var(--gray-hue))
+    );
+    --gray-2: light-dark(
+      oklch(0.965 calc(0.003 * var(--gray-chroma)) var(--gray-hue)),
+      oklch(0.25 calc(0.004 * var(--gray-chroma)) var(--gray-hue))
+    );
+    --gray-3: light-dark(
+      oklch(0.945 calc(0.004 * var(--gray-chroma)) var(--gray-hue)),
+      oklch(0.278 calc(0.004 * var(--gray-chroma)) var(--gray-hue))
+    );
+    --gray-4: light-dark(
+      oklch(0.92 calc(0.005 * var(--gray-chroma)) var(--gray-hue)),
+      oklch(0.305 calc(0.005 * var(--gray-chroma)) var(--gray-hue))
+    );
+    --gray-5: light-dark(
+      oklch(0.9 calc(0.005 * var(--gray-chroma)) var(--gray-hue)),
+      oklch(0.33 calc(0.005 * var(--gray-chroma)) var(--gray-hue))
+    );
+    --gray-6: light-dark(
+      oklch(0.875 calc(0.006 * var(--gray-chroma)) var(--gray-hue)),
+      oklch(0.36 calc(0.006 * var(--gray-chroma)) var(--gray-hue))
+    );
+    --gray-7: light-dark(
+      oklch(0.83 calc(0.007 * var(--gray-chroma)) var(--gray-hue)),
+      oklch(0.42 calc(0.006 * var(--gray-chroma)) var(--gray-hue))
+    );
+    --gray-8: light-dark(
+      oklch(0.72 calc(0.008 * var(--gray-chroma)) var(--gray-hue)),
+      oklch(0.52 calc(0.006 * var(--gray-chroma)) var(--gray-hue))
+    );
+    --gray-9: light-dark(
+      oklch(0.52 calc(0.009 * var(--gray-chroma)) var(--gray-hue)),
+      oklch(0.78 calc(0.005 * var(--gray-chroma)) var(--gray-hue))
+    );
+    --gray-10: light-dark(
+      oklch(0.45 calc(0.009 * var(--gray-chroma)) var(--gray-hue)),
+      oklch(0.82 calc(0.005 * var(--gray-chroma)) var(--gray-hue))
+    );
+    --gray-11: light-dark(
+      oklch(0.37 calc(0.008 * var(--gray-chroma)) var(--gray-hue)),
+      oklch(0.86 calc(0.004 * var(--gray-chroma)) var(--gray-hue))
+    );
+    --gray-12: light-dark(
+      var(--gray-ink),
+      oklch(0.95 calc(0.003 * var(--gray-chroma)) var(--gray-hue))
+    );
+
+    /*
+     * Step 12 of the light ramp as one colour rather than a pair: every edge in light is this ink
+     * at a fraction, and the text on a solid in dark is this ink whole.
+     */
+    --gray-ink: oklch(0.21 calc(0.006 * var(--gray-chroma)) var(--gray-hue));
+  }
+
+  /*
+   * No lone word on a paragraph's last line. The longhand leaves wrap modes (`nowrap`,
+   * `truncate`) alone, and headings keep their `text-balance`. Browsers apply it to editable
+   * text too, where it moves words between lines while typing, so fields and code opt out.
+   */
+  :root {
+    text-wrap-style: pretty;
+  }
+
+  input,
+  textarea,
+  select,
+  [contenteditable]:not([contenteditable="false"]),
+  pre,
+  code {
+    text-wrap-style: auto;
+  }
+
+  /* Tailwind v4 defaults `border` to currentColor; the components expect the hairline token. */
+  *,
+  ::before,
+  ::after {
+    border-color: var(--color-edge);
+  }
+
+  /* No grey flash from the OS on tap; the `:active` rule below is the feedback instead. */
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /*
+   * The one focus ring, wherever the browser judges focus worth showing (`:focus-visible`): a
+   * key press, or a text field however it took focus. Every control, row, link and cell draws the
+   * same 2px ring over its own edge, 1px in and 1px out with no gap, so focus reads as the edge
+   * turning blue, and a row flush with a surface that clips keeps it whole. Popups and menu items
+   * opt out with `outline-none`.
+   */
+  :focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: -1px;
+  }
+
+  /* The ring covers an invalid control's danger edge, so it takes the danger colour instead. */
+  [aria-invalid="true"]:focus-visible {
+    outline-color: var(--color-danger);
+  }
+
+  /*
+   * A disabled control takes no pointer: no hover look, no press, no cursor of its own. Base UI
+   * marks a disabled switch, tab or select trigger with `data-disabled` alone, since none of them
+   * is a native control. Two kinds keep the pointer, so a reason can show on hover: a control
+   * under `DisabledReason`, which is `aria-disabled` rather than disabled, and a disabled menu
+   * row, select option, radio or checkbox, which Base UI already keeps from acting.
+   */
+  :is(button, input, select, textarea):disabled,
+  :is(a, [role="button"], [role="switch"], [role="tab"], [role="combobox"])[data-disabled] {
+    pointer-events: none;
+  }
+
+  /* Taps fire at once, with no double-tap-to-zoom wait, on anything that acts like a control. */
+  a[href],
+  button,
+  [role="button"],
+  [role="tab"],
+  [role="menuitem"],
+  [role="option"] {
+    touch-action: manipulation;
+  }
+
+  /*
+   * Tap feedback. `hover:` is gated behind `@media (hover: hover)`, so on a touch screen a
+   * press would look inert; one rule dims every control the same amount, whatever its size.
+   * A control that moves under a press (`data-pressable`) already answers, so it stays solid.
+   */
+  @media (pointer: coarse) {
+    :is(
+        button,
+        [role="button"],
+        [role="tab"],
+        [role="menuitem"],
+        [role="option"],
+        a[href],
+        label[for]
+      ):active:not(:disabled, [aria-disabled="true"], [data-disabled], [data-pressable]) {
+      opacity: 0.6;
+    }
+  }
+
+  a,
+  button:not(:disabled),
+  label[for] {
+    cursor: pointer;
+  }
+
+  /*
+   * Less motion, not none. A reader who asks for reduced motion is asking for nothing to
+   * travel across the screen; a fade still explains that a dialog opened or a toast arrived,
+   * and stripping it leaves popups snapping in and out with no sense of where they came from.
+   * So movement goes and opacity and colour stay, at their authored timing.
+   */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+      /* `tailwindcss-animate` builds its enter/exit keyframe out of these four pairs, so
+         flattening them leaves every popup's fade and drops its slide and its zoom. A
+         keyframe of this library's own (a bar fill, a step bar) opts out with
+         `motion-reduce:animate-none` instead; a spinner keeps turning, since a still one
+         reads as a hung page. */
+      --tw-enter-translate-x: 0 !important;
+      --tw-enter-translate-y: 0 !important;
+      --tw-exit-translate-x: 0 !important;
+      --tw-exit-translate-y: 0 !important;
+      --tw-enter-scale: 1 !important;
+      --tw-exit-scale: 1 !important;
+      --tw-enter-rotate: 0 !important;
+      --tw-exit-rotate: 0 !important;
+
+      /* Transitions are narrowed to the properties that do not move anything: a transform,
+         a width, an inset or a clip-path jumps straight to its end value. */
+      transition-property:
+        opacity, color, background-color, border-color, outline-color, box-shadow, fill, stroke !important;
+      scroll-behavior: auto !important;
+    }
+
+    /* The view-transition pseudo-elements sit outside `*`; without animations they end at once. */
+    ::view-transition-group(*),
+    ::view-transition-old(*),
+    ::view-transition-new(*) {
+      animation: none !important;
+    }
+  }
+}
+
+/*
+ * One tooltip popup serves every trigger in the app, so moving the pointer from one trigger to
+ * the next slides the panel over instead of closing it and opening another in place. Only the
+ * move is animated: the content swaps at once, since a tooltip that reads as one panel changing
+ * what it says beats one that carries words across the screen. `data-instant` is Base UI asking
+ * for no animation at all (a keyboard focus, a dismissal), and both rules step aside for it.
+ */
+@layer components {
+  .tooltip-positioner {
+    transition:
+      top 150ms var(--ease-out-expo),
+      left 150ms var(--ease-out-expo),
+      right 150ms var(--ease-out-expo),
+      bottom 150ms var(--ease-out-expo),
+      transform 150ms var(--ease-out-expo);
+  }
+
+  /* Base UI slides the arrow along the panel's edge to stay over the anchor. */
+  .tooltip-arrow {
+    transition:
+      left 150ms var(--ease-out-expo),
+      top 150ms var(--ease-out-expo);
+  }
+
+  :is(.tooltip-positioner, .tooltip-arrow)[data-instant] {
+    transition: none;
+  }
+}

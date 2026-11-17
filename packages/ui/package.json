@@ -1,0 +1,145 @@
+{
+  "name": "@underpin/ui",
+  "version": "1.15.0",
+  "description": "React components on Base UI and Tailwind CSS v4: controls, overlays, forms, charts and the design tokens they share.",
+  "keywords": [
+    "base-ui",
+    "components",
+    "design-system",
+    "react",
+    "tailwind",
+    "ui"
+  ],
+  "homepage": "https://github.com/underpinhq/underpin/tree/main/packages/ui#readme",
+  "bugs": "https://github.com/underpinhq/underpin/issues",
+  "license": "MIT",
+  "author": {
+    "name": "Piotr Kulpinski",
+    "email": "piotr@kulpinski.pl",
+    "url": "https://kulpinski.pl"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/underpinhq/underpin.git",
+    "directory": "packages/ui"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "exports": {
+    "./styles.css": "./src/styles.css",
+    "./variants": {
+      "types": "./src/lib/variants.ts",
+      "default": "./src/lib/variants.ts"
+    },
+    "./classes": {
+      "types": "./src/lib/classes.ts",
+      "default": "./src/lib/classes.ts"
+    },
+    "./interactive": {
+      "types": "./src/lib/interactive.ts",
+      "default": "./src/lib/interactive.ts"
+    },
+    "./slot": {
+      "types": "./src/lib/slot.ts",
+      "default": "./src/lib/slot.ts"
+    },
+    "./tone": {
+      "types": "./src/lib/tone.ts",
+      "default": "./src/lib/tone.ts"
+    },
+    "./animation": {
+      "types": "./src/lib/animation.ts",
+      "default": "./src/lib/animation.ts"
+    },
+    "./icon": {
+      "types": "./src/lib/icon.tsx",
+      "default": "./src/lib/icon.tsx"
+    },
+    "./day": {
+      "types": "./src/lib/day.ts",
+      "default": "./src/lib/day.ts"
+    },
+    "./shortcuts": {
+      "types": "./src/lib/shortcuts.ts",
+      "default": "./src/lib/shortcuts.ts"
+    },
+    "./media": {
+      "types": "./src/lib/media.ts",
+      "default": "./src/lib/media.ts"
+    },
+    "./time-series": {
+      "types": "./src/lib/time-series.ts",
+      "default": "./src/lib/time-series.ts"
+    },
+    "./chart-curve": {
+      "types": "./src/lib/chart-curve.ts",
+      "default": "./src/lib/chart-curve.ts"
+    },
+    "./tokens": {
+      "types": "./src/tokens.ts",
+      "default": "./src/tokens.ts"
+    },
+    "./*": {
+      "types": "./src/components/*.tsx",
+      "default": "./src/components/*.tsx"
+    }
+  },
+  "publishConfig": {
+    "access": "public",
+    "directory": "dist"
+  },
+  "scripts": {
+    "build": "tsdown && kodeks prepare-package",
+    "check-exports": "node scripts/check-exports.ts",
+    "check-next": "node scripts/check-next.ts",
+    "check-types": "tsc --noEmit",
+    "tokens": "bun scripts/tokens.ts",
+    "figma:sync": "bun scripts/figma-sync.ts"
+  },
+  "dependencies": {
+    "@fontsource-variable/geist-mono": "^5.3.0",
+    "@hugeicons/core-free-icons": "^4.4.0",
+    "@hugeicons/react": "^1.1.10",
+    "@tanstack/charts": "1.0.0",
+    "cn": "^0.5.2",
+    "d3-shape": "3.2.0",
+    "react-day-picker": "^10.0.2",
+    "react-hotkeys-hook": "^5.3.3",
+    "sonner": "^2.0.8",
+    "tailwind-variants": "^4.0.1"
+  },
+  "devDependencies": {
+    "@base-ui/react": "^1.9.0",
+    "@dirstack/kodeks": "1.11.0",
+    "@happy-dom/global-registrator": "^21.0.4",
+    "@tanstack/react-form": "1.33.5",
+    "@types/bun": "^1.4.4",
+    "@types/d3-shape": "3",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "axe-core": "^4.14.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "tsdown": "^0.23.1",
+    "typescript": "^7.0.2"
+  },
+  "peerDependencies": {
+    "@base-ui/react": ">=1",
+    "@tanstack/react-form": ">=1",
+    "react": ">=19",
+    "react-dom": ">=19",
+    "tailwindcss": ">=4",
+    "tailwindcss-animate": ">=1"
+  },
+  "peerDependenciesMeta": {
+    "@tanstack/react-form": {
+      "optional": true
+    }
+  },
+  "_sideEffects": "The stylesheet is a real side effect: `false` let a bundler tree-shake away a consumer's `import \"@underpin/ui/styles.css\"` and ship an unstyled app."
+}
