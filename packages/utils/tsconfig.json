@@ -1,23 +1,11 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "../../tsconfig.base.json",
   "include": ["src"],
-  "exclude": ["node_modules", "dist"],
   "compilerOptions": {
-    "declaration": true,
-    "esModuleInterop": true,
-    "incremental": false,
+    // tsdown emits the published declarations, so every export carries an explicit type.
     "isolatedDeclarations": true,
-    "isolatedModules": true,
-    "lib": ["ESNext", "DOM", "DOM.Iterable"],
-    "target": "ESNext",
-    "module": "ESNext",
-    "moduleDetection": "force",
-    "moduleResolution": "Bundler",
-    "noUncheckedIndexedAccess": true,
-    "outDir": "./dist",
-    "resolveJsonModule": true,
-    "skipLibCheck": true,
-    "strictNullChecks": true,
-    "strict": true
+    "declaration": true,
+    "lib": ["ESNext", "DOM", "DOM.Iterable"]
   }
 }

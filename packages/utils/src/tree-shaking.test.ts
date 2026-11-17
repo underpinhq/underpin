@@ -17,6 +17,8 @@ const outDir = resolve(root, "node_modules/.cache/tree-shaking")
 async function bundleExport(name: string) {
   const result = await bundle({
     stdin: { contents: `export { ${name} } from "./index.js"`, resolveDir: outDir },
+    // The metafile's input paths are relative to this directory, wherever the test runs from.
+    absWorkingDir: root,
     bundle: true,
     format: "esm",
     metafile: true,

@@ -1,13 +1,15 @@
-# @dirstack/utils
+# @underpin/utils
 
 A lightweight, dependency-light set of TypeScript utilities shared across projects. Tree-shakeable, ESM-only, and fully typed.
 
 ## Install
 
 ```bash
-bun add @dirstack/utils
-# or: npm install @dirstack/utils
+bun add @underpin/utils
+# or: npm install @underpin/utils
 ```
+
+Renamed from `@dirstack/utils` 3.4.0. `@underpin/utils` continues its 3.x line, and only the import path changes.
 
 Requires Node.js 22.12 or later. The package ships ES modules only, and CommonJS code can `require()` it on these versions.
 
@@ -16,7 +18,7 @@ Requires Node.js 22.12 or later. The package ships ES modules only, and CommonJS
 Everything is exported from the package root:
 
 ```ts
-import { chunk, clamp, formatBytes, slugify, tryCatch } from "@dirstack/utils"
+import { chunk, clamp, formatBytes, slugify, tryCatch } from "@underpin/utils"
 
 chunk([1, 2, 3, 4, 5], 2) // [[1, 2], [3, 4], [5]]
 clamp(12, 0, 10) // 10
@@ -26,7 +28,7 @@ slugify("Hello World") // "hello-world"
 const { data, error } = await tryCatch(fetch("/api"))
 ```
 
-Each module is also available on its own path, such as `@dirstack/utils/array` or `@dirstack/utils/time`. Bundlers remove unused code from the root import either way, because the build keeps one file per module.
+Each module is also available on its own path, such as `@underpin/utils/array` or `@underpin/utils/time`. Bundlers remove unused code from the root import either way, because the build keeps one file per module.
 
 ## What's inside
 
@@ -54,7 +56,7 @@ Each module is also available on its own path, such as `@dirstack/utils/array` o
 The date helpers accept any `Intl.DateTimeFormat` option plus a `locale` (defaults to `"en-US"`). Without a `timeZone`, they format in the time zone of the machine that runs them. On server-rendered pages, the server (often UTC) and the browser (the visitor's zone) can then produce different text, which causes React hydration errors. Pass a fixed `timeZone` to get the same output in both places:
 
 ```ts
-import { formatDate, formatDateRange } from "@dirstack/utils"
+import { formatDate, formatDateRange } from "@underpin/utils"
 
 formatDate("2026-10-05T23:30:00Z", { dateStyle: "long", timeZone: "UTC", locale: "en-GB" }) // "5 October 2026"
 formatDate("2026-10-05", { day: "2-digit", month: "short", year: "numeric", timeZone: "UTC" }) // "Oct 05, 2026"
@@ -68,7 +70,7 @@ Date-only strings such as `"2026-10-05"` parse as UTC midnight, so format them w
 `getClientIp` reads the visitor's address from request headers set by a reverse proxy such as Traefik. The first `x-forwarded-for` entry comes from the client and can be forged, so it returns the last entry, which the proxy appends as the TCP peer. It falls back to `x-real-ip`, and returns `undefined` when no header holds a valid IP address:
 
 ```ts
-import { getClientIp } from "@dirstack/utils"
+import { getClientIp } from "@underpin/utils"
 
 getClientIp(request.headers) ?? "127.0.0.1"
 ```
@@ -85,7 +87,7 @@ getClientIp(request.headers, { trust: "cloudflare" })
 
 ```ts
 import { lookup } from "node:dns/promises"
-import { isPublicIp } from "@dirstack/utils"
+import { isPublicIp } from "@underpin/utils"
 
 const addresses = await lookup(new URL(url).hostname, { all: true })
 if (!addresses.every(({ address }) => isPublicIp(address))) throw new Error("Blocked address")
@@ -100,7 +102,7 @@ The IP helpers parse IPv4 and IPv6 in plain TypeScript, without `node:net`, so t
 `retry` runs an async function again when it throws. By default it makes 3 retries with no wait between them. `delay` and `factor` add exponential backoff, and `maxDelay` caps each wait:
 
 ```ts
-import { retry } from "@dirstack/utils"
+import { retry } from "@underpin/utils"
 
 // Waits 100ms, 200ms, 400ms, 800ms, then 1s between attempts, for at most 15 seconds.
 const rows = await retry(() => client.query(sql), {
@@ -132,9 +134,9 @@ The CommonJS/UMD build (`dist/index.umd.cjs`) is gone. The package is ESM-only a
 
 ```ts
 // Before: CommonJS on any Node.js version
-const { slugify } = require("@dirstack/utils")
+const { slugify } = require("@underpin/utils")
 // After: an import, or require() on Node.js 22.12+
-import { slugify } from "@dirstack/utils"
+import { slugify } from "@underpin/utils"
 ```
 
 ### Removed aliases
@@ -263,22 +265,16 @@ joinAsSentence(names, undefined, "or")          joinAsSentence(names, { type: "d
 
 ## Development
 
+This package lives in the [`underpinhq/underpin`](https://github.com/underpinhq/underpin) monorepo. Run the commands from the repository root, or these from `packages/utils`:
+
 ```bash
-bun install        # install dependencies
-bun test           # run the test suite on Bun
-bun run test:node  # run the same suite on Node.js with Vitest
-bun run typecheck
-bun run lint
-bun run build      # build with tsdown, then check the package with publint and attw
+bun test               # run the test suite on Bun
+bun run test:node      # run the same suite on Node.js with Vitest
+bun run check-types
+bun run build          # build with tsdown, then check the package with publint and attw
 ```
 
-## Releasing
-
-Releases use [Changesets](https://github.com/changesets/changesets) and [Kodeks](https://github.com/dirstack/kodeks#releasing-packages). Pushing to `main` never publishes on its own.
-
-1. In a pull request that changes the package, run `bunx changeset`, pick the bump type and write the changelog line. Commit the new file in `.changeset/`.
-2. After the pull request merges, the release workflow opens or updates the "Version Packages" pull request. That pull request bumps `version` in `package.json` and adds the entries to `CHANGELOG.md`.
-3. Merge the "Version Packages" pull request when you want to release. The release workflow then publishes the new version to npm with provenance and creates its GitHub Release.
+Releases follow the monorepo's Changesets flow, described in its `AGENTS.md`.
 
 ## License
 

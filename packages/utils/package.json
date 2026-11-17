@@ -1,6 +1,7 @@
 {
-  "name": "@dirstack/utils",
+  "name": "@underpin/utils",
   "version": "3.4.0",
+  "private": true,
   "description": "A lightweight set of utilities",
   "keywords": [
     "helpers",
@@ -8,8 +9,8 @@
     "utilities",
     "utils"
   ],
-  "homepage": "https://github.com/dirstack/utils#readme",
-  "bugs": "https://github.com/dirstack/utils/issues",
+  "homepage": "https://github.com/underpinhq/underpin/tree/main/packages/utils#readme",
+  "bugs": "https://github.com/underpinhq/underpin/issues",
   "license": "MIT",
   "author": {
     "name": "Piotr Kulpinski",
@@ -18,7 +19,8 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/dirstack/utils.git"
+    "url": "git+https://github.com/underpinhq/underpin.git",
+    "directory": "packages/utils"
   },
   "files": [
     "dist",
@@ -40,27 +42,17 @@
   },
   "scripts": {
     "build": "tsdown",
+    "check-types": "tsc --noEmit",
     "test": "bun test",
-    "test:node": "vitest run",
-    "typecheck": "tsc --noEmit",
-    "lint": "oxlint --fix .",
-    "format": "oxfmt --write .",
-    "prepare": "lefthook install || true"
+    "test:node": "vitest run"
   },
   "dependencies": {
     "@sindresorhus/slugify": "^3.0.1"
   },
   "devDependencies": {
     "@arethetypeswrong/core": "^0.18.5",
-    "@changesets/cli": "^3.0.3",
-    "@commitlint/cli": "^21.2.3",
-    "@commitlint/config-conventional": "^21.2.3",
-    "@dirstack/kodeks": "1.11.0",
     "@types/bun": "^1.2.21",
     "esbuild": "^0.27.3",
-    "lefthook": "^2.1.17",
-    "oxfmt": "^0.72.0",
-    "oxlint": "^1.87.0",
     "publint": "^0.3.25",
     "tsdown": "^0.23.0",
     "typescript": "^5.9.3",

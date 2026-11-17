@@ -39,7 +39,7 @@ export function isLightColor(color: string): boolean {
   // Short codes repeat each digit: "#fa0" is "#ffaa00".
   const hex =
     digits.length === 3 || digits.length === 4
-      ? [...digits.slice(0, 3)].map(digit => `${digit}${digit}`).join("")
+      ? Array.from(digits.slice(0, 3), digit => `${digit}${digit}`).join("")
       : digits.slice(0, 6)
 
   if (!/^[0-9a-f]{6}$/i.test(hex)) return false
