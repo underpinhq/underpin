@@ -6,6 +6,7 @@
     "analytics",
     "bots",
     "client-ip",
+    "favicon",
     "geoip",
     "user-agent"
   ],
@@ -43,6 +44,7 @@
     "test": "bun test"
   },
   "dependencies": {
+    "@underpin/fetch": "workspace:^",
     "@underpin/utils": "workspace:^",
     "isbot": "^5.2.2",
     "maxmind": "^5.0.7",

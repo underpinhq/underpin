@@ -6,5 +6,6 @@ Server-side analytics helpers, one subpath export per feature. Repo-wide rules (
 - **`ua-parser-js` stays on 1.x.** 2.x is AGPL-licensed. A test fails when the installed version is not MIT.
 - **User-agent names match `ua-parser-js` 2.x.** Highseat and Wend store the names 2.x gives. `src/user-agent/names.ts` renames 1.x output and `extensions.ts` adds patterns 1.x lacks. Write each pattern from observed user agents, never by copying the 2.x source.
 - **The corpus guards the names.** `src/user-agent/fixtures/highseat-corpus.json` holds real user agents with the names Highseat stores. A change that breaks a case changes stored data. Its README says how it was built.
+- **`/favicon` never fetches a user's host by itself.** The direct provider goes through `downloadPublicUrl` from `@underpin/fetch`. The other providers only call their own fixed service host.
 - **Every export carries an explicit type.** `isolatedDeclarations` is on.
 - **Imports stay relative**, and `@underpin/utils` is imported by subpath. Its built `dist` must exist, which `bun run check-types` takes care of through turbo.

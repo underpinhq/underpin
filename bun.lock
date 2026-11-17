@@ -21,6 +21,7 @@
       "name": "@underpin/analytics",
       "version": "0.0.0",
       "dependencies": {
+        "@underpin/fetch": "workspace:^",
         "@underpin/utils": "workspace:^",
         "isbot": "^5.2.2",
         "maxmind": "^5.0.7",

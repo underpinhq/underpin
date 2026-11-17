@@ -74,6 +74,29 @@ resolveGeo(edgeCountry, geo.lookup(clientIp.ip)) // the edge's country, with the
 
 `openGeoDatabase` reads any MMDB file: MaxMind GeoLite2 or GeoIP2, or DB-IP, Country or City. The package bundles no database. Download one, pass its path, and open it once at startup. A missing or broken file throws, so a server that runs without geo data catches the error. Unknown countries (DB-IP's "ZZ", "XX", Cloudflare's Tor code "T1") come back as an empty string.
 
+## `@underpin/analytics/favicon`
+
+```ts
+import { directProvider, findFavicon, googleProvider, logoDevProvider } from "@underpin/analytics/favicon"
+
+const providers = [directProvider(), googleProvider()]
+const favicon = await findFavicon("example.com", providers)
+// { body: Uint8Array, contentType: "image/png" } or null
+```
+
+`findFavicon` asks each provider in turn and returns the first icon. Storage and caching stay with you.
+
+- **It resolves to null** only when every provider answered that the host has no icon, so you may cache the miss.
+- **It rejects** when no icon was found and a provider failed (an outage, a rate limit, a timeout), so the next request asks again.
+
+| Provider | Source | Notes |
+| --- | --- | --- |
+| `directProvider()` | The site's own `/favicon.ico` | Downloads through `@underpin/fetch`, so every address, redirects included, must be public. The host never leaves your server. |
+| `googleProvider()` | Google's s2 favicon service | The widest coverage. Its grey-globe 404 counts as a miss. Proxy the icon, so browsers never contact Google. |
+| `logoDevProvider({ token })` | logo.dev | Asks for `fallback=404`, so no generated monogram. Re-host the icon, so your key stays private. |
+
+Every provider reads the image type from the bytes and accepts PNG, ICO, GIF, JPEG and WebP up to 128 KB. An SVG can carry script, so it is never accepted. `resolveLandingHost(url)` follows a short link's redirects with guarded `HEAD` requests and returns the host it lands on, to ask a provider about.
+
 ## License
 
 MIT

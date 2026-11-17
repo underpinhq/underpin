@@ -9,6 +9,7 @@ export default defineConfig({
     "src/bots/bots.ts",
     "src/client-ip/client-ip.ts",
     "src/geo/geo.ts",
+    "src/favicon/favicon.ts",
   ],
   format: "esm",
   platform: "node",
