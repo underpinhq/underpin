@@ -20,13 +20,14 @@ const { body, contentType, url } = await downloadPublicUrl(userUrl, {
 })
 ```
 
-`body` is a `Uint8Array`. `contentType` is the server's own header, so check the bytes before you trust it. `url` is the URL that answered, after redirects.
+`body` is a `Uint8Array`. With `method: "HEAD"`, the redirects are followed and checked the same way and `body` is empty, which finds where a short link lands. `contentType` is the server's own header, so check the bytes before you trust it. `url` is the URL that answered, after redirects.
 
 ## What it checks
 
 - **Every resolved address is public.** The check runs inside the connection's DNS lookup, and the connection uses the addresses it checked. A name that answers with a public address first and a private one later (DNS rebinding) cannot get past it. One private address among public ones fails the whole download.
 - **IP literals, protocols and credentials.** `assertPublicUrl(url)` refuses a private IP host, any protocol other than http and https, and a user name or password in the URL. It runs before each request.
 - **Redirects.** At most 3 by default (`maxRedirects`), followed by hand and checked like the first URL.
+- **Credentials.** A redirect to another origin drops `authorization`, `cookie`, `proxy-authorization` and `host`, as a browser does.
 - **Size.** A declared `content-length` over `maxBytes` fails at once, and a streamed body stops as soon as it passes the cap. The request always asks for `accept-encoding: identity`, so nothing inflates after the count, on Node.js and on Bun.
 - **Time.** `timeout` (30 seconds by default) covers the whole download, redirects included. `signal` aborts it early.
 

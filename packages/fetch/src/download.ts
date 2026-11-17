@@ -10,6 +10,16 @@ export const MAX_REDIRECTS = 3
 
 const REDIRECT_STATUSES = new Set([301, 302, 303, 307, 308])
 
+// Headers that carry credentials or name the origin. A redirect to another origin drops them, as
+// a browser does, so a caller's token never reaches a server the first one points at.
+const ORIGIN_HEADERS = new Set(["authorization", "cookie", "proxy-authorization", "host"])
+
+function withoutOriginHeaders(headers: Record<string, string>): Record<string, string> {
+  return Object.fromEntries(
+    Object.entries(headers).filter(([name]) => !ORIGIN_HEADERS.has(name.toLowerCase())),
+  )
+}
+
 /** Thrown when a URL, a redirect or a resolved address points to a private network. */
 export class PrivateAddressError extends Error {
   constructor() {
@@ -52,11 +62,19 @@ export type Resolver = (hostname: string) => Promise<ResolvedAddress[]>
 export interface DownloadOptions {
   /** The largest body to accept. The download stops as soon as it passes this size. */
   maxBytes: number
+  /**
+   * `HEAD` follows the redirects and returns the final URL with an empty body, such as to find
+   * where a short link lands. Defaults to `GET`.
+   */
+  method?: "GET" | "HEAD"
   /** The time limit for the whole download, redirects included, in milliseconds. Defaults to 30 s. */
   timeout?: number
   /** The most redirects to follow. Defaults to {@link MAX_REDIRECTS}. */
   maxRedirects?: number
-  /** Request headers. `accept-encoding` is always `identity`, so the byte limit counts real bytes. */
+  /**
+   * Request headers. `accept-encoding` is always `identity`, so the byte limit counts real bytes.
+   * A redirect to another origin drops `authorization`, `cookie`, `proxy-authorization` and `host`.
+   */
   headers?: Record<string, string>
   /** Aborts the download, on top of the timeout. */
   signal?: AbortSignal
@@ -147,6 +165,7 @@ function createLookup(guard: Guard): LookupFunction {
 /** Sends one GET request through the guarded lookup, without following redirects. */
 function requestOnce(
   url: URL,
+  method: "GET" | "HEAD",
   headers: Record<string, string>,
   guard: Guard,
   signal: AbortSignal,
@@ -157,6 +176,7 @@ function requestOnce(
     const clientRequest = request(
       url,
       {
+        method,
         lookup: createLookup(guard),
         signal,
         // No connection pool, so a socket opened for one host never serves another.
@@ -205,7 +225,8 @@ export async function download(
   options: DownloadOptions,
   guard: Guard,
 ): Promise<Download> {
-  const { maxBytes, timeout = 30_000, maxRedirects = MAX_REDIRECTS, headers = {} } = options
+  const { maxBytes, method = "GET", timeout = 30_000, maxRedirects = MAX_REDIRECTS } = options
+  let headers = options.headers ?? {}
   const signal = options.signal
     ? AbortSignal.any([options.signal, AbortSignal.timeout(timeout)])
     : AbortSignal.timeout(timeout)
@@ -215,13 +236,15 @@ export async function download(
   for (let hop = 0; hop <= maxRedirects; hop++) {
     assertPublicUrl(current, guard.isAllowed)
 
-    const response = await requestOnce(current, headers, guard, signal)
+    const response = await requestOnce(current, method, headers, guard, signal)
     const status = response.statusCode ?? 0
     const location = response.headers.location
 
     if (REDIRECT_STATUSES.has(status) && location) {
       response.resume()
-      current = new URL(location, current)
+      const next = new URL(location, current)
+      if (next.origin !== current.origin) headers = withoutOriginHeaders(headers)
+      current = next
       continue
     }
 
@@ -230,7 +253,9 @@ export async function download(
       throw new HttpStatusError(status)
     }
 
-    const body = await readBody(response, maxBytes)
+    // A HEAD response has no body, whatever its `content-length` says.
+    const body = method === "HEAD" ? new Uint8Array() : await readBody(response, maxBytes)
+    if (method === "HEAD") response.resume()
     return { body, contentType: response.headers["content-type"] ?? "", url: current }
   }
 

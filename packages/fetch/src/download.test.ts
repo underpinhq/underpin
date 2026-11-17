@@ -28,7 +28,9 @@ function guard(resolve: Resolver): Guard {
   return { resolve, isAllowed: address => address === SERVER }
 }
 
-const publicNames = guard(names({ "site.test": [SERVER], "private.test": [PRIVATE] }))
+const publicNames = guard(
+  names({ "site.test": [SERVER], "other.test": [SERVER], "private.test": [PRIVATE] }),
+)
 
 function url(path: string, host = "site.test") {
   return `http://${host}:${port}${path}`
@@ -53,6 +55,10 @@ beforeAll(async () => {
       next(url("/ok", "private.test"))
     } else if (path === "/to-metadata") {
       next("http://169.254.169.254/latest/meta-data")
+    } else if (path === "/to-other") {
+      next(url("/headers", "other.test"))
+    } else if (path === "/to-self-headers") {
+      next("/headers")
     } else if (path === "/to-self") {
       next("/ok")
     } else if (path === "/large") {
@@ -208,6 +214,40 @@ describe("download", () => {
 
     expect(headers["accept-encoding"]).toBe("identity")
     expect(headers.accept).toBe("image/*")
+  })
+
+  test("follows redirects with HEAD and returns the final URL", async () => {
+    const result = await download(url("/hops/2"), { maxBytes: 0, method: "HEAD" }, publicNames)
+
+    expect(result.url.pathname).toBe("/hops/0")
+    expect(result.body.byteLength).toBe(0)
+  })
+
+  test("refuses a HEAD redirect to a private address", async () => {
+    await expect(
+      download(url("/to-private"), { maxBytes: 0, method: "HEAD" }, publicNames),
+    ).rejects.toThrow(PrivateAddressError)
+  })
+
+  test("drops credentials on a redirect to another origin", async () => {
+    const options = {
+      maxBytes: 4096,
+      headers: { authorization: "Bearer secret", cookie: "a=1", accept: "image/*" },
+    }
+    const result = await download(url("/to-other"), options, publicNames)
+    const headers = JSON.parse(new TextDecoder().decode(result.body))
+
+    expect(headers.authorization).toBeUndefined()
+    expect(headers.cookie).toBeUndefined()
+    expect(headers.accept).toBe("image/*")
+  })
+
+  test("keeps credentials on a redirect within the origin", async () => {
+    const options = { maxBytes: 4096, headers: { authorization: "Bearer secret" } }
+    const result = await download(url("/to-self-headers"), options, publicNames)
+    const headers = JSON.parse(new TextDecoder().decode(result.body))
+
+    expect(headers.authorization).toBe("Bearer secret")
   })
 
   test("stops at the timeout", async () => {
