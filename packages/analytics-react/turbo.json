@@ -1,0 +1,14 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "extends": ["//"],
+  "tasks": {
+    // `check-types` writes `src/generated` first, which the root `bun test` then imports. A cache
+    // hit must restore those files too.
+    "check-types": {
+      "outputs": ["src/generated/**"]
+    },
+    "build": {
+      "outputs": ["dist/**", "src/generated/**"]
+    }
+  }
+}

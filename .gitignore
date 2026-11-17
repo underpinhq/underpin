@@ -7,3 +7,6 @@ coverage
 .env
 .env.*
 .DS_Store
+
+# Written by packages/analytics-react/scripts/generate.ts
+packages/analytics-react/src/generated

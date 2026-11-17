@@ -1,0 +1,75 @@
+{
+  "name": "@underpin/analytics-react",
+  "version": "0.0.0",
+  "description": "React icons for analytics dimensions: browser, OS and device marks, country flags and favicons",
+  "keywords": [
+    "analytics",
+    "browser-logos",
+    "flags",
+    "icons",
+    "react"
+  ],
+  "homepage": "https://github.com/underpinhq/underpin/tree/main/packages/analytics-react#readme",
+  "bugs": "https://github.com/underpinhq/underpin/issues",
+  "license": "MIT",
+  "author": {
+    "name": "Piotr Kulpinski",
+    "email": "piotr@kulpinski.pl",
+    "url": "https://kulpinski.pl"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/underpinhq/underpin.git",
+    "directory": "packages/analytics-react"
+  },
+  "files": [
+    "dist",
+    "src",
+    "!src/**/*.test.ts",
+    "!src/**/*.test.tsx",
+    "!src/__snapshots__",
+    "!src/fixtures",
+    "!src/generated",
+    "assets/browsers/LICENSE.txt",
+    "NOTICE.md"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "generate": "bun scripts/generate.ts",
+    "build": "bun run generate && tsdown",
+    "check-types": "bun run generate && tsc --noEmit",
+    "test": "bun run generate && bun test"
+  },
+  "devDependencies": {
+    "@arethetypeswrong/core": "^0.18.5",
+    "@types/bun": "^1.2.21",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@underpin/analytics": "workspace:*",
+    "flag-icons": "7.5.0",
+    "lucide-static": "1.74.0",
+    "publint": "^0.3.25",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "simple-icons": "16.38.0",
+    "tsdown": "^0.23.0",
+    "typescript": "^5.9.3"
+  },
+  "peerDependencies": {
+    "react": ">=19"
+  },
+  "engines": {
+    "node": ">=22.12"
+  }
+}
