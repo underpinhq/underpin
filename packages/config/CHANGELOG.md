@@ -1,5 +1,11 @@
 # @underpin/config
 
+## 1.12.1
+
+### Patch Changes
+
+- The `underpin` and `kodeks` bins point at a committed `bin/underpin.js`, which loads the built CLI. A package manager now links them at install time even in a workspace that builds the package from source, where `dist` does not exist yet. ([0e07861](https://github.com/underpinhq/underpin/commit/0e0786114699fc0f6e4c215a3315d2c453e8c27d))
+
 ## 1.12.0
 
 ### Minor Changes
