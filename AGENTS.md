@@ -6,7 +6,7 @@ The source monorepo of the `@underpin` npm packages. Bun workspaces and Turborep
 
 This repository is a hybrid:
 
-- **`packages/ui` (`@underpin/ui`) is developed in Highseat**, in its `packages/ui`. Highseat's `sync-ui.yml` copies it here on every change, with `kodeks sync-public` and `packagesOnly`. Each sync replaces `packages/ui` and nothing else.
+- **`packages/ui` (`@underpin/ui`) is developed in Highseat**, in its `packages/ui`. Highseat's `sync-ui.yml` copies it here on every change, with `underpin sync-public` and `packagesOnly`. Each sync replaces `packages/ui` and nothing else.
 - **Every other package is developed here.** The root files (this file, `package.json`, `bun.lock`, the workflows, the configs) are this repository's own source too.
 
 Rules:
@@ -35,10 +35,10 @@ Releases use Changesets. Pushing to `main` never publishes a package that has no
 1. **A PR that changes what a package ships carries a changeset.** Run `bunx changeset`, pick the package and the bump, and write the entry for the people who use the package. It lands in that package's `CHANGELOG.md` and in its GitHub Release.
 2. **Pick the bump by its effect on existing users.** A fix is a patch. A new export, option or command is a minor. A removed or renamed export, a changed signature or return value, or any change that makes a working setup fail is a major.
 3. **A change that ships nothing needs no changeset.** That covers tests, READMEs and the root configs and workflows. CI runs `bunx changeset status --since=origin/main`.
-4. **`release.yml` versions and publishes.** While changesets are pending, its `version` job opens or updates the "Version Packages" PR. Merging that PR bumps the versions on `main`. Its `release` job then runs `kodeks publish`, which publishes every version listed in `kodeks.release.json` that is not on npm yet, and creates one GitHub Release per package version, tagged `<name>@<version>`.
+4. **`release.yml` versions and publishes.** While changesets are pending, its `version` job opens or updates the "Version Packages" PR. Merging that PR bumps the versions on `main`. Its `release` job then runs `underpin publish`, which publishes every version listed in `underpin.release.json` that is not on npm yet, and creates one GitHub Release per package version, tagged `<name>@<version>`.
 
 Rules:
 
 - **Never publish by hand.** npm accepts only trusted publishing from this repository's `release.yml`. Renaming `release.yml` breaks publishing until each package's trusted publisher on npmjs.com names the new file.
-- **A package publishes only when `kodeks.release.json` lists it and its `package.json` is not private.** A new package starts private and unlisted. Before it is listed, its name needs a placeholder version on npm and a trusted publisher pointing at `underpinhq/underpin` and `release.yml`.
-- **Kodeks is pinned exactly.** `release.yml` calls the kodeks workflows at the commit SHA of a kodeks release, and the root `package.json` takes its exact version. Bump them together.
+- **A package publishes only when `underpin.release.json` lists it and its `package.json` is not private.** A new package starts private and unlisted. Before it is listed, its name needs a placeholder version on npm and a trusted publisher pointing at `underpinhq/underpin` and `release.yml`.
+- **`@underpin/config` is pinned exactly.** It was `@dirstack/kodeks`, and its source is still `dirstack/kodeks`. `release.yml` calls its workflows at the commit SHA of a release there, and the root `package.json` takes its exact version. Bump them together.

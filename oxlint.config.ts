@@ -1,4 +1,4 @@
-import baseConfig from "@dirstack/kodeks/oxlint"
+import baseConfig from "@underpin/config/oxlint"
 import { defineConfig } from "oxlint"
 
 export default defineConfig({
