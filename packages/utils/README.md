@@ -1,0 +1,281 @@
+# @underpin/utils
+
+A lightweight, dependency-light set of TypeScript utilities shared across projects. Tree-shakeable, ESM-only, and fully typed.
+
+## Install
+
+```bash
+bun add @underpin/utils
+# or: npm install @underpin/utils
+```
+
+Renamed from `@dirstack/utils` 3.4.0. `@underpin/utils` continues its 3.x line, and only the import path changes.
+
+Requires Node.js 22.12 or later. The package ships ES modules only, and CommonJS code can `require()` it on these versions.
+
+## Usage
+
+Everything is exported from the package root:
+
+```ts
+import { chunk, clamp, formatBytes, slugify, tryCatch } from "@underpin/utils"
+
+chunk([1, 2, 3, 4, 5], 2) // [[1, 2], [3, 4], [5]]
+clamp(12, 0, 10) // 10
+formatBytes(1536, 1) // "1.5 KB"
+slugify("Hello World") // "hello-world"
+
+const { data, error } = await tryCatch(fetch("/api"))
+```
+
+Each module is also available on its own path, such as `@underpin/utils/array` or `@underpin/utils/time`. Bundlers remove unused code from the root import either way, because the build keeps one file per module.
+
+## What's inside
+
+| Module | Highlights |
+| --- | --- |
+| `array` | `uniq`, `uniqBy`, `chunk`, `groupBy`, `keyBy`, `countBy`, `compact`, `sortBy`, `sum`, `sumBy`, `range` |
+| `batch` | `processBatch`, `processBatchSettled` (ordered, concurrency-limited, with `onProgress`) |
+| `errors` | `getErrorMessage`, `toError` |
+| `files` | `formatBytes`, `isMimeTypeMatch`, `toBase64`, `toDataUrl` |
+| `format` | `formatNumber`, `formatCurrency`, `formatIntervalAmount`, `currencyExponent`, `minorUnits` |
+| `helpers` | `sleep`, `isTruthy`, `tryCatch`, `retry`, `withTimeout` |
+| `http` | `isValidUrl`, `addProtocol`, `removeProtocol`, `getDomain`, `isExternalUrl`, `joinUrlPaths`, `setQueryParams`, `removeQueryParams`, `isValidImageSrc`, `isHostname`, `normalizeHostname`, `stripWildcard`, `isWithinDomain`, `isIp`, `isIpInRange`, `isPublicIp`, `isCloudflareIp`, `getClientIp`, `CLOUDFLARE_IP_RANGES` |
+| `numbers` | `clamp`, `preciseRound` |
+| `objects` | `pick`, `omit`, `isEmptyObject`, `isKeyInObject` |
+| `parsers` | `serialize` |
+| `random` | `getRandomString`, `getRandomDigits`, `getRandomNumber`, `getRandomElement` |
+| `string` | `ucFirst`, `lcFirst`, `truncate`, `slugify`, `getInitials`, `joinAsSentence` |
+| `time` | `formatDate`, `formatTime`, `formatDateTime`, `formatDateRange`, `getReadTime`, `dayKey`, `shiftDayKey`, `dayIn`, `fromUnix`, `toUnix`, `SECOND_MS`, `MINUTE_MS`, `HOUR_MS`, `DAY_MS`, `MINUTE_SECONDS`, `HOUR_SECONDS`, `DAY_SECONDS` |
+| `ui` | `getBalancedColumns`, `isLightColor`, `getCurrentPage`, `getPagination`, `getPageCount`, `isPageOutOfRange`, `getPageLink` |
+| types | `WithOptional`, `WithRequired`, plus the types in helper signatures, such as `Result` (from `tryCatch`), `Timestamp` and `ProcessBatchOptions` |
+
+
+### Dates and time zones
+
+The date helpers accept any `Intl.DateTimeFormat` option plus a `locale` (defaults to `"en-US"`). Without a `timeZone`, they format in the time zone of the machine that runs them. On server-rendered pages, the server (often UTC) and the browser (the visitor's zone) can then produce different text, which causes React hydration errors. Pass a fixed `timeZone` to get the same output in both places:
+
+```ts
+import { formatDate, formatDateRange } from "@underpin/utils"
+
+formatDate("2026-10-05T23:30:00Z", { dateStyle: "long", timeZone: "UTC", locale: "en-GB" }) // "5 October 2026"
+formatDate("2026-10-05", { day: "2-digit", month: "short", year: "numeric", timeZone: "UTC" }) // "Oct 05, 2026"
+formatDateRange("2026-10-05", "2026-10-09", { timeZone: "UTC" }) // "Oct 5 – 9, 2026"
+```
+
+Date-only strings such as `"2026-10-05"` parse as UTC midnight, so format them with `timeZone: "UTC"` to keep the same calendar day everywhere.
+
+### Client IP behind a proxy
+
+`getClientIp` reads the visitor's address from request headers set by a reverse proxy such as Traefik. The first `x-forwarded-for` entry comes from the client and can be forged, so it returns the last entry, which the proxy appends as the TCP peer. It falls back to `x-real-ip`, and returns `undefined` when no header holds a valid IP address:
+
+```ts
+import { getClientIp } from "@underpin/utils"
+
+getClientIp(request.headers) ?? "127.0.0.1"
+```
+
+Behind proxied Cloudflare records, the peer is a Cloudflare server. Pass `trust: "cloudflare"` to return `cf-connecting-ip` instead. The header is read only when the peer is in `CLOUDFLARE_IP_RANGES`, because a request sent straight to the origin can set it to anything:
+
+```ts
+getClientIp(request.headers, { trust: "cloudflare" })
+```
+
+### Blocking private addresses before a fetch
+
+`isPublicIp` guards a server that fetches a user-supplied URL against server-side request forgery (SSRF). Resolve the hostname, then check every address it returns:
+
+```ts
+import { lookup } from "node:dns/promises"
+import { isPublicIp } from "@underpin/utils"
+
+const addresses = await lookup(new URL(url).hostname, { all: true })
+if (!addresses.every(({ address }) => isPublicIp(address))) throw new Error("Blocked address")
+```
+
+It returns `false` for private, loopback, link-local, shared, reserved, multicast, benchmarking and documentation ranges. IPv6 forms that embed an IPv4 address are blocked too: IPv4-mapped (`::ffff:127.0.0.1`, `::ffff:7f00:1`), IPv4-compatible (`::7f00:1`), IPv4-translated, NAT64 (`64:ff9b::/96` and `64:ff9b:1::/48`), Teredo (`2001::/32`) and 6to4 (`2002::/16`). Anything `isIp` rejects also returns `false`, including zone IDs and short or octal IPv4 such as `127.1`. Connect to the address you checked, not the hostname, or a second DNS lookup can return a different address.
+
+The IP helpers parse IPv4 and IPv6 in plain TypeScript, without `node:net`, so they also run in browsers and edge runtimes.
+
+### Retrying with a time budget
+
+`retry` runs an async function again when it throws. By default it makes 3 retries with no wait between them. `delay` and `factor` add exponential backoff, and `maxDelay` caps each wait:
+
+```ts
+import { retry } from "@underpin/utils"
+
+// Waits 100ms, 200ms, 400ms, 800ms, then 1s between attempts, for at most 15 seconds.
+const rows = await retry(() => client.query(sql), {
+  retries: Infinity,
+  delay: 100,
+  maxDelay: 1000,
+  timeout: 15_000,
+  shouldRetry: isConnectionError,
+})
+```
+
+`timeout` counts milliseconds from the call to `retry`. `deadline` takes an epoch timestamp instead, so several calls can share one budget. When both are set, the earlier one applies. `retry` never starts a wait that would end past the budget: it rethrows the last error instead. `retries` still defaults to 3 with a budget set, so pass `retries: Infinity` to let the budget alone end the loop.
+
+```ts
+const deadline = Date.now() + 15_000
+const user = await retry(() => findUser(id), { retries: Infinity, delay: 100, deadline })
+await retry(() => insertEvent(user), { retries: Infinity, delay: 100, deadline })
+```
+
+`signal` takes an `AbortSignal`. Once it aborts, `retry` stops, even in the middle of a wait, and rejects with `signal.reason`. Neither the budget nor the signal interrupts an attempt that is already running. Wrap the callback in `withTimeout` when a single attempt can hang.
+
+## Migrating from v2
+
+v3 leaves one way to call each helper. Each removed alias or call form below has a direct replacement.
+
+### Package format
+
+The CommonJS/UMD build (`dist/index.umd.cjs`) is gone. The package is ESM-only and needs Node.js 22.12 or later.
+
+```ts
+// Before: CommonJS on any Node.js version
+const { slugify } = require("@underpin/utils")
+// After: an import, or require() on Node.js 22.12+
+import { slugify } from "@underpin/utils"
+```
+
+### Removed aliases
+
+```ts
+// Before                                    // After
+splitArrayIntoChunks(items, 10)              chunk(items, 10)
+keepNumberInRange(value, 0, 100)             clamp(value, 0, 100)
+pickFromObject(user, ["id", "name"])         pick(user, ["id", "name"])
+```
+
+### Date formatters take an options object only
+
+```ts
+// Before                                                   // After
+formatDate(date, "long", "en-GB")                           formatDate(date, { dateStyle: "long", locale: "en-GB" })
+formatTime(date, "short", "pl")                             formatTime(date, { timeStyle: "short", locale: "pl" })
+formatDateTime(date, "long", "short", "de")                 formatDateTime(date, { dateStyle: "long", timeStyle: "short", locale: "de" })
+formatDateRange(start, end, "short", "es")                  formatDateRange(start, end, { dateStyle: "short", locale: "es" })
+```
+
+### `sortBy` takes an options object
+
+```ts
+// Before                                  // After
+sortBy(posts, post => post.date, "desc")   sortBy(posts, post => post.date, { order: "desc" })
+```
+
+### Removed helpers
+
+No project used these, so v3 drops them. Each has a short native or library replacement.
+
+| Removed | Use instead |
+| --- | --- |
+| `getElementPosition` | `element.getBoundingClientRect()` or `element.scrollIntoView()` |
+| `setInputValue` | Copy the five lines into the project that needs them |
+| `subscribe`, `unsubscribe`, `publish` | `document.addEventListener`, `removeEventListener`, `dispatchEvent(new CustomEvent(name, { detail }))` |
+| `publishEscape` | `document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }))` |
+| `isErrorWithMessage`, `toErrorWithMessage`, `ErrorWithMessage` | `getErrorMessage(error)` or `toError(error)` |
+| `formatMimeType` | `mimeType.split("/")[1]?.toUpperCase()` |
+| `formatToDecimals` | `formatNumber(value, { maximumFractionDigits: 2, useGrouping: false })` |
+| `debounce`, `throttle` | `useDebouncedCallback` and `useThrottledCallback` from `@mantine/hooks` |
+| `getBaseUrl` | `new URL(url).origin` |
+| `getQueryParams` | `Object.fromEntries(new URL(url).searchParams)` |
+| `checkUrlAvailability` | `fetch(url, { method: "HEAD", signal: AbortSignal.timeout(5000) })` |
+| `normalizeUrl`, `isLocalhostUrl` | Still used inside the package, no longer exported |
+| `parseNumericValue` | `Number.parseFloat(value)` with a `Number.isNaN` check, or `z.coerce.number()` |
+| `sortObject` | `Object.fromEntries(Object.entries(source).sort(([a], [b]) => a.localeCompare(b)))` |
+| `sortObjectKeys` | A comparator in the project that needs it |
+| `nullsToUndefined`, `ReplaceNullWithUndefined` | Map the fields that need it |
+| `maybeParseJson`, `maybeStringifyJson`, `deserialize` | `JSON.parse` and `JSON.stringify` |
+| `getRandomColor` | `Math.floor(Math.random() * 0x1000000).toString(16).padStart(6, "0")` |
+| `getRandomProperty` | `getRandomElement(Object.values(source))` |
+| `isCuid` | `isCuid` from `@paralleldrive/cuid2` |
+| `formatDateOrTime` | `formatDate`, `formatTime` or `formatDateTime` |
+| `getShortcutLabel` | A `<Kbd>` component that knows the platform's modifier key |
+| `DeepIdx`, `DeepIndex`, `ValidatePath` | `Path` and `PathValue` from `react-hook-form`, or `Get` and `Paths` from `type-fest` |
+| `NestedPartial`, `NestedRequired` | `PartialDeep` and `RequiredDeep` from `type-fest` |
+
+### `processBatchWithErrorHandling` is now `processBatchSettled`
+
+Like `Promise.allSettled`, each result now says whether its item succeeded and carries the item, instead of mixing values and `Error` objects in one array. Options, including `onError`, are unchanged.
+
+```ts
+// Before
+const results = await processBatchWithErrorHandling(items, processor, { batchSize: 10 })
+const failed = results.filter(result => result instanceof Error)
+
+// After
+const results = await processBatchSettled(items, processor, { batchSize: 10 })
+const failed = results.filter(result => result.status === "rejected") // { item, error }
+```
+
+### `toBase64` returns plain Base64, and `toDataUrl` returns the data URL
+
+`toBase64` used to return a data URL (`data:image/png;base64,…`), so most callers stripped the prefix. It now returns the Base64 string alone, and `toDataUrl` returns the full data URL. Both accept any `Blob` and work in Node.js too.
+
+```ts
+// Before                                                          // After
+(await toBase64(file)).replace(/^data:[^;]+;base64,/, "")          await toBase64(file)
+await toBase64(file) // when the data URL was wanted                await toDataUrl(file)
+```
+
+### `slugify` takes an options object
+
+```ts
+// Before                         // After
+slugify(title, true)              slugify(title, { decamelize: true })
+```
+
+### `getExcerpt` is now `truncate`
+
+Every caller passed plain text, so `truncate` drops the HTML stripping (which also deleted any text after a `<`). It cuts between words, never splits an emoji, and keeps the result within `length` including the `…`.
+
+```ts
+// Before                              // After
+getExcerpt(description, 125)           truncate(description, 125)
+```
+
+Three details changed: the ellipsis is `…` instead of `...`, it counts toward `length`, and empty input returns `""` instead of `null`. `stripHtml` and `convertNewlines` are removed too.
+
+### `getPageParams` is now `getPagination`
+
+`getPageParams` read the page from a URL and returned the other query parameters under an unchecked type. `getPagination` only does the math: parse the page with your router or nuqs first.
+
+```ts
+// Before                                    // After
+getPageParams<Filters>(url, 20)              getPagination({ page, perPage: 20 }) // { skip, take }
+```
+
+### `joinAsSentence` takes an options object
+
+```ts
+// Before                                       // After
+joinAsSentence(names)                           joinAsSentence(names, { limit: 3, locale: "en-GB" })
+joinAsSentence(names, 5)                        joinAsSentence(names, { limit: 5, locale: "en-GB" })
+joinAsSentence(names, undefined, t("and"))      joinAsSentence(names, { locale })
+joinAsSentence(names, undefined, "or")          joinAsSentence(names, { type: "disjunction", locale: "en-GB" })
+```
+
+`joinAsSentence` now formats with `Intl.ListFormat`, which changes its output in three ways:
+
+- It has no default limit. A `limit` collapses the rest into one trailing item ("a, b, and 2 more") instead of dropping it, and never hides a single item.
+- The default `en-US` locale adds a serial comma: "a, b, and c". Pass `locale: "en-GB"` for "a, b and c", as in v2.
+- The locale sets the conjunction and punctuation. Pass the active locale instead of a translated "and".
+
+## Development
+
+This package lives in the [`underpinhq/underpin`](https://github.com/underpinhq/underpin) monorepo. Run the commands from the repository root, or these from `packages/utils`:
+
+```bash
+bun test               # run the test suite on Bun
+bun run test:node      # run the same suite on Node.js with Vitest
+bun run check-types
+bun run build          # build with tsdown, then check the package with publint and attw
+```
+
+Releases follow the monorepo's Changesets flow, described in its `AGENTS.md`.
+
+## License
+
+MIT © [Piotr Kulpinski](https://kulpinski.pl)

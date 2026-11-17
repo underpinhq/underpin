@@ -49,6 +49,31 @@ jobs:
       - name: Build
         run: bun run build
 
+  test-node:
+    # `@underpin/utils` supports Node.js 22.12 and later, so its suite also runs on Node.js.
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [22, 24, 26]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Test @underpin/utils on Node.js ${{ matrix.node-version }}
+        run: bun run --filter @underpin/utils test:node
+
   changeset:
     # The "Version Packages" pull request consumes the changesets, so it has none to check.
     if: github.event_name == 'pull_request' && github.head_ref != 'changeset-release/main'
