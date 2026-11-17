@@ -72,11 +72,20 @@ describe("getClientIp", () => {
     })
 
     test("accepts a bare address as a range", () => {
-      const result = getClientIp(headers({ "x-forwarded-for": `${VISITOR}, 192.0.2.10` }), {
+      const result = getClientIp(headers({ "x-forwarded-for": VISITOR }), {
         trustedProxies: ["192.0.2.10"],
+        socketAddress: "192.0.2.10",
       })
 
       expect(result?.ip).toBe(VISITOR)
+    })
+
+    test("ignores the header when the socket is unknown", () => {
+      const result = getClientIp(headers({ "x-forwarded-for": SPOOFED }), {
+        trustedProxies: ["10.0.0.0/8"],
+      })
+
+      expect(result).toBeUndefined()
     })
 
     test("ignores the header when the socket is outside the ranges", () => {

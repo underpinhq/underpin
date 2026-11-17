@@ -18,7 +18,8 @@ export interface ClientIpOptions {
    * read, from the right:
    * - A number: how many proxies sit in front. The client is that many entries from the right.
    * - A list of addresses or CIDR ranges: every entry from the right inside one of them is a
-   *   proxy, and the first entry outside them is the client.
+   *   proxy, and the first entry outside them is the client. The header is read only when
+   *   `socketAddress` is inside the ranges too.
    *
    * Defaults to 0: `x-forwarded-for` is ignored and the socket address is the client.
    */
@@ -82,9 +83,10 @@ function findForwardedIp(
     return trustedProxies > 0 ? parseIp(findByCount(hops, trustedProxies)) : undefined
   }
 
-  // A socket outside the trusted ranges is a client that reached this server directly, so the
-  // header it sent says nothing.
-  if (!trustedProxies.length || (socket && !isInRanges(socket, trustedProxies))) return
+  // Only a peer inside the trusted ranges may speak for the client. A socket outside them is a
+  // client that reached this server directly, and an unknown socket proves nothing, so in both
+  // cases the header it sent says nothing.
+  if (!trustedProxies.length || !socket || !isInRanges(socket, trustedProxies)) return
 
   return parseIp(findByRanges(hops, trustedProxies))
 }

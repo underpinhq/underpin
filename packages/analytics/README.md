@@ -55,7 +55,7 @@ getClientIp(request.headers, { trustedProxies: ["10.0.0.0/8"], socketAddress })
 The trusted proxies are always config. With none, `x-forwarded-for` is ignored and the socket address is the client.
 
 - `trustedProxies: n` reads the entry `n` hops from the right of `x-forwarded-for`.
-- `trustedProxies: [...ranges]` skips every entry from the right inside a range and returns the first one outside. A socket outside the ranges is a direct client, and its header is ignored.
+- `trustedProxies: [...ranges]` skips every entry from the right inside a range and returns the first one outside. The header is read only when `socketAddress` is inside the ranges too: a socket outside them is a direct client, and an unknown socket proves nothing.
 - `cloudflare: true` believes `cf-connecting-ip` only when the peer is one of Cloudflare's published addresses.
 - `x-real-ip` is never read.
 
