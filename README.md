@@ -6,9 +6,18 @@ The source of the `@underpin` npm packages, shared by the products built on them
 | --- | --- |
 | [`@underpin/ui`](packages/ui) | React components on Base UI and Tailwind CSS v4 ([npm](https://www.npmjs.com/package/@underpin/ui)) |
 
-**This repository is a read-only mirror.** The packages are developed in a private monorepo, and every commit here is a one-way sync from it. Pull requests and edits made here are overwritten by the next sync, so this repository takes no issues or pull requests.
-
 Upgrading from `@dirstack/ui` 1.x: [`packages/ui/MIGRATION.md`](packages/ui/MIGRATION.md).
+
+## Contributing
+
+`packages/ui` is developed in a private monorepo and synced here one way, so a change to it made here is overwritten by the next sync. Issues about it are welcome. Every other package is developed in this repository.
+
+```bash
+bun install
+bun run check-types
+bun run test
+bun run build
+```
 
 ## Releases
 

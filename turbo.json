@@ -1,0 +1,13 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**"]
+    },
+    // A package type-checks against the built declarations of the workspace packages it uses.
+    "check-types": {
+      "dependsOn": ["^build"]
+    }
+  }
+}
