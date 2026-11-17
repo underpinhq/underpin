@@ -1,7 +1,6 @@
 {
   "name": "@underpin/utils",
   "version": "3.4.0",
-  "private": true,
   "description": "A lightweight set of utilities",
   "keywords": [
     "helpers",
