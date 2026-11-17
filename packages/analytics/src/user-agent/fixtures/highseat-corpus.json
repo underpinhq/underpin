@@ -1,0 +1,1738 @@
+[
+  {
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.82 Safari/537.36; SiteKiosk 9.6 Build 4409; PASSENGER3",
+    "browser": "Chrome",
+    "os": "Windows",
+    "deviceType": "desktop",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 XSplitBroadcaster/4.4.2304.1201 Safari/537.36",
+    "browser": "Chrome",
+    "os": "Windows",
+    "deviceType": "desktop",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Macintosh) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.98 Safari/537.36 CreativeCloud/4.8.1.435",
+    "browser": "Chrome",
+    "os": "macOS",
+    "deviceType": "desktop",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_6_8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/28.0.1500.95 Safari/537.36",
+    "browser": "Chrome",
+    "os": "macOS",
+    "deviceType": "desktop",
+    "source": "ua-parser-js-1"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Linux; Android 7.1.1; SM-N950U1 Build/NMF26X) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.98 Mobile Safari/537.36",
+    "browser": "Mobile Chrome",
+    "os": "Android",
+    "deviceType": "mobile",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Linux; Android 4.4.4; SM-E7000) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.96 Mobile Safari/537.36",
+    "browser": "Mobile Chrome",
+    "os": "Android",
+    "deviceType": "mobile",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.140 Safari/537.36 Edge/18.17763",
+    "browser": "Edge",
+    "os": "Windows",
+    "deviceType": "desktop",
+    "source": "ua-parser-js-1"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; ARM; 909) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2486.0 Safari/537.36 Edge/13.10586",
+    "browser": "Edge",
+    "os": "Windows",
+    "deviceType": "desktop",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 14_7_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Safari/605.1 Blackboard/6.9",
+    "browser": "Mobile Safari",
+    "os": "iOS",
+    "deviceType": "mobile",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.1 Mobile/15E148 Safari/604.1 Startpage/137.1.7",
+    "browser": "Mobile Safari",
+    "os": "iOS",
+    "deviceType": "mobile",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.7b) Gecko/20040323 Firefox/0.8.0+",
+    "browser": "Firefox",
+    "os": "Windows",
+    "deviceType": "desktop",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Windows; U; Windows NT 5.0; fr-FR; rv:1.7.5) Gecko/20041108 Firefox/1.0",
+    "browser": "Firefox",
+    "os": "Windows",
+    "deviceType": "desktop",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.140 Safari/537.36 Liri/0.4.0",
+    "browser": "Chrome",
+    "os": "Linux",
+    "deviceType": "desktop",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "BrightSign/R3G75N003767/7.0.60 (XD233) Mozilla/5.0 (Unknown; Linux arm) AppleWebKit/537.36 (KHTML, like Gecko) QtWebEngine/5.6.0 Chrome/45.0.2454.101 Safari/537.36",
+    "browser": "Chrome",
+    "os": "Linux",
+    "deviceType": "desktop",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Macintosh; U; PPC Mac OS X; en) AppleWebKit/146.1 (KHTML, like Gecko) Safari/146",
+    "browser": "Safari",
+    "os": "macOS",
+    "deviceType": "desktop",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_8; en-us) AppleWebKit/533.21.1 (KHTML, like Gecko) Version/5.0.5 Safari/533.21.1",
+    "browser": "Safari",
+    "os": "macOS",
+    "deviceType": "desktop",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (X11; Linux armv7l; rv:2.0.1) Gecko Firefox/5.0.1",
+    "browser": "Firefox",
+    "os": "Linux",
+    "deviceType": "desktop",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.7) Gecko/20040808 Firefox/0.9.3",
+    "browser": "Firefox",
+    "os": "Linux",
+    "deviceType": "desktop",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.7; en-US; rv:1.9.2.2) Gecko/20100316 Firefox/3.6.2",
+    "browser": "Firefox",
+    "os": "macOS",
+    "deviceType": "desktop",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Macintosh; U; PPC Mac OS X Mach-O; de-DE; rv:1.7.6) Gecko/20050223 Firefox/1.0.1",
+    "browser": "Firefox",
+    "os": "macOS",
+    "deviceType": "desktop",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Mobile; LYF/F271i/LYF_F271i-000-01-20-101019; Android; rv:48.0) Gecko/48.0 Firefox/48.0 KAIOS/2.5 PodLP/1.3.2.0",
+    "browser": "Mobile Firefox",
+    "os": "Android",
+    "deviceType": "mobile",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Android 13; Mobile; LG-M255; rv:111.0) Gecko/111.0 Firefox/111.0",
+    "browser": "Mobile Firefox",
+    "os": "Android",
+    "deviceType": "mobile",
+    "source": "ua-parser-js-1"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (iPhone; CPU IPhone OS 8_1_3 Like Mac OS X) AppleWebKit/600.1.4 (KHTML, Like Gecko) CriOS/43.0.2357.61 Mobile/12B466 Safari/600.1.4",
+    "browser": "Mobile Chrome",
+    "os": "iOS",
+    "deviceType": "mobile",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 26_2_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/146.0.7680.55 Mobile/15E148 Safari/604.1 VivaiOS/7.9.3974.10000",
+    "browser": "Mobile Chrome",
+    "os": "iOS",
+    "deviceType": "mobile",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Opera/7.52 (Windows NT 5.0; U)  [en]",
+    "browser": "Opera",
+    "os": "Windows",
+    "deviceType": "desktop",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Opera/8.0 (Windows NT 5.0; U; en)",
+    "browser": "Opera",
+    "os": "Windows",
+    "deviceType": "desktop",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) TagInspector/500.1 Chrome/90.0.4430.72 Safari/537.36 Edg/90.0.818.42",
+    "browser": "Edge",
+    "os": "macOS",
+    "deviceType": "desktop",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.1108.55 Safari/537.36 Edg/100.0.1108.55",
+    "browser": "Edge",
+    "os": "macOS",
+    "deviceType": "desktop",
+    "source": "ua-parser-js-1"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (X11; U; Linux i686; zh-CN; rv:1.9.2.8) Gecko/20100722 Ubuntu/10.04 (lucid) Firefox/3.6.8",
+    "browser": "Firefox",
+    "os": "Ubuntu",
+    "deviceType": "desktop",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.7.5) Gecko/20050221 Firefox/1.0 (Ubuntu)",
+    "browser": "Firefox",
+    "os": "Ubuntu",
+    "deviceType": "desktop",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) FxiOS/113.1 Mobile/15E148 Safari/605.1.15 Freespoke/2.0.0",
+    "browser": "Mobile Firefox",
+    "os": "iOS",
+    "deviceType": "mobile",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) FxiOS/1.1 Mobile/13B143 Safari/601.1.46",
+    "browser": "Mobile Firefox",
+    "os": "iOS",
+    "deviceType": "mobile",
+    "source": "ua-parser-js-1"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Linux; Android 10; SAMSUNG SM-F707W) AppleWebKit/537.36 (KHTML, like Gecko) SamsungBrowser/12.1 Chrome/79.0.3945.136 Mobile Safari/537.36",
+    "browser": "Samsung Internet",
+    "os": "Android",
+    "deviceType": "mobile",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Linux; Android 4.4.4; SAMSUNG SM-J110H Build/KTU84P) AppleWebKit/537.36 (KHTML, like Gecko) SamsungBrowser/2.0 Chrome/34.0.1847.76 Mobile Safari/537.36",
+    "browser": "Samsung Internet",
+    "os": "Android",
+    "deviceType": "mobile",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Linux; Android 9; TPM4G_WT8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36",
+    "browser": "Chrome",
+    "os": "Android",
+    "deviceType": "tablet",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Linux; Android 5.1.1; U103GT1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.101 Safari/537.36",
+    "browser": "Chrome",
+    "os": "Android",
+    "deviceType": "tablet",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_3_2 like Mac OS X) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.0.0 Safari/537.36 Brave/101",
+    "browser": "Brave",
+    "os": "iOS",
+    "deviceType": "mobile",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Linux; Android 11; Reno7 Pro) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Mobile Safari/537.36 EdgA/90.0.818.56",
+    "browser": "Edge",
+    "os": "Android",
+    "deviceType": "mobile",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Linux; Android 11; Y31s 5G) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.111 Mobile Safari/537.36 EdgA/86.0.622.56",
+    "browser": "Edge",
+    "os": "Android",
+    "deviceType": "mobile",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Linux; Android 2.3.5; GT-I9103 Build/GINGERBREAD) AppleWebKit/537.31 (KHTML, like Gecko) Chrome/26.0.1410.58 Mobile Safari/537.31 OPR/14.0.1074.57453",
+    "browser": "Opera",
+    "os": "Android",
+    "deviceType": "mobile",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Linux; Android 2.3.6; R8015 Build/GRK39F) AppleWebKit/537.31 (KHTML, like Gecko) Chrome/26.0.1410.40 Mobile Safari/537.31 OPR/14.0.1074.54070",
+    "browser": "Opera",
+    "os": "Android",
+    "deviceType": "mobile",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (X11; CrOS x86_64 4731.101.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/31.0.1650.67 Safari/537.36",
+    "browser": "Chrome",
+    "os": "Chrome OS",
+    "deviceType": "desktop",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (X11; CrOS aarch64 13310.93.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.133 Safari/537.36",
+    "browser": "Chrome",
+    "os": "Chrome OS",
+    "deviceType": "desktop",
+    "source": "ua-parser-js-1"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.4 (KHTML, like Gecko) Chrome/22.0.1104.222 YaBrowser/1.5.1104.222 Safari/537.4",
+    "browser": "Yandex",
+    "os": "Windows",
+    "deviceType": "desktop",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.6099.870 YaBrowser/24.1.3.870 (corp-ext) Yowser/2.5 Safari/537.36",
+    "browser": "Yandex",
+    "os": "Windows",
+    "deviceType": "desktop",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.116 Safari/537.36 Edg/77.07.4.5059",
+    "browser": "Edge",
+    "os": "Linux",
+    "deviceType": "desktop",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/4.0 (compatible; MSIE 5.23; Mac_PowerPC) Opera 7.51  [en]",
+    "browser": "Opera",
+    "os": "macOS",
+    "deviceType": "desktop",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Opera/7.54 (Macintosh; PPC Mac OS X; U)  [en]",
+    "browser": "Opera",
+    "os": "macOS",
+    "deviceType": "desktop",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Mobile Safari/537.36 (Ecosia android@119)",
+    "browser": "Ecosia",
+    "os": "Android",
+    "deviceType": "mobile",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Linux; Android 11; Action-X5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.181 Mobile Safari/537.36 (Ecosia android@88.0.4324.181)",
+    "browser": "Ecosia",
+    "os": "Android",
+    "deviceType": "mobile",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (iPad; CPU OS 12_5_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Safari/601.1 bingipadclient BingWeb",
+    "browser": "Safari",
+    "os": "iOS",
+    "deviceType": "tablet",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (iPad; CPU OS 16_5_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) FSCDCSafe/20.1.291705 Mobile/15E148 Version/16.5.1 Safari/605.1.15",
+    "browser": "Safari",
+    "os": "iOS",
+    "deviceType": "tablet",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 10_3_2 like Mac OS X) AppleWebKit/603.2.4 (KHTML, like Gecko) Mobile/14F89 Safari/603.2.4 EdgiOS/41.1.35.1",
+    "browser": "Edge",
+    "os": "iOS",
+    "deviceType": "mobile",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 12_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.1.1 EdgiOS/44.5.0.10 Mobile/15E148 Safari/604.1",
+    "browser": "Edge",
+    "os": "iOS",
+    "deviceType": "mobile",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Linux ) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36 OPR/46.0.2207.0 OMI/4.13.5.431.SIERRA.119 Model/Vestel-MB230 VSTVB MB200 FVC/4.0 (MITCHELL_BROWN; MB230; ) SmartTvA/3.0.0",
+    "browser": "Opera",
+    "os": "Linux",
+    "deviceType": "desktop",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Opera/9.80 (Linux mips;) Presto/2.12.407 Version/12.50 (avkb/pc,B:461;avvp/ssl;avui/tv;avst/off;avdn/VESTEL-v.tv.2013) Broadcast",
+    "browser": "Opera",
+    "os": "Linux",
+    "deviceType": "desktop",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_2) AppleWebKit/536.5 (KHTML, like Gecko) YaBrowser/1.0.1084.5402 Chrome/19.0.1084.5402 Safari/536.5",
+    "browser": "Yandex",
+    "os": "macOS",
+    "deviceType": "desktop",
+    "source": "ua-parser-js-1"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (iPad; CPU OS 18_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Brave/1 Mobile/15E148 Safari/604.1",
+    "browser": "Brave",
+    "os": "iOS",
+    "deviceType": "tablet",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Linux; arm; Android 7.0; LGMS550) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.135 YaBrowser/20.8.3.71.00 Mobile Safari/537.36",
+    "browser": "Yandex",
+    "os": "Android",
+    "deviceType": "mobile",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Linux; Android 15; AMM-AN00 Build/HONORAMM-AN00; wv) AppleWebKit/537.36 (KHTML, like Gecko)  Chrome/132.0.6834.163 YaBrowser/24.1.1.23 (lite) Mobile Safari/537.36",
+    "browser": "Yandex",
+    "os": "Android",
+    "deviceType": "mobile",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36 Avast/72.0.1174.122",
+    "browser": "Avast Secure Browser",
+    "os": "Windows",
+    "deviceType": "desktop",
+    "source": "ua-parser-js-1"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Avast/120.0.0.0",
+    "browser": "Avast Secure Browser",
+    "os": "Windows",
+    "deviceType": "desktop",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Linux; Android 4.0.4; U8836D Build/HuaweiU8836D) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.166 Mob",
+    "browser": "Chrome",
+    "os": "Android",
+    "deviceType": "mobile",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Linux; Android 8.1.0; G8060) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.157 Safari/537.36",
+    "browser": "Chrome",
+    "os": "Android",
+    "deviceType": "mobile",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 10_2_1 like Mac OS X) AppleWebKit/602.4.6 (KHTML, like Gecko) Mobile/14D27 (Ecosia ios@3.0.1.533)",
+    "browser": "Ecosia",
+    "os": "iOS",
+    "deviceType": "mobile",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Safari/605.1.15 (Ecosia ios@8.1.3.72)",
+    "browser": "Ecosia",
+    "os": "iOS",
+    "deviceType": "mobile",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 13_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.6511.3 Safari/537.36 Brave/1.62.158",
+    "browser": "Brave",
+    "os": "macOS",
+    "deviceType": "desktop",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_3) AppleWebKit/537.36 (KHTML, like Gecko) Brave Chrome/80.0.3987.87 Safari/537.36",
+    "browser": "Brave",
+    "os": "macOS",
+    "deviceType": "desktop",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Linux; U; Android 12; ru-ru; Redmi Note 10T 5G Build/SP1A.210812.016) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/100.0.4896.127 Mobile Safari/537.36 XiaoMi/MiuiBrowser/13.17.0-gn",
+    "browser": "MIUI Browser",
+    "os": "Android",
+    "deviceType": "mobile",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Linux; U; Android 11; uz-uz; Redmi Note 11 SE Build/RP1A.200720.011) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/100.0.4896.127 Mobile Safari/537.36 XiaoMi/MiuiBrowser/13.18.0-gn",
+    "browser": "MIUI Browser",
+    "os": "Android",
+    "deviceType": "mobile",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Linux; Android 12; SM-X800) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.104 Safari/537.36 OPR/67.1.3508.63168",
+    "browser": "Opera",
+    "os": "Android",
+    "deviceType": "tablet",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Linux; Android 14; SM-X806C) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.5938.154 Safari/537.36 OPR/78.1.4143.75368",
+    "browser": "Opera",
+    "os": "Android",
+    "deviceType": "tablet",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 YaBrowser/23.7.1.1217 (corp) Yowser/2.5 Safari/537.36",
+    "browser": "Yandex",
+    "os": "Linux",
+    "deviceType": "desktop",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Linux 6.1.57; ; ) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.6099.234 Not_A Brand/8 YaBrowser/24.1.3.845 YaBrowserCorp/120 Yowser/2.5 Safari/537.36",
+    "browser": "Yandex",
+    "os": "Linux",
+    "deviceType": "desktop",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (iPad; CPU OS 12_5_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.0 EdgiOS/46.3.26 Mobile/15E148 Safari/605.1.15",
+    "browser": "Edge",
+    "os": "iOS",
+    "deviceType": "tablet",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Linux; Android 14; ELP-NX9 Build/HONORELP-N39) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.6478.135 Mobile Safari/537.36 OPX/2.5",
+    "browser": "Opera GX",
+    "os": "Android",
+    "deviceType": "mobile",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Linux; Android 14; WOD-LX3 Build/HONORWDY-L13) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.7390.97 Mobile Safari/537.36 OPX/3.0",
+    "browser": "Opera GX",
+    "os": "Android",
+    "deviceType": "mobile",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/4.76 (Macintosh; I; PPC; Incompatible my ass! What if I don't want your jerky, elitist, ugly-assed css crap? Screw you!)",
+    "browser": "",
+    "os": "macOS",
+    "deviceType": "desktop",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "MailBar/1.3.2 (Mac OS X Version 10.11.1 (Build 15B42))",
+    "browser": "",
+    "os": "macOS",
+    "deviceType": "desktop",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Linux; Android 9; ZMOOTH) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36 EdgA/111.0.1661.59",
+    "browser": "Edge",
+    "os": "Android",
+    "deviceType": "tablet",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Linux; Android 10; DBY-W09) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.63 Safari/537.36 EdgA/93.0.961.44",
+    "browser": "Edge",
+    "os": "Android",
+    "deviceType": "tablet",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Linux; U; Android 14; zh-CN; 24090RA29C Build/UP1A.231005.007) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/100.0.4896.58 Quark/7.2.6.641 Mobile Safari/537.36",
+    "browser": "Quark",
+    "os": "Android",
+    "deviceType": "mobile",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Linux; U; Android 7.1.1; zh-CN; Shanling M6(21) Build/NMF26F) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/78.0.3904.108 Quark/5.2.2.186 Mobile Safari/537.36",
+    "browser": "Quark",
+    "os": "Android",
+    "deviceType": "mobile",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 OPX/1.3.1",
+    "browser": "Opera GX",
+    "os": "iOS",
+    "deviceType": "mobile",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 YaBrowser/26.4.3.680.10 YaApp_iOS/2604.3 YaApp_iOS_Browser/2604.3 YazekaApp/2604.3 Safari/604.1 SA/3 SAPublic/0 Version/26.5",
+    "browser": "Yandex",
+    "os": "iOS",
+    "deviceType": "mobile",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_4_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.4 YaBrowser/23.3.3.330 Mobile/15E148 Safari/604.1",
+    "browser": "Yandex",
+    "os": "iOS",
+    "deviceType": "mobile",
+    "source": "ua-parser-js-1"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36 AVG/72.0.719.123",
+    "browser": "AVG Secure Browser",
+    "os": "Windows",
+    "deviceType": "desktop",
+    "source": "ua-parser-js-1"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36 AVG/121.0.0.0",
+    "browser": "AVG Secure Browser",
+    "os": "Windows",
+    "deviceType": "desktop",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Iron/26.0.1450.0 Chrome/26.0.1450.0 Safari/537.36",
+    "browser": "Iron",
+    "os": "Windows",
+    "deviceType": "desktop",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Iron Safari/537.36",
+    "browser": "Iron",
+    "os": "Windows",
+    "deviceType": "desktop",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Linux; Android 10; SAMSUNG SM-T875) AppleWebKit/537.36 (KHTML, like Gecko) SamsungBrowser/12.1 Chrome/79.0.3945.136 Safari/537.36",
+    "browser": "Samsung Internet",
+    "os": "Android",
+    "deviceType": "tablet",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Linux; Android 11; SAMSUNG SM-T225) AppleWebKit/537.36 (KHTML, like Gecko) SamsungBrowser/16.0 Chrome/92.0.4515.166 Safari/537.36",
+    "browser": "Samsung Internet",
+    "os": "Android",
+    "deviceType": "tablet",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Linux; U; en-US) AppleWebKit/534.6 (KHTML, like Gecko) Safari/534.6 TouchPad/1.0",
+    "browser": "Safari",
+    "os": "Linux",
+    "deviceType": "desktop",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Linux; U; Cosmote_My_mini_Tab 4.0.4; Cosmote_My_mini_Tab Build/IMM76D) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Safari/534.30",
+    "browser": "Safari",
+    "os": "Linux",
+    "deviceType": "desktop",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.89 Safari/537.36 SLBrowser/7.0.0.6241 SLBChan/",
+    "browser": "Smart Lenovo Browser",
+    "os": "Windows",
+    "deviceType": "desktop",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36 SLBrowser/9.0.5.12181 SLBChan/ SLBVPV/64-bit",
+    "browser": "Smart Lenovo Browser",
+    "os": "Windows",
+    "deviceType": "desktop",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (iPad; U; CPU OS 5_0 like Mac OS X; en-us) AppleWebKit/534.46 (KHTML, like Gecko) Version/5.0.2 Mobile/9A5248d Safari/6533.18.5#2.0#TCL/THOM-EU-RT2841-S1/28/tclwebkit1.0.2/1920*1080(542703859,null;222510156,f9ee107e6f6243db988aa25378bf21ca)",
+    "browser": "Mobile Safari",
+    "os": "iOS",
+    "deviceType": "tablet",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (iPad; CPU OS 7_0_4 like Mac OS X) AppleWebKit/537.51.1 (KHTML, like Gecko) Version/7.0 Mobile/11B554a Safari/9537.53",
+    "browser": "Mobile Safari",
+    "os": "iOS",
+    "deviceType": "tablet",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Linux; arm_64; Android 13; ELN-W09) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.5993.2332 YaApp_Android/23.110/apad YaSearchBrowser/23.110/apad BroPP/1.0 SA/3 Mobile Safari/537.36",
+    "browser": "Yandex",
+    "os": "Android",
+    "deviceType": "tablet",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Linux; arm_64; Android 13; GDI-W09) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.5993.414 YaSearchBrowser/23.115/apad BroPP/1.0 YaSearchApp/23.115/apad webOmni SA/3 Mobile Safari/537.36",
+    "browser": "Yandex",
+    "os": "Android",
+    "deviceType": "tablet",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (iPad; CPU OS 6_0_1 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) CriOS/31.0.1650.18 Mobile/10A523 Safari/8536.25",
+    "browser": "Mobile Chrome",
+    "os": "iOS",
+    "deviceType": "tablet",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (iPad; U; CPU OS 5_1_1 like Mac OS X; en-us) AppleWebKit/534.46.0 (KHTML, like Gecko) Chrome/19.0.1084.60 Mobile/9B206 Safari/7534.48.3",
+    "browser": "Mobile Chrome",
+    "os": "iOS",
+    "deviceType": "tablet",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36 Norton/121.0.0.0",
+    "browser": "Norton Private Browser",
+    "os": "Windows",
+    "deviceType": "desktop",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36 Norton/115.0.21984.175",
+    "browser": "Norton Private Browser",
+    "os": "Windows",
+    "deviceType": "desktop",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.221 Safari/537.36 SE 2.X MetaSr 1.0",
+    "browser": "Sogou Explorer",
+    "os": "Windows",
+    "deviceType": "desktop",
+    "source": "ua-parser-js-1"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/31.0.1650.63 Safari/537.36 SE 2.X MetaSr 1.0",
+    "browser": "Sogou Explorer",
+    "os": "Windows",
+    "deviceType": "desktop",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/534.24 (KHTML, like Gecko) Chrome/122.0.6261.119 Safari/534.24 XiaoMi/MiuiBrowser/18.4.720715",
+    "browser": "MIUI Browser",
+    "os": "Linux",
+    "deviceType": "desktop",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Linux; Android 8.1.0; INOI_1_Lite Build/O11019) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.91 Mobile Safari/537.36 OPT/2.5",
+    "browser": "Opera Touch",
+    "os": "Android",
+    "deviceType": "mobile",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Linux; Android 8.1.0; SM-J710K Build/M1AJQ) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.45 Mobile Safari/537.36 OPT/2.9",
+    "browser": "Opera Touch",
+    "os": "Android",
+    "deviceType": "mobile",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Linux; Android 7.0; SM-G920I Build/NRD90M) AppleWebKit/537.36 (KHTML, like Gecko) OculusBrowser/3.4.9 SamsungBrowser/4.0 Chrome/57.0.2987.146 Mobile VR Safari/537.36",
+    "browser": "Oculus Browser",
+    "os": "Android",
+    "deviceType": "mobile",
+    "source": "ua-parser-js-1"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; System75) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Safari/605.1.15 Ubuntu/22.04 Eolie/605.1.15",
+    "browser": "Safari",
+    "os": "Ubuntu",
+    "deviceType": "desktop",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "BrightSign/6.0.13 (XD1132) Mozilla/5.0 (compatible; Linux mips) AppleWebKit/537.4 (KHTML, like Gecko) Chromium/18.0.1025.168 Chrome/18.0.1025.168 Safari/537.4",
+    "browser": "Chromium",
+    "os": "Linux",
+    "deviceType": "desktop",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "BrightSign/4.8.108 (XD230) Mozilla/5.0 (compatible; Linux mips) AppleWebKit/537.4 (KHTML, like Gecko) Chromium/18.0.1025.168 Chrome/18.0.1025.168 Safari/537.4",
+    "browser": "Chromium",
+    "os": "Linux",
+    "deviceType": "desktop",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36 Vivaldi/6.0.2979.18",
+    "browser": "Vivaldi",
+    "os": "Windows",
+    "deviceType": "desktop",
+    "source": "ua-parser-js-1"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Windows NT 6.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/40.0.2214.89 Vivaldi/1.0.83.38 Safari/537.36",
+    "browser": "Vivaldi",
+    "os": "Windows",
+    "deviceType": "desktop",
+    "source": "ua-parser-js-1"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (PC; OpenHarmony 6.1; Windows NT 10.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36 ArkWeb/6.1.0.100 HuaweiBrowser/6.1.3.321",
+    "browser": "Huawei Browser",
+    "os": "Windows",
+    "deviceType": "desktop",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.107 Safari/537.36 HBPC/11.0.7.301",
+    "browser": "Huawei Browser",
+    "os": "Windows",
+    "deviceType": "desktop",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X; zh-cn) AppleWebKit/601.1.46 (KHTML, like Gecko) Mobile/20A362 Quark/5.8.9.1457 Mobile",
+    "browser": "Quark",
+    "os": "iOS",
+    "deviceType": "mobile",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 11_2_1 like Mac OS X) AppleWebKit/604.4.7 (KHTML, like Gecko) Mobile/15C153 Twitter for iPhone/7.19",
+    "browser": "Twitter",
+    "os": "iOS",
+    "deviceType": "mobile",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.2.10 (KHTML, like Gecko) Mobile/15A372 Twitter for iPhone/7.52",
+    "browser": "Twitter",
+    "os": "iOS",
+    "deviceType": "mobile",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (X11; U; Linux i686; cs-CZ; rv:1.7.6) Gecko/20050301 Firefox/1.0.1 Fedora/1.0.1-1.3.1",
+    "browser": "Firefox",
+    "os": "Fedora",
+    "deviceType": "desktop",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (X11; U; Linux x86_64; it; rv:1.9.1.9) Gecko/20100330 Fedora/3.5.9-2.fc12 Firefox/3.5.9",
+    "browser": "Firefox",
+    "os": "Fedora",
+    "deviceType": "desktop",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Avira/131.0.0.0",
+    "browser": "Avira Secure Browser",
+    "os": "Windows",
+    "deviceType": "desktop",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36 Avira/116.0.0.0",
+    "browser": "Avira Secure Browser",
+    "os": "Windows",
+    "deviceType": "desktop",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (X11; Fedora; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.121 Safari/537.36",
+    "browser": "Chrome",
+    "os": "Fedora",
+    "deviceType": "desktop",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (iPad; CPU OS 14_7_1 like Mac OS X) AppleWebKit/604.1.34 (KHTML, like Gecko) Version/14.0 YaBrowser/18.9.2.79.11 Mobile/18G82 Safari/604.1",
+    "browser": "Yandex",
+    "os": "iOS",
+    "deviceType": "tablet",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (iPad; CPU OS 16_4_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.4 YaBrowser/23.3.3.330 Mobile/15E148 Safari/605.1",
+    "browser": "Yandex",
+    "os": "iOS",
+    "deviceType": "tablet",
+    "source": "ua-parser-js-1"
+  },
+  {
+    "userAgent": "Microsoft Office Excel/16.42.1011 (Mac OS/10.13.6; Desktop; es-MX; NonAppStore; Apple/Macmini7,1)",
+    "browser": "",
+    "os": "",
+    "deviceType": "desktop",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "SpeedySpider - http://www.entireweb.com",
+    "browser": "",
+    "os": "",
+    "deviceType": "desktop",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 (Chromium GOST) Safari/537.36",
+    "browser": "Chromium",
+    "os": "Windows",
+    "deviceType": "desktop",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; Chromium GOST) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
+    "browser": "Chromium",
+    "os": "Windows",
+    "deviceType": "desktop",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Linux; Android 16; SM-A576Q Build/BP4A.251205.006; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/150.0.7871.181 Mobile Safari/537.36 Sleipnir/3.8.5",
+    "browser": "Sleipnir",
+    "os": "Android",
+    "deviceType": "mobile",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Linux; Android 16; SM-S942Q Build/BP4A.251205.006; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/150.0.7871.183 Mobile Safari/537.36 Sleipnir/3.8.5",
+    "browser": "Sleipnir",
+    "os": "Android",
+    "deviceType": "mobile",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Vodafone/1.0/HTC_Touch_Pro Opera/9.50 (Windows NT 5.1; U; en)",
+    "browser": "Opera",
+    "os": "Windows",
+    "deviceType": "mobile",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "HTC_Touch_Viva_T2223 Opera/9.50 (Windows NT 5.1; U; en)",
+    "browser": "Opera",
+    "os": "Windows",
+    "deviceType": "mobile",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (X11; U; Linux x86_64; en-US) AppleWebKit/534.13 (KHTML, like Gecko) Iron/9.0.600.2 Chrome/9.0.600.2 Safari/534.13",
+    "browser": "Iron",
+    "os": "Linux",
+    "deviceType": "desktop",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (compatible; Konqueror/3.2.2; Linux) (KHTML, like Gecko) - www.amorosi4u.de.vu",
+    "browser": "Konqueror",
+    "os": "Linux",
+    "deviceType": "desktop",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (compatible; Konqueror/3.1; Linux 2.4.22-xfs; X11)",
+    "browser": "Konqueror",
+    "os": "Linux",
+    "deviceType": "desktop",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Linux; Android 5.1; winnovo_K43FO) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.80 Mobile Safari/537.36",
+    "browser": "Mobile Chrome",
+    "os": "Windows",
+    "deviceType": "mobile",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Linux; Android 5.1; winnovo_K54HO) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.117 Mobile Safari/537.36",
+    "browser": "Mobile Chrome",
+    "os": "Windows",
+    "deviceType": "mobile",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_0) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1300.0 Iron/23.0.1300.0 Safari/537.11",
+    "browser": "Iron",
+    "os": "macOS",
+    "deviceType": "desktop",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.21 (KHTML, like Gecko) adspider Safari/537.21",
+    "browser": "Safari",
+    "os": "Windows",
+    "deviceType": "desktop",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) RockstarGames/2.4.0.240/5.0.0.0/launcher/Steam Safari/537.36",
+    "browser": "Safari",
+    "os": "Windows",
+    "deviceType": "desktop",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Falkon/3.0.0 Chrome/61.0.3163.140 Safari/537.36",
+    "browser": "Falkon",
+    "os": "Linux",
+    "deviceType": "desktop",
+    "source": "ua-parser-js-1"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Linux; U; Android 13; ru-ru; Xiaomi Pad 6 Build/TKQ1.221114.001) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/112.0.5615.136 Mobile Safari/537.36 XiaoMi/MiuiBrowser/14.9.1-gn",
+    "browser": "MIUI Browser",
+    "os": "Android",
+    "deviceType": "tablet",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Linux; Android 15; Redmi Pad 2 Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.6312.118 Mobile Safari/537.36 XiaoMi/MiuiBrowser/14.39.0.6-gn",
+    "browser": "MIUI Browser",
+    "os": "Android",
+    "deviceType": "tablet",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_5) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/102 Version/11.1.1 Safari/605.1.15",
+    "browser": "Mobile Chrome",
+    "os": "macOS",
+    "deviceType": "desktop",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (X11; U; FreeBSD i386; en-US; rv:1.6) Gecko/20040405 Firefox/0.8",
+    "browser": "Firefox",
+    "os": "FreeBSD",
+    "deviceType": "desktop",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (X11; U; FreeBSD i386; en-US; rv:1.6) Gecko/20040610 Firefox/0.8",
+    "browser": "Firefox",
+    "os": "FreeBSD",
+    "deviceType": "desktop",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:60.9) Gecko/20100101 Goanna/4.4 Firefox/60.9 Basilisk/20190912",
+    "browser": "Basilisk",
+    "os": "Windows",
+    "deviceType": "desktop",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:17.0) Gecko/20131030 Firefox/17.0 Iceweasel/17.0.10",
+    "browser": "Iceweasel",
+    "os": "Linux",
+    "deviceType": "desktop",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.7.5) Gecko/20041129 Firefox/1.0 (Debian package 1.0-3.backports.org.1)",
+    "browser": "Firefox",
+    "os": "Debian",
+    "deviceType": "desktop",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.7.5) Gecko/20050206 Firefox/1.0 (Debian package 1.0+dfsg.1-5)",
+    "browser": "Firefox",
+    "os": "Debian",
+    "deviceType": "desktop",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 11_4_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.182 Safari/537.36 (Chromium GOST)",
+    "browser": "Chromium",
+    "os": "macOS",
+    "deviceType": "desktop",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 10_3_2 like Mac OS X) AppleWebKit/602.1.50 (KHTML, like Gecko) GSA/30.1.161623614 Mobile/14F89 Safari/602.1",
+    "browser": "GSA",
+    "os": "iOS",
+    "deviceType": "mobile",
+    "source": "ua-parser-js-1"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0_2 like Mac OS X) AppleWebKit/604.1.34 (KHTML, like Gecko) GSA/36.0.169645775 Mobile/15A421 Safari/604.1",
+    "browser": "GSA",
+    "os": "iOS",
+    "deviceType": "mobile",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Linux; Android 16; SM-X210 Build/BP2A.250605.031.A3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.7559.132 Safari/537.36 OPX/3.1",
+    "browser": "Opera GX",
+    "os": "Android",
+    "deviceType": "tablet",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Linux; Android 14; TLG01_EEA Build/UP1A.231005.007) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.6261.119 Safari/537.36 OPX/2.3",
+    "browser": "Opera GX",
+    "os": "Android",
+    "deviceType": "tablet",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Windows; U; Win98; en-US; rv:1.8webcrawler) http://skateboarddirectory.com",
+    "browser": "",
+    "os": "Windows",
+    "deviceType": "desktop",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 [en] (Windows; U; Win98; en-US; rv.0.9.2)",
+    "browser": "",
+    "os": "Windows",
+    "deviceType": "desktop",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (FreeBSD; U; Viera; fr-FR) AppleWebKit/535.1 (KHTML, like Gecko) Viera/1.5.2 Chrome/14.0.835.202 Safari/535.1",
+    "browser": "Chrome",
+    "os": "FreeBSD",
+    "deviceType": "desktop",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (X11; U; FreeBSD x86_64; en-US) AppleWebKit/534.16 (KHTML, like Gecko) Chrome/10.0.648.204 Safari/534.16",
+    "browser": "Chrome",
+    "os": "FreeBSD",
+    "deviceType": "desktop",
+    "source": "ua-parser-js-1"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Linux; U; Android 12; zh-Hans-CN; BRT-W09 Build/HONORBRT-W09) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/100.0.4896.58 Quark/6.5.0.336 Mobile Safari/537.36",
+    "browser": "Quark",
+    "os": "Android",
+    "deviceType": "tablet",
+    "source": "ua-parser-js-1"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Linux; U; Android 12; zh-Hans-CN; DBR-W10 Build/HUAWEIDBR-W10) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/100.0.4896.58 Quark/6.9.6.501 Mobile Safari/537.36",
+    "browser": "Quark",
+    "os": "Android",
+    "deviceType": "tablet",
+    "source": "ua-parser-js-1"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Linux; U; Android 2.2.2; ru-ru; IDEOS X5 Build/HuaweiU8800Pro) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1",
+    "browser": "Android Browser",
+    "os": "Android",
+    "deviceType": "mobile",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Linux; Android 5.1; JKL A28 Build/LMY47D) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/39.0.0.0 Mobile Safari/537.36",
+    "browser": "Android Browser",
+    "os": "Android",
+    "deviceType": "mobile",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Linux; Android 7.0; BLN-AL10 Build/HONORBLN-AL10; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/77.0.3865.120 MQQBrowser/6.2 TBS/045410 Mobile Safari/537.36",
+    "browser": "QQBrowser",
+    "os": "Android",
+    "deviceType": "mobile",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Linux; U; Android 10; zh-cn; EBG-AN00 Build/XXXXX) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/66.0.3359.126 MQQBrowser/10.4 Mobile Safari/537.36",
+    "browser": "QQBrowser",
+    "os": "Android",
+    "deviceType": "mobile",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Linux; Android 13; iHunt S24 PLUS Build/T00624; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/126.0.6478.134 Mobile Safari/537.36 TwitterAndroid",
+    "browser": "Twitter",
+    "os": "Android",
+    "deviceType": "mobile",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Linux; Android 13; 2312DRAABG Build/TP1A.220624.014; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/122.0.6261.119 Mobile Safari/537.36 TwitterAndroid",
+    "browser": "Twitter",
+    "os": "Android",
+    "deviceType": "mobile",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (X11; Linux) AppleWebKit/538.1 (KHTML, like Gecko) Chrome/18.0.1025.133 Safari/538.1 Midori/0.5",
+    "browser": "Midori",
+    "os": "Linux",
+    "deviceType": "desktop",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Midori/0.2.2 (X11; Linux i686; U; en-us) WebKit/531.2+",
+    "browser": "Midori",
+    "os": "Linux",
+    "deviceType": "desktop",
+    "source": "ua-parser-js-1"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.1; Trident/6.0; Sleipnir/2.9.18)",
+    "browser": "Sleipnir",
+    "os": "Windows",
+    "deviceType": "desktop",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.1; Trident/4.0; chromeframe; .NET CLR 2.0.50727; .NET CLR 3.0.4506.2152; .NET CLR 3.5.30729; Sleipnir 2.8.5)3.0.30729)",
+    "browser": "Sleipnir",
+    "os": "Windows",
+    "deviceType": "desktop",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Linux; Android 4.4.2; SM-G800F Build/KOT49H) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1985.135 MobileIron/1.6.0 Mobile Safari/537.36",
+    "browser": "Iron",
+    "os": "Android",
+    "deviceType": "mobile",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Linux; Android 11; Pixel 4 XL) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Mobile Iron Safari/537.36",
+    "browser": "Iron",
+    "os": "Android",
+    "deviceType": "mobile",
+    "source": "ua-parser-js-1"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 6_1_4 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Mobile/10B350 [Pinterest/iOS]",
+    "browser": "WebKit",
+    "os": "iOS",
+    "deviceType": "mobile",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_8 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Cici_2.0.0 JsSdk/2.0 NetType/MOBILE Channel/App Store AppVersion/2.0.0 AppName/Cici Rifle_2.0.0 Spark/1.3.4 HybridTag/5AB1DA49-C007-4655-9CEE-6A5E60142D9A WKWebView/1 Bullet/1 Cici/2.0.0 FalconTag/9CB373C3-ED16-4918-B035-4C8806D7FCBE",
+    "browser": "WebKit",
+    "os": "iOS",
+    "deviceType": "mobile",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.124 Safari/537.36 qblink wegame.exe WeGame/5.1.1.11100 QBCore/3.70.107.400 QQBrowser/9.0.2524.400",
+    "browser": "QQBrowser",
+    "os": "Windows",
+    "deviceType": "desktop",
+    "source": "ua-parser-js-1"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Windows NT 5.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/31.0.1650.48 Safari/537.36 QQBrowser/8.0.3197.400",
+    "browser": "QQBrowser",
+    "os": "Windows",
+    "deviceType": "desktop",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Focus/1.0.8 Chrome/123.0.6312.118 Mobile Safari/537.36",
+    "browser": "Firefox Focus",
+    "os": "Android",
+    "deviceType": "mobile",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Focus/5.2 Chrome/91.0.4472.88 Mobile Safari/537.36",
+    "browser": "Firefox Focus",
+    "os": "Android",
+    "deviceType": "mobile",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36 QuarkPC/2.0.7.222",
+    "browser": "Quark",
+    "os": "Windows",
+    "deviceType": "desktop",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Windows; U; Windows NT 5.2;. en-US) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.6312.80 Safari/537.36 Quark/7.8.0.750",
+    "browser": "Quark",
+    "os": "Windows",
+    "deviceType": "desktop",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (SerenityOS; x86_64) LibWeb+LibJS/1.0 Ladybird/1.0",
+    "browser": "Ladybird",
+    "os": "SerenityOS",
+    "deviceType": "desktop",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.88 Safari/537.36 Vivaldi/2.4.1488.36",
+    "browser": "Vivaldi",
+    "os": "macOS",
+    "deviceType": "desktop",
+    "source": "ua-parser-js-1"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 11_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36 Vivaldi/3.7",
+    "browser": "Vivaldi",
+    "os": "macOS",
+    "deviceType": "desktop",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (X11; U; NetBSD i386; en-US; rv:1.7.5) Gecko/20050103 Firefox/1.0",
+    "browser": "Firefox",
+    "os": "NetBSD",
+    "deviceType": "desktop",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (X11; U; NetBSD i386; en-US; rv:1.7.5) Gecko/20041205 Firefox/1.0",
+    "browser": "Firefox",
+    "os": "NetBSD",
+    "deviceType": "desktop",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:55.0) Gecko/20100101 Goanna/4.0 Firefox/55.0 Basilisk/20171113",
+    "browser": "Basilisk",
+    "os": "Linux",
+    "deviceType": "desktop",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Linux; Android 4.4.2; D2406 Build/18.3.C.0.40) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/30.0.0.0 Mobile Safari/537.36 [FBAN/FB4A;FBAV/22.0.0.15.13;]",
+    "browser": "Facebook",
+    "os": "Android",
+    "deviceType": "mobile",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Linux; Android 10; moto g(7) play Build/QPYS30.52-22-9; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/86.0.4240.110 Mobile Safari/537.36 [FB_IAB/Orca-Android;FBAV/288.0.0.15.118;]",
+    "browser": "Facebook",
+    "os": "Android",
+    "deviceType": "mobile",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/80.0.3987.117 Mobile Safari/537.36",
+    "browser": "Mobile Chrome",
+    "os": "",
+    "deviceType": "mobile",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Linux; Android 4.0.4; GSmart GS202 Build/IMM76D) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.166 Mob",
+    "browser": "Chrome",
+    "os": "Android",
+    "deviceType": "desktop",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 Linux; Android 6.0; T84Bi_4G AppleWebKit/537.36 KHTML, like Gecko Chrome/70.0.3538.110 Safari/537.36",
+    "browser": "Chrome",
+    "os": "Android",
+    "deviceType": "desktop",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Linux; U; Android 4.2.2; ru-ru; W867 Build/JDQ39) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30 Instagram 54.0.0.14.82 Android (17/4.2.2; 240dpi; 540x960; Haier; W867; W867; mt6582; ru_RU; 117539695)",
+    "browser": "Instagram",
+    "os": "Android",
+    "deviceType": "mobile",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Linux; Android 4.4.2; ZOPO ZP998 Build/KOT49H) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/30.0.0.0 Mobile Safari/537.36 Instagram 93.1.0.19.102 Android (19/4.4.2; 480dpi; 1080x1920; ZOPO/Xiaomi; ZOPO ZP998; lcsh92_wet_jb9; mt6592; ru_RU; 154400383)",
+    "browser": "Instagram",
+    "os": "Android",
+    "deviceType": "mobile",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.38 Safari/537.36 Brave/75",
+    "browser": "Brave",
+    "os": "Windows",
+    "deviceType": "desktop",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (X11; U; Linux x86_64; fr; rv:1.9.1.9) Gecko/20100428 Lightning/1.0b1 SeaMonkey/2.0.4",
+    "browser": "SeaMonkey",
+    "os": "Linux",
+    "deviceType": "desktop",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (X11; Linux i686; rv:2.0.1) Gecko/20100101 Firefox/4.0.1 SeaMonkey/2.1.1",
+    "browser": "SeaMonkey",
+    "os": "Linux",
+    "deviceType": "desktop",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Brave/537.36",
+    "browser": "Brave",
+    "os": "Linux",
+    "deviceType": "desktop",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_0) EkiohFlow/5.7.4.30559 Flow/5.7.4 (like Gecko Firefox/53.0 rv:53.0)",
+    "browser": "Flow",
+    "os": "macOS",
+    "deviceType": "desktop",
+    "source": "ua-parser-js-1"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36 Vivaldi/6.0.2979.18",
+    "browser": "Vivaldi",
+    "os": "Linux",
+    "deviceType": "desktop",
+    "source": "ua-parser-js-1"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36 Vivaldi/6.0.2979.18",
+    "browser": "Vivaldi",
+    "os": "Linux",
+    "deviceType": "desktop",
+    "source": "ua-parser-js-1"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_3; es-es) AppleWebKit/531.22.7 (KHTML, like Gecko)",
+    "browser": "WebKit",
+    "os": "macOS",
+    "deviceType": "desktop",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Macintosh; U; PPC Mac OS X; en-us) AppleWebKit/125.2 (KHTML, like Gecko, Safari) Shiira/0.9.2.2",
+    "browser": "WebKit",
+    "os": "macOS",
+    "deviceType": "desktop",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Linux UPnP/1.0 Sonos/57.21-51190 (ANVIL)",
+    "browser": "",
+    "os": "Linux",
+    "deviceType": "desktop",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Liferea/0.x.x (Linux; en_US.UTF-8; http://liferea.sf.net/)",
+    "browser": "",
+    "os": "Linux",
+    "deviceType": "desktop",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/604.5.6 (KHTML, like Gecko) Version/11.0.3 Safari/604.5.6 Maxthon/5.1.102",
+    "browser": "Maxthon",
+    "os": "macOS",
+    "deviceType": "desktop",
+    "source": "ua-parser-js-1"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_5) AppleWebKit/537.22 (KHTML, like Gecko) Maxthon/4.1.2.2000 Chrome/25.0.1364.99 Safari/537.22",
+    "browser": "Maxthon",
+    "os": "macOS",
+    "deviceType": "desktop",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "SAMSUNG-GT-E2200 Opera(J2ME/MIDP; Opera Mini; U; en)",
+    "browser": "Opera",
+    "os": "iOS",
+    "deviceType": "mobile",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Linux; Android 14; A301SH Build/S5080; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/126.0.6478.134 Mobile Safari/537.36 TwitterAndroid",
+    "browser": "Twitter",
+    "os": "Android",
+    "deviceType": "tablet",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Linux; Android 13; iPlay 50 Pro Build/TP1A.220624.014; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/126.0.6478.134 Safari/537.36 TwitterAndroid",
+    "browser": "Twitter",
+    "os": "Android",
+    "deviceType": "tablet",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Linux; Android 6.0.1; 43UK35G Build/M5C14J; uk-ua) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Mobile Safari/537.36 Puffin/7.8.2.40664AP",
+    "browser": "Puffin",
+    "os": "Android",
+    "deviceType": "mobile",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Linux; Android 16; SM-S731N Build/BP2A.250605.031.A3; ko-kr) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.66 Mobile Safari/537.36 Puffin/10.5.1.70541AP",
+    "browser": "Puffin",
+    "os": "Android",
+    "deviceType": "mobile",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Windows; U; Windows NT 5.1; es-ES; rv:1.0.1) Gecko/20020823 Netscape/7.0",
+    "browser": "Netscape",
+    "os": "Windows",
+    "deviceType": "desktop",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Windows; U; WinNT4.0; en-US; rv:0.9.4.1) Gecko/20020508 Netscape6/6.2.3",
+    "browser": "Netscape",
+    "os": "Windows",
+    "deviceType": "desktop",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; Gemini-Deep-Research; +https://gemini.google/overview/deep-research/) Chrome/135.0.0.0 Safari/537.36",
+    "browser": "Chrome",
+    "os": "",
+    "deviceType": "desktop",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; Amzn-User/0.1) Chrome/119.0.6045.214 Safari/537.36",
+    "browser": "Chrome",
+    "os": "",
+    "deviceType": "desktop",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Linux; Android 7.1.2; Smart Box v009 Build/NHG47L; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/52.0.2743.100 Safari/537.36",
+    "browser": "Chrome WebView",
+    "os": "Android",
+    "deviceType": "tablet",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Linux; Android 7.0; CONTIXO KT 1100GT 4G Build/NRD90M; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/51.0.2704.91 Safari/537.36",
+    "browser": "Chrome WebView",
+    "os": "Android",
+    "deviceType": "tablet",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (X11; Linux i686) AppleWebKit/535.7 (KHTML, like Gecko) Ubuntu/11.10 Chromium/16.0.912.21 Chrome/16.0.912.21 Safari/535.7",
+    "browser": "Chromium",
+    "os": "Ubuntu",
+    "deviceType": "desktop",
+    "source": "ua-parser-js-1"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (X11; U; Linux i686; en-US) AppleWebKit/534.16 (KHTML, like Gecko) Ubuntu/10.10 Chromium/10.0.648.133 Chrome/10.0.648.133 Safari/534.16",
+    "browser": "Chromium",
+    "os": "Ubuntu",
+    "deviceType": "desktop",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (X11; OpenBSD amd64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/28.0.1500.45 Safari/537.36",
+    "browser": "Chrome",
+    "os": "OpenBSD",
+    "deviceType": "desktop",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Windows NT 6.1; rv:2.0.1) Gecko/20100101 Firefox/4.0.1 SeaMonkey/2.1.1",
+    "browser": "SeaMonkey",
+    "os": "Windows",
+    "deviceType": "desktop",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Windows; U; Windows NT 5.2; en-US; rv:1.9.1.10) Gecko/20100504 Lightning/1.0b1 SeaMonkey/2.0.5",
+    "browser": "SeaMonkey",
+    "os": "Windows",
+    "deviceType": "desktop",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (X11; U; Linux x86_64; en-US; rv:1.9.1.8) Gecko/20100318 Gentoo Firefox/3.5.8",
+    "browser": "Firefox",
+    "os": "Gentoo",
+    "deviceType": "desktop",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (X11; U; Linux x86_64; en-US; rv:1.9.2.8) Gecko/20100804 Gentoo Firefox/3.6.8",
+    "browser": "Firefox",
+    "os": "Gentoo",
+    "deviceType": "desktop",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Blitz/1.14.3 Chrome/87.0.4280.141 Electron/11.2.1 Safari/537.36",
+    "browser": "Electron",
+    "os": "Windows",
+    "deviceType": "desktop",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) webscraping/1.0.0 Chrome/122.0.6261.130 Electron/29.1.5 Safari/537.36",
+    "browser": "Electron",
+    "os": "Windows",
+    "deviceType": "desktop",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (ca-AD; Celtric) Firefox/1.0",
+    "browser": "Firefox",
+    "os": "",
+    "deviceType": "desktop",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Windows U; Win NT 5.0; en-US; rv:1.8.0.2) Gecko/20060308 Firefox/1.5.0.2",
+    "browser": "Firefox",
+    "os": "",
+    "deviceType": "desktop",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:55.0) Gecko/20100101 Firefox/55.2.2 Waterfox/55.2.2",
+    "browser": "Waterfox",
+    "os": "Linux",
+    "deviceType": "desktop",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:66.0) WhatCMS/1.0",
+    "browser": "",
+    "os": "Ubuntu",
+    "deviceType": "desktop",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Ubuntu APT-HTTP/1.3 (0.7.20.2ubuntu6)",
+    "browser": "",
+    "os": "Ubuntu",
+    "deviceType": "desktop",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Linux; CentOS Linux release 7.4.1708) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.120 Safari/537.36 (compatible; AdsBot-Naver/1.0; +http://searchad.naver.com)",
+    "browser": "Chrome",
+    "os": "CentOS",
+    "deviceType": "desktop",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Linux; U; Android 4.1.2; vi-vn; IM-A850Iron Build/JZO54K) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Điện thoạiSafari/534.30",
+    "browser": "Android Browser",
+    "os": "Android",
+    "deviceType": "desktop",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Linux; U;Android4.1.1;de-de; LC0816C Build/JRO03C) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 4.1.1; de-de; Build/JRO03CSafari/534.30",
+    "browser": "Android Browser",
+    "os": "Android",
+    "deviceType": "desktop",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "",
+    "browser": "",
+    "os": "",
+    "deviceType": "",
+    "source": "none"
+  },
+  {
+    "userAgent": "HuaweiU3200s/B000 Browser/NetFront/3.5 MMS/Obigo-MMS/Q05A SyncML/HW-SyncML/1.0 Java/HWJa/2.0 Profile/MIDP-2.0 Configuration/CLDC-1.1 Player/QTV-Player/5.3",
+    "browser": "NetFront",
+    "os": "",
+    "deviceType": "desktop",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Windows NT 5.1) AppleWebKit/534.34 (KHTML, like Gecko) Dooble/1.41 Safari/534.34",
+    "browser": "Dooble",
+    "os": "Windows",
+    "deviceType": "desktop",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Samsung Windows Mobile GPS",
+    "browser": "",
+    "os": "Windows Mobile",
+    "deviceType": "mobile",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Windows Phone 10.0; Android 6.0.1; Wileyfox; Pro) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Mobile Safari/537.36 Edge/15.15254",
+    "browser": "Edge",
+    "os": "Windows Phone",
+    "deviceType": "mobile",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Darwin/25.6.0 (Watch7,13; watchOS 26.6) MatomoTrackerSDK/7.8.0",
+    "browser": "",
+    "os": "watchOS",
+    "deviceType": "desktop",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Mobile; rv:37.0) Gecko/37.0 Firefox/37.0 KaiOS/1.0",
+    "browser": "Mobile Firefox",
+    "os": "KaiOS",
+    "deviceType": "mobile",
+    "source": "uap-core"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Mobile; ALCATEL ONE TOUCH 4012A; rv:18.1) Gecko/18.1 Firefox/18.1",
+    "browser": "Mobile Firefox",
+    "os": "Firefox OS",
+    "deviceType": "mobile",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Linux; Android 11; HarmonyOS; GLA-AL00; HMSCore 6.6.0.332) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.105 HuaweiBrowser/12.1.2.311 Mobile Safari/537.36",
+    "browser": "Huawei Browser",
+    "os": "HarmonyOS",
+    "deviceType": "mobile",
+    "source": "matomo"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Linux; Tizen 2.4; SAMSUNG SM-Z200M) AppleWebKit/537.3 (KHTML, like Gecko) SamsungBrowser/1.1 Mobile Safari/537.3",
+    "browser": "Samsung Internet",
+    "os": "Tizen",
+    "deviceType": "mobile",
+    "source": "matomo"
+  }
+]
