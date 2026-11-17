@@ -1,5 +1,5 @@
-import baseConfig from "@underpin/config/oxfmt"
 import { defineConfig } from "oxfmt"
+import baseConfig from "./packages/config/configs/oxfmt.ts"
 
 export default defineConfig({
   ...baseConfig,

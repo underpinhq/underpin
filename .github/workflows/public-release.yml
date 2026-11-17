@@ -1,0 +1,81 @@
+# Reusable workflow that runs in the repository that publishes: a single-package repository,
+# a public monorepo, or the public mirror of a private monorepo. It builds the packages and
+# runs `underpin publish`, which publishes every version not yet on npm and cuts one GitHub
+# Release per new version.
+#
+# Auth is npm trusted publishing (OIDC), so there is no NPM_TOKEN. npm validates the
+# calling workflow, not this one: on npmjs.com, set each package's trusted publisher to the
+# publishing repository and the caller's filename (for example `release.yml`). The calling job
+# must grant `contents: write` and `id-token: write`.
+name: Release public packages
+
+on:
+  workflow_call:
+    inputs:
+      bun-version:
+        description: Bun version. Empty reads `packageManager` from package.json.
+        type: string
+        default: ""
+      bun-version-file:
+        description: File that holds the Bun version, such as `.bun-version`. Overrides `bun-version`.
+        type: string
+        default: ""
+      npm-version:
+        description: npm version to install. Trusted publishing needs 11.5.1 or newer.
+        type: string
+        default: "11"
+      install-command:
+        description: Command that installs the mirror's dependencies from its lockfile.
+        type: string
+        default: bun install --frozen-lockfile
+      build-command:
+        description: Command that builds every package's dist directory.
+        type: string
+        default: bun run build
+      publish-command:
+        description: Command that runs `underpin publish`. `bun run` only runs a locally installed bin, so it never fetches a package of that name from npm.
+        type: string
+        default: bun run underpin publish
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: ${{ inputs.bun-version }}
+          bun-version-file: ${{ inputs.bun-version-file }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version: 24
+
+      # The npm bundled with Node is older than trusted publishing requires.
+      - name: Update npm
+        run: npm install --global "npm@$NPM_VERSION"
+        env:
+          NPM_VERSION: ${{ inputs.npm-version }}
+
+      - name: Install dependencies
+        run: bash -c "$INSTALL_COMMAND"
+        env:
+          INSTALL_COMMAND: ${{ inputs.install-command }}
+
+      - name: Build
+        run: bash -c "$BUILD_COMMAND"
+        env:
+          BUILD_COMMAND: ${{ inputs.build-command }}
+
+      - name: Publish and release
+        run: bash -c "$PUBLISH_COMMAND"
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          PUBLISH_COMMAND: ${{ inputs.publish-command }}

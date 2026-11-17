@@ -1,7 +1,7 @@
 {
   "extends": [
-    "node_modules/@underpin/config/configs/lefthook-oxfmt.json",
-    "node_modules/@underpin/config/configs/lefthook-oxlint.json",
-    "node_modules/@underpin/config/configs/lefthook-commitlint.json"
+    "packages/config/configs/lefthook-oxfmt.json",
+    "packages/config/configs/lefthook-oxlint.json",
+    "packages/config/configs/lefthook-commitlint.json"
   ]
 }

@@ -9,6 +9,9 @@
 # "Version Packages" pull request here, or a sync from Highseat that carries a UI bump. A push
 # that changes no version publishes nothing.
 #
+# The reusable workflows and the `underpin` CLI come from `packages/config` in this repository,
+# so a release runs the workflow files and the CLI build of the commit being released.
+#
 # npm trusts this file by name (trusted publishing, no NPM_TOKEN): renaming it breaks
 # publishing until each package's trusted publisher on npmjs.com names the new file.
 name: Release
@@ -31,7 +34,7 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
-    uses: dirstack/kodeks/.github/workflows/public-version.yml@9b4210f828925ca368f9fc92fbce20ac5fb83ac7 # v1.12.0
+    uses: ./.github/workflows/public-version.yml
     with:
       # The lockfile records each workspace's version, so the bump rewrites it too.
       version-command: bun run version-packages
@@ -41,7 +44,7 @@ jobs:
     permissions:
       contents: write
       id-token: write
-    uses: dirstack/kodeks/.github/workflows/public-release.yml@9b4210f828925ca368f9fc92fbce20ac5fb83ac7 # v1.12.0
+    uses: ./.github/workflows/public-release.yml
     with:
       # CI does not run on the "Version Packages" pull request, so check again before publishing.
       build-command: bun run check-types && bun run test && bun run build
