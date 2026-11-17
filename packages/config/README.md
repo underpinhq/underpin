@@ -1,11 +1,11 @@
 # @underpin/config
 
 [![npm version](https://img.shields.io/npm/v/%40underpin%2Fconfig.svg)](https://www.npmjs.com/package/@underpin/config)
-[![license](https://img.shields.io/npm/l/%40underpin%2Fconfig.svg)](https://github.com/dirstack/kodeks/blob/main/LICENSE)
+[![license](https://img.shields.io/npm/l/%40underpin%2Fconfig.svg)](https://github.com/underpinhq/underpin/blob/main/packages/config/LICENSE)
 
 Shared linter configurations and release tooling for TypeScript projects.
 
-Renamed from `@dirstack/kodeks`, whose last version is 1.11.0. `@underpin/config` continues its 1.x line: replace the package name in your `package.json` and in every config path that names it. The CLI is now `underpin`, and `kodeks` still works as a second name for it. The config file is now `underpin.release.json`, and a repository that only has `kodeks.release.json` keeps working. The workflows stay in this repository, so `uses:` lines need no change.
+Renamed from `@dirstack/kodeks`, whose last version is 1.11.0. `@underpin/config` continues its 1.x line: replace the package name in your `package.json` and in every config path that names it. The CLI is now `underpin`, and `kodeks` still works as a second name for it. The config file is now `underpin.release.json`, and a repository that only has `kodeks.release.json` keeps working. The workflows moved from `dirstack/kodeks` to `underpinhq/underpin`. Calls pinned to a `dirstack/kodeks` commit keep working, and new pins name a commit here.
 
 `@underpin/config` provides reusable, opinionated configurations for maintaining consistent code quality across TypeScript projects, plus an `underpin` CLI that releases npm packages with Changesets: from a single-package repository, a public monorepo, or a private monorepo through a public mirror.
 
@@ -181,21 +181,21 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
-    uses: dirstack/kodeks/.github/workflows/public-version.yml@<release commit SHA> # v<version>
+    uses: underpinhq/underpin/.github/workflows/public-version.yml@<release commit SHA> # @underpin/config@<version>
 
   release:
     if: github.ref == 'refs/heads/main'
     permissions:
       contents: write
       id-token: write
-    uses: dirstack/kodeks/.github/workflows/public-release.yml@<release commit SHA> # v<version>
+    uses: underpinhq/underpin/.github/workflows/public-release.yml@<release commit SHA> # @underpin/config@<version>
 ```
 
 Both workflows accept `bun-version` or `bun-version-file` (such as `.bun-version`), and `install-command`. The release workflow also accepts `build-command` and `publish-command` (default `bun run underpin publish`, which runs only the locally installed CLI). Set up [trusted publishing](#trusted-publishing-on-npmjscom) with `release.yml` as the workflow filename.
 
 To move an existing package over, set `version` in `package.json` to the version that is on npm now, so the first changeset bumps from there.
 
-This package releases itself this way. Its `release.yml` calls the two workflows by path and passes `publish-command: node dist/cli/underpin.js publish`, so a release runs the build of the commit being released.
+This package releases itself this way, from the [`underpinhq/underpin`](https://github.com/underpinhq/underpin) monorepo. Its `release.yml` calls the workflows by path and runs the CLI built from the same commit.
 
 ### Private monorepo through a public mirror
 
@@ -311,7 +311,7 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
-    uses: dirstack/kodeks/.github/workflows/public-version.yml@<release commit SHA> # v<version>
+    uses: underpinhq/underpin/.github/workflows/public-version.yml@<release commit SHA> # @underpin/config@<version>
 ```
 
 ```yaml
@@ -338,7 +338,7 @@ jobs:
   sync:
     permissions:
       contents: read
-    uses: dirstack/kodeks/.github/workflows/public-sync.yml@<release commit SHA> # v<version>
+    uses: underpinhq/underpin/.github/workflows/public-sync.yml@<release commit SHA> # @underpin/config@<version>
     with:
       mirror-repository: acme/acme-js
     secrets:
@@ -369,7 +369,7 @@ jobs:
     permissions:
       contents: write
       id-token: write
-    uses: dirstack/kodeks/.github/workflows/public-release.yml@<release commit SHA> # v<version>
+    uses: underpinhq/underpin/.github/workflows/public-release.yml@<release commit SHA> # @underpin/config@<version>
 ```
 
 The release workflow installs npm 11 (input `npm-version`), runs `install-command` (default `bun install --frozen-lockfile`) and `build-command` (default `bun run build`), then runs `publish-command` (default `bun run underpin publish`). Commit this file to the mirror once, by hand.
@@ -422,13 +422,13 @@ This package includes agent skills for code formatting, testing, and commit conv
 Install all skills using [skills.sh](https://skills.sh):
 
 ```bash
-npx skills add dirstack/kodeks
+npx skills add underpinhq/underpin
 ```
 
 Or install individual skills:
 
 ```bash
-npx skills add dirstack/kodeks --skill formatting
-npx skills add dirstack/kodeks --skill testing
-npx skills add dirstack/kodeks --skill commits
+npx skills add underpinhq/underpin --skill formatting
+npx skills add underpinhq/underpin --skill testing
+npx skills add underpinhq/underpin --skill commits
 ```

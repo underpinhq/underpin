@@ -6,6 +6,7 @@ The source of the `@underpin` npm packages, shared by the products built on them
 | --- | --- |
 | [`@underpin/ui`](packages/ui) | React components on Base UI and Tailwind CSS v4 ([npm](https://www.npmjs.com/package/@underpin/ui)) |
 | [`@underpin/utils`](packages/utils) | A lightweight set of TypeScript utilities, renamed from `@dirstack/utils` |
+| [`@underpin/config`](packages/config) | Shared lint, format and commit configs, and the `underpin` release CLI and workflows, renamed from `@dirstack/kodeks` ([npm](https://www.npmjs.com/package/@underpin/config)) |
 
 Upgrading from `@dirstack/ui` 1.x: [`packages/ui/MIGRATION.md`](packages/ui/MIGRATION.md).
 

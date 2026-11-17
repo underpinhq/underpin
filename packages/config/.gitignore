@@ -1,6 +1,0 @@
-node_modules/
-.DS_Store
-*.tgz
-
-# Build output
-dist/

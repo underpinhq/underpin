@@ -1,0 +1,5 @@
+[install]
+# A workspace package links only through a `workspace:` range. `packages/ui` pins
+# `@underpin/config` by version, and it must get that published version from npm, with its
+# bins, even when `packages/config` holds the same version.
+linkWorkspacePackages = false
