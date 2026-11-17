@@ -1,4 +1,4 @@
-import baseConfig from "@dirstack/kodeks/oxfmt"
+import baseConfig from "@underpin/config/oxfmt"
 import { defineConfig } from "oxfmt"
 
 export default defineConfig({
