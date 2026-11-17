@@ -1,4 +1,4 @@
 {
-  "packages": ["ui", "utils"],
+  "packages": ["ui", "utils", "config"],
   "releaseTag": "package"
 }
