@@ -1,11 +1,10 @@
 {
   "name": "@underpin/analytics",
   "version": "0.0.0",
-  "description": "Server-side analytics helpers: user-agent parsing, bot detection, client IP and geo lookup",
+  "description": "Server-side analytics helpers: user-agent parsing, bot detection, geo lookup, favicons and referrers",
   "keywords": [
     "analytics",
     "bots",
-    "client-ip",
     "favicon",
     "geoip",
     "referrer",

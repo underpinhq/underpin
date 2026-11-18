@@ -1,9 +1,8 @@
 import { describe, expect, test } from "bun:test"
-import { HttpStatusError, PrivateAddressError } from "@underpin/fetch"
+import { DownloadTooLargeError, HttpStatusError, PrivateAddressError } from "@underpin/fetch"
 import {
   directProvider,
   type FaviconProvider,
-  type FetchFunction,
   findFavicon,
   findImageType,
   googleProvider,
@@ -16,19 +15,18 @@ const PNG = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0, 0
 const ICO = new Uint8Array([0x00, 0x00, 0x01, 0x00, 1, 0])
 const SVG = new TextEncoder().encode('<svg xmlns="http://www.w3.org/2000/svg"><script/></svg>')
 
-/** A fake `fetch` that records each URL and answers with the given response. */
-function fakeFetch(respond: (url: string) => Response) {
+/** A fake `downloadPublicUrl` that records each URL and answers with a body or an error. */
+function fakeDownload(respond: (url: string) => Uint8Array | Error) {
   const urls: string[] = []
-  async function fetchFunction(url: string): Promise<Response> {
-    urls.push(url)
-    return respond(url)
+
+  async function download(url: string | URL) {
+    urls.push(String(url))
+    const answer = respond(String(url))
+    if (answer instanceof Error) throw answer
+    return { body: answer, contentType: "image/png", url: new URL(String(url)) }
   }
 
-  return { urls, fetch: fetchFunction satisfies FetchFunction }
-}
-
-function image(body: Uint8Array, contentType = "image/png") {
-  return new Response(body, { headers: { "content-type": contentType } })
+  return { urls, download }
 }
 
 describe("findImageType", () => {
@@ -148,63 +146,44 @@ describe("directProvider", () => {
 
 describe("googleProvider", () => {
   test("asks Google's s2 service for the host", async () => {
-    const fake = fakeFetch(() => image(PNG))
-    const favicon = await googleProvider({ fetch: fake.fetch, size: 32 }).find("example.com")
+    const fake = fakeDownload(() => PNG)
+    const favicon = await googleProvider({ download: fake.download, size: 32 }).find("example.com")
 
     expect(favicon).toEqual({ body: PNG, contentType: "image/png" })
     expect(fake.urls).toEqual(["https://www.google.com/s2/favicons?domain=example.com&sz=32"])
   })
 
   test("counts Google's 404 globe as a miss", async () => {
-    const fake = fakeFetch(() => new Response(PNG, { status: 404 }))
+    const fake = fakeDownload(() => new HttpStatusError(404))
 
-    expect(await googleProvider({ fetch: fake.fetch }).find("unknown.example")).toBeNull()
+    expect(await googleProvider({ download: fake.download }).find("unknown.example")).toBeNull()
   })
 
   test("rejects on a rate limit, so the miss is not cached", async () => {
-    const fake = fakeFetch(() => new Response(null, { status: 429 }))
+    const fake = fakeDownload(() => new HttpStatusError(429))
 
-    await expect(googleProvider({ fetch: fake.fetch }).find("example.com")).rejects.toThrow(
+    await expect(googleProvider({ download: fake.download }).find("example.com")).rejects.toThrow(
       HttpStatusError,
     )
   })
 
-  test("stops a body without a declared length as soon as it passes the limit", async () => {
-    const stream = new ReadableStream<Uint8Array>({
-      start(controller) {
-        controller.enqueue(PNG)
-        controller.enqueue(new Uint8Array(2048))
-        controller.close()
-      },
-    })
-    const fake = fakeFetch(() => new Response(stream))
-
-    expect(
-      await googleProvider({ fetch: fake.fetch, maxBytes: 1024 }).find("example.com"),
-    ).toBeNull()
-  })
-
   test("refuses a body over the size limit", async () => {
-    const big = new Uint8Array(2048)
-    big.set(PNG)
-    const fake = fakeFetch(() => image(big))
+    const fake = fakeDownload(() => new DownloadTooLargeError(1024))
 
-    expect(
-      await googleProvider({ fetch: fake.fetch, maxBytes: 1024 }).find("example.com"),
-    ).toBeNull()
+    expect(await googleProvider({ download: fake.download }).find("example.com")).toBeNull()
   })
 
   test("refuses an SVG whatever its content type says", async () => {
-    const fake = fakeFetch(() => image(SVG, "image/png"))
+    const fake = fakeDownload(() => SVG)
 
-    expect(await googleProvider({ fetch: fake.fetch }).find("example.com")).toBeNull()
+    expect(await googleProvider({ download: fake.download }).find("example.com")).toBeNull()
   })
 })
 
 describe("logoDevProvider", () => {
   test("asks logo.dev with the key and a 404 fallback", async () => {
-    const fake = fakeFetch(() => image(PNG))
-    const favicon = await logoDevProvider({ token: "pk_test", fetch: fake.fetch }).find(
+    const fake = fakeDownload(() => PNG)
+    const favicon = await logoDevProvider({ token: "pk_test", download: fake.download }).find(
       "example.com",
     )
     const url = new URL(fake.urls[0] ?? "")
@@ -219,15 +198,25 @@ describe("logoDevProvider", () => {
   })
 
   test("counts a 404 as a miss and a 500 as a failure", async () => {
-    const missing = fakeFetch(() => new Response(null, { status: 404 }))
-    const broken = fakeFetch(() => new Response(null, { status: 500 }))
+    const missing = fakeDownload(() => new HttpStatusError(404))
+    const broken = fakeDownload(() => new HttpStatusError(500))
 
     expect(
-      await logoDevProvider({ token: "pk", fetch: missing.fetch }).find("example.com"),
+      await logoDevProvider({ token: "pk", download: missing.download }).find("example.com"),
     ).toBeNull()
     await expect(
-      logoDevProvider({ token: "pk", fetch: broken.fetch }).find("example.com"),
-    ).rejects.toThrow()
+      logoDevProvider({ token: "pk", download: broken.download }).find("example.com"),
+    ).rejects.toThrow(HttpStatusError)
+  })
+
+  test("counts a service host that does not resolve as a failure", async () => {
+    const offline = fakeDownload(() =>
+      Object.assign(new Error("getaddrinfo ENOTFOUND img.logo.dev"), { code: "ENOTFOUND" }),
+    )
+
+    await expect(
+      logoDevProvider({ token: "pk", download: offline.download }).find("example.com"),
+    ).rejects.toThrow("ENOTFOUND")
   })
 })
 

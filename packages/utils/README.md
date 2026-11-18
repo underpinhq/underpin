@@ -39,8 +39,8 @@ Each module is also available on its own path, such as `@underpin/utils/array` o
 | `errors` | `getErrorMessage`, `toError` |
 | `files` | `formatBytes`, `isMimeTypeMatch`, `toBase64`, `toDataUrl` |
 | `format` | `formatNumber`, `formatCurrency`, `formatIntervalAmount`, `currencyExponent`, `minorUnits` |
-| `helpers` | `sleep`, `isTruthy`, `tryCatch`, `retry`, `withTimeout` |
-| `http` | `isValidUrl`, `addProtocol`, `removeProtocol`, `getDomain`, `isExternalUrl`, `joinUrlPaths`, `setQueryParams`, `removeQueryParams`, `isValidImageSrc`, `isHostname`, `normalizeHostname`, `stripWildcard`, `isWithinDomain`, `isIp`, `isIpInRange`, `isPublicIp`, `isCloudflareIp`, `getClientIp`, `CLOUDFLARE_IP_RANGES` |
+| `helpers` | `sleep`, `isTruthy`, `tryCatch`, `retry`, `withTimeout`, `timeoutSignal` |
+| `http` | `isValidUrl`, `addProtocol`, `removeProtocol`, `getDomain`, `isExternalUrl`, `joinUrlPaths`, `setQueryParams`, `removeQueryParams`, `isValidImageSrc`, `isHostname`, `normalizeHostname`, `stripWildcard`, `isWithinDomain`, `getParentDomains`, `isHostnameAllowed`, `isIp`, `isIpInRange`, `isPublicIp`, `isCloudflareIp`, `getClientIp`, `resolveClientIp`, `CLOUDFLARE_IP_RANGES` |
 | `numbers` | `clamp`, `preciseRound` |
 | `objects` | `pick`, `omit`, `isEmptyObject`, `isKeyInObject` |
 | `parsers` | `serialize` |
@@ -80,6 +80,21 @@ Behind proxied Cloudflare records, the peer is a Cloudflare server. Pass `trust:
 ```ts
 getClientIp(request.headers, { trust: "cloudflare" })
 ```
+
+The `x-real-ip` fallback is safe only behind a proxy that overwrites that header, as Traefik does.
+
+To name the proxies yourself, pass `trustedProxies` and the socket address. These options turn on stricter rules: only the entries the trusted proxies wrote are read, the socket address is the fallback, and `x-real-ip` is never read.
+
+```ts
+// One proxy in front, behind Cloudflare.
+getClientIp(request.headers, { trust: "cloudflare", trustedProxies: 1, socketAddress })
+
+// Proxies on a private network: entries inside the ranges are skipped from the right. The header
+// counts only when the socket is a trusted proxy too.
+getClientIp(request.headers, { trustedProxies: ["10.0.0.0/8"], socketAddress })
+```
+
+`resolveClientIp` takes the same arguments and also says where the address came from: `"cf-connecting-ip"`, `"x-forwarded-for"`, `"x-real-ip"` or `"socket"`. Both functions also accept a function that reads one header by its lowercase name.
 
 ### Blocking private addresses before a fetch
 

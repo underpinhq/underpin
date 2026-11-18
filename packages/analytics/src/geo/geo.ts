@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs"
+import type { ClientIpSource } from "@underpin/utils/http"
 import { type CityResponse, Reader } from "maxmind"
-import type { ClientIpSource } from "../client-ip/client-ip.js"
 
 /** Where an IP address is, as far as the database knows. Unknown fields are empty or null. */
 export interface GeoLocation {
@@ -101,7 +101,7 @@ export function openGeoDatabase(path: string): GeoDatabase {
 
 /**
  * Reads the country Cloudflare stamps on a request (`cf-ipcountry`). Anyone can send that header,
- * so pass the source `getClientIp` from `@underpin/analytics/client-ip` gave: the country counts
+ * so pass the source `resolveClientIp` from `@underpin/utils` gave: the country counts
  * only when the IP itself came from Cloudflare's `cf-connecting-ip`.
  * @param headers - The request headers.
  * @param ipSource - Where the client IP came from.

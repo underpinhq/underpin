@@ -4,7 +4,8 @@ import {
   HttpStatusError,
   PrivateAddressError,
 } from "@underpin/fetch"
-import { normalizeHostname } from "@underpin/utils/http"
+import { isHostname, normalizeHostname } from "@underpin/utils/http"
+import { SECOND_MS } from "@underpin/utils/time"
 
 export interface Favicon {
   body: Uint8Array
@@ -24,16 +25,10 @@ export interface FaviconProvider {
   find(hostname: string, signal?: AbortSignal): Promise<Favicon | null>
 }
 
-/** A `fetch` implementation, replaceable in tests. */
-export type FetchFunction = (input: string, init?: RequestInit) => Promise<Response>
-
 /** The size of the largest icon a provider accepts by default. A real favicon is a few kilobytes. */
 const MAX_ICON_BYTES = 128 * 1024
 
-const DEFAULT_TIMEOUT_MS = 4000
-
-// Dot-separated labels ending in a top-level domain of letters or its punycode form (`xn--p1ai`).
-const HOSTNAME = /^(?!-)[a-z0-9-]+(?:\.[a-z0-9-]+)*\.(?:[a-z]{2,}|xn--[a-z0-9-]+)$/
+const DEFAULT_TIMEOUT_MS = 4 * SECOND_MS
 
 // A status that says the host has no icon. A rate limit (429) or a timeout (408) says nothing
 // about the icon, so it counts as a failure.
@@ -81,60 +76,13 @@ export function parseFaviconHost(domainOrUrl: string): string | undefined {
   }
 
   const host = normalizeHostname(hostname)
-  return HOSTNAME.test(host) ? host : undefined
+  return isHostname(host) ? host : undefined
 }
 
 /** Turns a downloaded body into a favicon, or null when it is not an image of an accepted size. */
 function toFavicon(body: Uint8Array, maxBytes: number): Favicon | null {
   const contentType = findImageType(body)
   return contentType && body.byteLength <= maxBytes ? { body, contentType } : null
-}
-
-/** Reads a body up to `maxBytes`, or returns undefined as soon as it passes them. */
-async function readCapped(response: Response, maxBytes: number): Promise<Uint8Array | undefined> {
-  if (Number(response.headers.get("content-length")) > maxBytes) {
-    await response.body?.cancel()
-    return
-  }
-
-  const reader = response.body?.getReader()
-  const chunks: Uint8Array[] = []
-  let size = 0
-
-  while (reader) {
-    const { done, value } = await reader.read()
-    if (done) {
-      break
-    }
-
-    size += value.byteLength
-
-    if (size > maxBytes) {
-      await reader.cancel()
-      return
-    }
-
-    chunks.push(value)
-  }
-
-  return new Uint8Array(Buffer.concat(chunks, size))
-}
-
-/** Reads a third-party response with a size limit, as {@link FaviconProvider.find} reports it. */
-async function readResponse(response: Response, maxBytes: number): Promise<Favicon | null> {
-  if (!response.ok) {
-    await response.body?.cancel()
-    if (isMissingStatus(response.status)) return null
-    throw new HttpStatusError(response.status)
-  }
-
-  const body = await readCapped(response, maxBytes)
-  return body ? toFavicon(body, maxBytes) : null
-}
-
-function timeoutSignal(signal: AbortSignal | undefined, timeout: number): AbortSignal {
-  const deadline = AbortSignal.timeout(timeout)
-  return signal ? AbortSignal.any([signal, deadline]) : deadline
 }
 
 /** The limits every provider takes. */
@@ -145,36 +93,50 @@ export interface ProviderLimits {
   timeout?: number
 }
 
-/** The options of a provider that calls a third-party service. */
-export interface ServiceProviderOptions extends ProviderLimits {
-  /** Replaces `fetch`, such as in tests. */
-  fetch?: FetchFunction
-}
-
-/** Asks a third-party icon service for one URL. */
-async function fetchIcon(
-  url: string,
-  options: ServiceProviderOptions,
-  signal: AbortSignal | undefined,
-): Promise<Favicon | null> {
-  const {
-    maxBytes = MAX_ICON_BYTES,
-    timeout = DEFAULT_TIMEOUT_MS,
-    fetch: fetchFunction = fetch,
-  } = options
-  const response = await fetchFunction(url, { signal: timeoutSignal(signal, timeout) })
-
-  return readResponse(response, maxBytes)
-}
-
 /** True for a DNS answer that the host does not exist, which is as final as a 404. */
 function isUnknownHost(error: unknown): boolean {
   return error instanceof Error && "code" in error && error.code === "ENOTFOUND"
 }
 
-export interface DirectProviderOptions extends ProviderLimits {
+/** The options every provider takes. */
+export interface ProviderOptions extends ProviderLimits {
   /** Replaces `downloadPublicUrl`, such as in tests. Keep its address checks in any replacement. */
   download?: typeof downloadPublicUrl
+}
+
+/**
+ * Downloads one icon through `downloadPublicUrl`, as {@link FaviconProvider.find} reports it: a
+ * private address, a body that is too large and a status that says the host has no icon are
+ * misses, and anything else rejects.
+ */
+async function downloadIcon(
+  url: string,
+  options: ProviderOptions,
+  signal: AbortSignal | undefined,
+): Promise<Favicon | null> {
+  const {
+    maxBytes = MAX_ICON_BYTES,
+    timeout = DEFAULT_TIMEOUT_MS,
+    download = downloadPublicUrl,
+  } = options
+
+  try {
+    const { body } = await download(url, {
+      maxBytes,
+      timeout,
+      signal,
+      headers: { accept: "image/*" },
+    })
+    return toFavicon(body, maxBytes)
+  } catch (error) {
+    const isMiss =
+      error instanceof PrivateAddressError ||
+      error instanceof DownloadTooLargeError ||
+      (error instanceof HttpStatusError && isMissingStatus(error.status))
+
+    if (isMiss) return null
+    throw error
+  }
 }
 
 /**
@@ -184,42 +146,22 @@ export interface DirectProviderOptions extends ProviderLimits {
  * @param options - The size and time limits.
  * @returns The provider.
  */
-export function directProvider(options: DirectProviderOptions = {}): FaviconProvider {
-  const {
-    maxBytes = MAX_ICON_BYTES,
-    timeout = DEFAULT_TIMEOUT_MS,
-    download = downloadPublicUrl,
-  } = options
-
+export function directProvider(options: ProviderOptions = {}): FaviconProvider {
   return {
     name: "direct",
     async find(hostname, signal) {
       try {
-        const { body } = await download(`https://${hostname}/favicon.ico`, {
-          maxBytes,
-          timeout,
-          signal,
-          headers: { accept: "image/*" },
-        })
-
-        return toFavicon(body, maxBytes)
+        return await downloadIcon(`https://${hostname}/favicon.ico`, options, signal)
       } catch (error) {
-        // A host on a private network has no icon this may fetch, and a host that does not exist
-        // or answers without one is a miss too. Anything else is the network's failure.
-        const isMiss =
-          error instanceof PrivateAddressError ||
-          error instanceof DownloadTooLargeError ||
-          (error instanceof HttpStatusError && isMissingStatus(error.status)) ||
-          isUnknownHost(error)
-
-        if (isMiss) return null
+        // A site's own host that does not exist has no icon. A service's host is another matter.
+        if (isUnknownHost(error)) return null
         throw error
       }
     },
   }
 }
 
-export interface GoogleProviderOptions extends ServiceProviderOptions {
+export interface GoogleProviderOptions extends ProviderOptions {
   /** The icon size in pixels. Defaults to 64. */
   size?: number
 }
@@ -238,12 +180,12 @@ export function googleProvider(options: GoogleProviderOptions = {}): FaviconProv
     name: "google",
     find(hostname, signal) {
       const url = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(hostname)}&sz=${size}`
-      return fetchIcon(url, options, signal)
+      return downloadIcon(url, options, signal)
     },
   }
 }
 
-export interface LogoDevProviderOptions extends ServiceProviderOptions {
+export interface LogoDevProviderOptions extends ProviderOptions {
   /** The logo.dev publishable key (`pk_...`). */
   token: string
   /** The image size in pixels. Defaults to logo.dev's own, 128. */
@@ -268,7 +210,7 @@ export function logoDevProvider(options: LogoDevProviderOptions): FaviconProvide
         query.set("size", String(size))
       }
 
-      return fetchIcon(
+      return downloadIcon(
         `https://img.logo.dev/${encodeURIComponent(hostname)}?${query}`,
         options,
         signal,

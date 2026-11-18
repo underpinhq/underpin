@@ -1,3 +1,5 @@
+import { timeoutSignal } from "@underpin/utils/helpers"
+import { SECOND_MS } from "@underpin/utils/time"
 import { parse } from "yaml"
 import type { Medium, ReferrerDataset, ReferrerEntry } from "../referrer/referrer.js"
 
@@ -69,7 +71,7 @@ export function parseReferrerDataset(yamlText: string): ReferrerDataset {
 export async function downloadReferrerDataset(
   url: string = REFERER_PARSER_URL,
 ): Promise<ReferrerDataset> {
-  const response = await fetch(url, { signal: AbortSignal.timeout(30_000) })
+  const response = await fetch(url, { signal: timeoutSignal(30 * SECOND_MS) })
   if (!response.ok) {
     throw new Error(`Downloading ${url} answered ${response.status}`)
   }

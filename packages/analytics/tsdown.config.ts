@@ -7,7 +7,6 @@ export default defineConfig({
   entry: [
     "src/user-agent/user-agent.ts",
     "src/bots/bots.ts",
-    "src/client-ip/client-ip.ts",
     "src/geo/geo.ts",
     "src/favicon/favicon.ts",
     "src/referrer/referrer.ts",

@@ -1,4 +1,11 @@
-import { isHostname, isWithinDomain, normalizeHostname } from "@underpin/utils/http"
+import {
+  getParentDomains,
+  isHostname,
+  isHostnameAllowed,
+  type SiteHostnames,
+} from "@underpin/utils/http"
+
+export type { SiteHostnames } from "@underpin/utils/http"
 
 /**
  * Referrer classification: a referrer dataset the consumer supplies (Snowplow's referer-parser,
@@ -58,13 +65,6 @@ export interface ReferrerClassification {
 export interface ResolvedReferrer extends ReferrerClassification {
   /** The referrer host without "www.", or "" for a self-referral, a pass-through host or none. */
   domain: string
-}
-
-/** The hosts a site counts as its own. */
-export interface SiteHostnames {
-  domain: string
-  /** Counted besides the domain: an exact name, or `*.example.com` as the domain counts. */
-  extraHostnames?: string[]
 }
 
 export interface ReferrerClassifierOptions {
@@ -211,25 +211,6 @@ function nameKey(name: string) {
   return name.toLowerCase().replace(/[^a-z0-9]/g, "")
 }
 
-/** The host and each parent domain: `m.facebook.com`, then `facebook.com`. */
-function domainLabels(host: string): string[] {
-  const parts = host.split(".")
-  return parts.slice(0, -1).map((_, index) => parts.slice(index).join("."))
-}
-
-function matchesEntry(hostname: string, entry: string) {
-  return entry.startsWith("*.")
-    ? isWithinDomain(hostname, entry)
-    : normalizeHostname(hostname) === entry
-}
-
-function isHostnameAllowed(hostname: string, site: SiteHostnames): boolean {
-  return (
-    isWithinDomain(hostname, site.domain) ||
-    (site.extraHostnames?.some(entry => matchesEntry(hostname, entry)) ?? false)
-  )
-}
-
 /** Lowercased hostname, or "" for unparsable input. */
 function parseHost(url: string): string {
   try {
@@ -343,7 +324,7 @@ export function createReferrerClassifier(
   // host-only: the dataset's path-qualified entries (google.com/products) are treated as plain
   // hosts.
   function lookup(host: string): ReferrerEntry | undefined {
-    for (const key of domainLabels(host)) {
+    for (const key of getParentDomains(host)) {
       const hit = ownEntry(overrides, key) ?? ownEntry(dataset, key)
       if (!hit) continue
       if (isGoogleProduct(host, key, hit)) return
@@ -391,7 +372,7 @@ export function createReferrerClassifier(
     const host = stripWww(fullHost)
     const isSelfReferral =
       site !== undefined && fullHost !== "" && isHostnameAllowed(fullHost, site)
-    const isPassThrough = domainLabels(host).some(key => passThroughHosts.has(key))
+    const isPassThrough = getParentDomains(host).some(key => passThroughHosts.has(key))
     const domain = isSelfReferral || isPassThrough ? "" : host
 
     return { domain, ...classifyReferrer(domain, attribution) }

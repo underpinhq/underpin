@@ -1,6 +1,6 @@
 # @underpin/analytics
 
-Server-side helpers for analytics ingest: user-agent parsing, bot detection, the client IP and a geo lookup. Plain TypeScript with no framework. Each feature is its own subpath, so a server bundles only what it imports.
+Server-side helpers for analytics ingest: user-agent parsing, bot detection, a geo lookup, favicons and referrer classification. Plain TypeScript with no framework. Each feature is its own subpath, so a server bundles only what it imports.
 
 ```bash
 bun add @underpin/analytics
@@ -39,26 +39,6 @@ isBackendClient("node") // true
 
 Crawlers come from [`isbot`](https://github.com/omrilotan/isbot). A browser or OS version below a 2020-era floor (Chrome 80, Firefox 80, Safari 13, iOS 13, Android 7) reads as spoofed. Only the user agent is judged. Datacenter IPs and spam referrers are the caller's own checks.
 
-## `@underpin/analytics/client-ip`
-
-```ts
-import { getClientIp } from "@underpin/analytics/client-ip"
-
-// One reverse proxy in front, behind Cloudflare.
-getClientIp(request.headers, { trustedProxies: 1, cloudflare: true, socketAddress })
-// { ip: "203.0.113.7", source: "cf-connecting-ip" }
-
-// Proxies on a private network.
-getClientIp(request.headers, { trustedProxies: ["10.0.0.0/8"], socketAddress })
-```
-
-The trusted proxies are always config. With none, `x-forwarded-for` is ignored and the socket address is the client.
-
-- `trustedProxies: n` reads the entry `n` hops from the right of `x-forwarded-for`.
-- `trustedProxies: [...ranges]` skips every entry from the right inside a range and returns the first one outside. The header is read only when `socketAddress` is inside the ranges too: a socket outside them is a direct client, and an unknown socket proves nothing.
-- `cloudflare: true` believes `cf-connecting-ip` only when the peer is one of Cloudflare's published addresses.
-- `x-real-ip` is never read.
-
 ## `@underpin/analytics/geo`
 
 ```ts
@@ -68,8 +48,10 @@ const geo = openGeoDatabase("data/GeoLite2-City.mmdb")
 
 geo.lookup("81.2.69.142") // { country: "GB", region: "ENG", city: "London", latitude: 51.5142, longitude: -0.0931 }
 geo.lookupCountry("81.2.69.142") // "GB"
-getEdgeCountry(request.headers, clientIp.source) // Cloudflare's `cf-ipcountry`, when it gave the IP
-resolveGeo(edgeCountry, geo.lookup(clientIp.ip)) // the edge's country, with the database's city only where both agree
+// `resolveClientIp` from `@underpin/utils` finds the IP and the header it came from.
+const clientIp = resolveClientIp(request.headers, { trust: "cloudflare", trustedProxies: 1 })
+getEdgeCountry(request.headers, clientIp?.source) // Cloudflare's `cf-ipcountry`, when it gave the IP
+resolveGeo(edgeCountry, geo.lookup(clientIp?.ip ?? "")) // the edge's country, with the database's city only where both agree
 ```
 
 `openGeoDatabase` reads any MMDB file: MaxMind GeoLite2 or GeoIP2, or DB-IP, Country or City. The package bundles no database. Download one, pass its path, and open it once at startup. A missing or broken file throws, so a server that runs without geo data catches the error. Unknown countries (DB-IP's "ZZ", "XX", Cloudflare's Tor code "T1") come back as an empty string.

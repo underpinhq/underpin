@@ -3,7 +3,9 @@ import { type IncomingMessage, request as httpRequest } from "node:http"
 import { request as httpsRequest } from "node:https"
 import type { LookupFunction } from "node:net"
 import { formatBytes } from "@underpin/utils/files"
+import { timeoutSignal } from "@underpin/utils/helpers"
 import { isIp, isPublicIp } from "@underpin/utils/http"
+import { SECOND_MS } from "@underpin/utils/time"
 
 /** The most redirects a download follows by default, each checked like the first URL. */
 export const MAX_REDIRECTS = 3
@@ -240,11 +242,14 @@ export async function download(
   options: DownloadOptions,
   guard: Guard,
 ): Promise<Download> {
-  const { maxBytes, method = "GET", timeout = 30_000, maxRedirects = MAX_REDIRECTS } = options
+  const {
+    maxBytes,
+    method = "GET",
+    timeout = 30 * SECOND_MS,
+    maxRedirects = MAX_REDIRECTS,
+  } = options
   let headers = options.headers ?? {}
-  const signal = options.signal
-    ? AbortSignal.any([options.signal, AbortSignal.timeout(timeout)])
-    : AbortSignal.timeout(timeout)
+  const signal = timeoutSignal(timeout, options.signal)
 
   let current = new URL(url)
 
