@@ -8,7 +8,6 @@ export default defineConfig({
     "src/user-agent/user-agent.ts",
     "src/bots/bots.ts",
     "src/geo/geo.ts",
-    "src/favicon/favicon.ts",
     "src/referrer/referrer.ts",
     "src/referrer-dataset/referrer-dataset.ts",
     // The `underpin-referers` bin in package.json.

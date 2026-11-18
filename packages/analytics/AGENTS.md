@@ -7,7 +7,6 @@ Server-side analytics helpers, one subpath export per feature. Repo-wide rules (
 - **Dependencies carry a permissive licence.** MIT, BSD, ISC or Apache-2.0, never a copyleft one such as GPL or AGPL.
 - **User-agent names match `ua-parser-js` 2.x.** Highseat and Wend store the names 2.x gives. `src/user-agent/names.ts` renames 1.x output and `extensions.ts` adds patterns 1.x lacks. Write each pattern from observed user agents, never by copying the 2.x source.
 - **The corpus guards the names.** `src/user-agent/fixtures/highseat-corpus.json` holds real user agents with the names Highseat stores. A change that breaks a case changes stored data. Its README says how it was built.
-- **`/favicon` downloads only through `downloadPublicUrl`** from `@underpin/fetch`, for the site's own icon and for the services alike. Tests pass a fake `download`.
 - **Shared helpers go to `@underpin/utils`** when they need no Node built-ins, such as the client IP, `timeoutSignal` and the hostname helpers. Products then need no analytics import for them.
 - **`/referrer` never bundles referer-parser's list.** The list is GPL-3.0. Consumers download it with the `underpin-referers` bin or `/referrer-dataset`, a separate subpath so `/referrer` never loads `yaml`. The only copy here is the GPL test slice in `src/referrer/fixtures`, which stays out of the package.
 - **No private analytics data in fixtures.** This repository is public. A fixture from a product's database keeps only values that name public platforms.
