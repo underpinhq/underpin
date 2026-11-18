@@ -107,7 +107,7 @@ function systemResolver(hostname: string): Promise<ResolvedAddress[]> {
   })
 }
 
-export const defaultGuard: Guard = { resolve: systemResolver, isAllowed: isPublicIp }
+const defaultGuard: Guard = { resolve: systemResolver, isAllowed: isPublicIp }
 
 /** The URL parser keeps an IPv6 host in brackets. */
 function toHost(url: URL): string {
@@ -119,6 +119,7 @@ function toHost(url: URL): string {
  * address, that address is public. A host name is checked when the connection resolves it, so
  * this check alone cannot stop DNS rebinding: use {@link downloadPublicUrl} to fetch.
  * @param url - The URL to check.
+ * @param isAllowed - The rule for an IP host. Defaults to `isPublicIp`.
  * @throws When the protocol, the credentials or the address is not allowed.
  */
 export function assertPublicUrl(url: URL, isAllowed: Guard["isAllowed"] = isPublicIp): void {
@@ -152,7 +153,7 @@ function createLookup(guard: Guard): LookupFunction {
         const family = options.family
         const usable = (
           family ? addresses.filter(address => address.family === family) : addresses
-        ).toSorted((a, b) => a.family - b.family)
+        ).toSorted((left, right) => left.family - right.family)
 
         if (options.all) {
           callback(null, usable)
@@ -195,7 +196,7 @@ function requestOnce(
         signal,
         // No connection pool, so a socket opened for one host never serves another.
         agent: false,
-        // An uncompressed body keeps the byte limit honest: nothing inflates after the count.
+        // An uncompressed body keeps the byte count exact: nothing inflates after the count.
         headers: {
           "user-agent": "Mozilla/5.0 (compatible)",
           ...headers,

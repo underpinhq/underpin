@@ -39,7 +39,7 @@ function url(path: string, host = "site.test") {
 beforeAll(async () => {
   server = createServer((request, response) => {
     const path = new URL(request.url ?? "/", "http://x").pathname
-    function next(location: string) {
+    function redirect(location: string) {
       response.writeHead(302, { location })
       response.end()
     }
@@ -49,23 +49,23 @@ beforeAll(async () => {
       response.end("hello")
     } else if (path.startsWith("/hops/")) {
       const left = Number(path.slice(6))
-      if (left > 0) next(`/hops/${left - 1}`)
+      if (left > 0) redirect(`/hops/${left - 1}`)
       else response.end("done")
     } else if (path === "/to-private") {
-      next(url("/ok", "private.test"))
+      redirect(url("/ok", "private.test"))
     } else if (path === "/to-metadata") {
-      next("http://169.254.169.254/latest/meta-data")
+      redirect("http://169.254.169.254/latest/meta-data")
     } else if (path === "/to-other") {
-      next(url("/headers", "other.test"))
+      redirect(url("/headers", "other.test"))
     } else if (path === "/to-self-headers") {
-      next("/headers")
+      redirect("/headers")
     } else if (path === "/to-self") {
-      next("/ok")
+      redirect("/ok")
     } else if (path === "/large") {
       response.writeHead(200, { "content-length": "2048" })
       response.end(Buffer.alloc(2048))
     } else if (path === "/to-missing") {
-      next("/missing")
+      redirect("/missing")
     } else if (path === "/drip") {
       // Headers, then a body that never ends.
       response.writeHead(200)
@@ -218,11 +218,11 @@ describe("download", () => {
 
   test("throws the status of a failed response", async () => {
     const error = await download(url("/missing"), { maxBytes: 1024 }, publicNames).catch(
-      error => error,
+      (caught: unknown) => caught,
     )
 
     expect(error).toBeInstanceOf(HttpStatusError)
-    expect(error.status).toBe(404)
+    expect((error as HttpStatusError).status).toBe(404)
   })
 
   test("asks for an uncompressed body whatever the caller sends", async () => {
