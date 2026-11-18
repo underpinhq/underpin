@@ -103,7 +103,7 @@ describe("parseUserAgent", () => {
         "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/141.0.7390.96 Mobile/15E148 Safari/604.1",
       osVersion: "18.7",
     },
-  ])("reads the iOS version $osVersion behind a frozen OS token", ({ userAgent, osVersion }) => {
+  ])("reads iOS $osVersion for $userAgent", ({ userAgent, osVersion }) => {
     expect(parseUserAgent(userAgent)).toMatchObject({ os: "iOS", osVersion })
   })
 
