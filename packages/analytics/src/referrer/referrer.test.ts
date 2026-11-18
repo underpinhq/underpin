@@ -49,6 +49,52 @@ describe("classifyReferrer", () => {
     expect(custom.classifyReferrer("claude.ai").source).toBe("claude.ai")
   })
 
+  test("reads utm_medium=mcp as AI", () => {
+    expect(classifier.resolveReferrer({ utm_medium: "mcp" })).toEqual({
+      domain: "",
+      source: "",
+      channel: "AI",
+    })
+    expect(classifier.resolveReferrer({ utm_source: "newsletter", utm_medium: "mcp" })).toEqual({
+      domain: "",
+      source: "newsletter",
+      channel: "AI",
+    })
+    expect(
+      classifier.resolveReferrer({ referrer: "https://claude.ai/", utm_medium: "mcp" }),
+    ).toEqual({ domain: "claude.ai", source: "Claude", channel: "AI" })
+  })
+
+  test("takes a utm_source lookup from the options and checks it last", () => {
+    const seen: string[] = []
+    const custom = createReferrerClassifier(dataset as unknown as ReferrerDataset, {
+      findSource: utmSource => {
+        seen.push(utmSource)
+        return utmSource === "claude-user" ? ["Claude", "chatbot"] : undefined
+      },
+    })
+
+    expect(custom.resolveReferrer({ utm_source: "Claude-User", utm_medium: "mcp" })).toEqual({
+      domain: "",
+      source: "Claude",
+      channel: "AI",
+    })
+    expect(custom.resolveReferrer({ utm_source: "Claude-User" })).toMatchObject({
+      source: "Claude",
+      channel: "AI",
+    })
+    // An assistant named only in utm_medium goes through the same lookup.
+    expect(custom.resolveReferrer({ utm_medium: "claude-user" })).toMatchObject({
+      source: "Claude",
+      channel: "AI",
+    })
+
+    // A tag the dataset already knows never reaches it.
+    seen.length = 0
+    expect(custom.resolveReferrer({ utm_source: "producthunt" }).source).toBe("Product Hunt")
+    expect(seen).toEqual([])
+  })
+
   test("takes pass-through hosts from the options", () => {
     const custom = createReferrerClassifier({}, { passThroughHosts: new Set(["auth.example"]) })
 

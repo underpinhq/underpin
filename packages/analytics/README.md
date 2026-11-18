@@ -96,6 +96,28 @@ resolveReferrer({ utm_source: "newsletter", utm_medium: "email" })
 
 It names the source of a visit (Google, Hacker News, the raw host when unknown) and a default channel in the style of Google Analytics 4 (GA4): Direct, Organic Search, Paid Search, Organic Social, Paid Social, Email, Referral, Affiliate, Display, AI or Other. `resolveReferrer` folds a self-referral, and a return from a sign-in or checkout host, to Direct. Campaign parameters and ad click ids (`gclid`, `msclkid`, `fbclid` and others) decide paid channels.
 
+`utm_medium=mcp` reads as AI. An MCP (Model Context Protocol) server writes it on the links its tools return. Only a paid click id outranks it.
+
+`findSource` resolves a `utm_source` that no host or name in the list matches, such as an MCP client name that stands for its assistant. It gets the lowercased tag and runs last, after the host, `<tag>.com` and name lookups. It also covers an assistant named only in `utm_medium`:
+
+```ts
+import type { ReferrerEntry } from "@underpin/analytics/referrer"
+
+const MCP_CLIENTS: Record<string, ReferrerEntry> = {
+  "claude-user": ["Claude", "chatbot"],
+  "claude-code": ["Claude", "chatbot"],
+  "openai-mcp": ["ChatGPT", "chatbot"],
+  "cursor-vscode": ["Cursor", "chatbot"],
+}
+
+const { resolveReferrer } = createReferrerClassifier(dataset as ReferrerDataset, {
+  findSource: utmSource => MCP_CLIENTS[utmSource],
+})
+
+resolveReferrer({ utm_source: "Claude-User", utm_medium: "mcp" })
+// { domain: "", source: "Claude", channel: "AI" }
+```
+
 **You supply the referrer list.** The usual one, Snowplow's [referer-parser](https://github.com/snowplow-referer-parser/referer-parser), is GPL-3.0, so this MIT package cannot bundle it. Download it once with the `underpin-referers` command, commit both files it writes, and run it again every few months:
 
 ```bash
