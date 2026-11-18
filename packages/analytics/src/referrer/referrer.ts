@@ -74,6 +74,11 @@ export interface ReferrerClassifierOptions {
   renames?: Record<string, string>
   /** Hosts that hand a visitor back, which fold to Direct. Defaults to {@link PASS_THROUGH_HOSTS}. */
   passThroughHosts?: ReadonlySet<string>
+  /**
+   * A source for a utm_source that no host or name matches, such as an MCP client name
+   * (`claude-code`) that stands for its assistant. Gets the lowercased tag. Checked last.
+   */
+  findSource?: (utmSource: string) => ReferrerEntry | undefined
 }
 
 export interface ReferrerClassifier {
@@ -200,7 +205,8 @@ const SOCIAL_MEDIUM = /^(social|social-network|social-media|sm|social network|so
 const EMAIL_MEDIUM = /^e[-_ ]?mail$/
 const DISPLAY_MEDIUM = /^(display|cpm|banner)$/
 // GA4 tags its own AI Assistant channel `ai-assistant`; the rest are common hand-written forms.
-const AI_MEDIUM = /^(ai|ai-assistant|ai-chat|ai-search|chatbot|llm)$/
+// `mcp` is what an MCP server writes on the links its tools return.
+const AI_MEDIUM = /^(ai|ai-assistant|ai-chat|ai-search|chatbot|llm|mcp)$/
 
 // An own entry only, so a host such as `constructor` never reads the prototype.
 function ownEntry(dataset: ReferrerDataset, key: string): ReferrerEntry | undefined {
@@ -250,7 +256,9 @@ function resolveChannel(
   const paid = CLICK_IDS.find(([param, , channel]) => channel && attribution[param])?.[2]
   if (paid) return paid
 
-  // Display first: "cpm" would otherwise be swallowed by the paid regex (.*cp.*).
+  // AI and display before paid: "mcp" and "cpm" would otherwise be swallowed by the paid regex
+  // (.*cp.*).
+  if (AI_MEDIUM.test(utmMedium)) return "AI"
   if (DISPLAY_MEDIUM.test(utmMedium)) return "Display"
   if (PAID_MEDIUM.test(utmMedium)) return medium === "social" ? "Paid Social" : "Paid Search"
   if (EMAIL_MEDIUM.test(utmMedium)) return "Email"
@@ -258,7 +266,6 @@ function resolveChannel(
   if (SOCIAL_MEDIUM.test(utmMedium)) return "Organic Social"
   if (utmMedium === "organic") return "Organic Search"
   if (utmMedium === "referral") return "Referral"
-  if (AI_MEDIUM.test(utmMedium)) return "AI"
 
   switch (medium) {
     case "search":
@@ -284,7 +291,8 @@ function resolveChannel(
  * referer-parser list is GPL-3.0, so download it with `underpin-referers` or
  * `@underpin/analytics/referrer-dataset` and commit the result in your own repository.
  * @param dataset - Source names and mediums by host.
- * @param options - Replacements for the built-in overrides, renames and pass-through hosts.
+ * @param options - Replacements for the built-in overrides, renames and pass-through hosts, and
+ *   a lookup of your own for utm_source.
  * @returns The classifier.
  * @example
  * import dataset from "./data/referers.json" with { type: "json" }
@@ -299,6 +307,7 @@ export function createReferrerClassifier(
     overrides = REFERRER_OVERRIDES,
     renames = REFERRER_RENAMES,
     passThroughHosts = PASS_THROUGH_HOSTS,
+    findSource,
   } = options
 
   // Canonical names by a loose key ("producthunt", "hackernews"), so a utm_source that names
@@ -333,10 +342,16 @@ export function createReferrerClassifier(
   }
 
   // utm_source is free text: a host ("news.ycombinator.com"), a bare domain ("producthunt"),
-  // or a name ("twitter", "Product Hunt"). Try each reading before keeping it raw.
+  // or a name ("twitter", "Product Hunt"). Try each reading, then the caller's own lookup,
+  // before keeping it raw.
   function lookupSource(utmSource: string): ReferrerEntry | undefined {
     if (!utmSource) return
-    return lookup(utmSource) ?? lookup(`${utmSource}.com`) ?? byName.get(nameKey(utmSource))
+    return (
+      lookup(utmSource) ??
+      lookup(`${utmSource}.com`) ??
+      byName.get(nameKey(utmSource)) ??
+      findSource?.(utmSource)
+    )
   }
 
   // The source of a visit with no referrer: its utm_source, else an assistant that names itself
