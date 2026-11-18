@@ -2,14 +2,9 @@
 import { mkdir, writeFile } from "node:fs/promises"
 import { dirname, join } from "node:path"
 import { parseArgs } from "node:util"
-import {
-  downloadReferrerDataset,
-  REFERER_PARSER_NOTICE,
-  REFERER_PARSER_URL,
-} from "./referrer-dataset.js"
+import { downloadReferrerDataset, REFERER_PARSER_NOTICE } from "./referrer-dataset.js"
 
 // Downloads referer-parser's list, writes it as JSON and writes its licence notice beside it.
-// Usage: underpin-referers <output.json> [--url <yaml url>]
 
 const USAGE = "Usage: underpin-referers <output.json> [--url <yaml url>]"
 
@@ -26,7 +21,7 @@ async function main() {
     return
   }
 
-  const dataset = await downloadReferrerDataset(values.url ?? REFERER_PARSER_URL)
+  const dataset = await downloadReferrerDataset(values.url)
   const noticePath = join(dirname(output), "NOTICE.md")
 
   await mkdir(dirname(output), { recursive: true })

@@ -91,8 +91,8 @@ export interface ReferrerClassifier {
 }
 
 // Layered on top of the dataset: platforms it lacks or lists incompletely, such as AI
-// assistants (vendor lists lag; GA4 still has no Claude/Perplexity), X, and the
-// indie/dev communities.
+// assistants, X and developer communities. Vendor lists lag behind AI assistants, and GA4 has
+// no Claude or Perplexity.
 export const REFERRER_OVERRIDES: ReferrerDataset = {
   "x.com": ["X", "social"],
   "bsky.app": ["Bluesky", "social"],
@@ -183,7 +183,7 @@ const CLICK_IDS: [param: keyof Attribution, source: ReferrerEntry, channel?: Cha
   ["igshid", ["Instagram", "social"]],
 ]
 
-// Dataset names we display differently (Twitter rebranded; drop ".ai" suffixes).
+// Dataset names displayed differently: Twitter is now X, and ".ai" suffixes are dropped.
 export const REFERRER_RENAMES: Record<string, string> = {
   Twitter: "X",
   "Claude.ai": "Claude",
