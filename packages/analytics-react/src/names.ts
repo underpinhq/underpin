@@ -41,6 +41,8 @@ const IMPORTED_BROWSER_NAMES: Record<string, string> = {
   "samsung browser": "samsung-internet",
   "yandex browser": "yandex",
   "uc browser": "uc",
+  // Tor Browser sends a plain Firefox user agent, so only an imported row names it.
+  tor: "tor",
 }
 
 /**
