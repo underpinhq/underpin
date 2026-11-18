@@ -1,4 +1,23 @@
-import { describe, expect, test } from "bun:test"
+import { describe, expect, mock, test } from "bun:test"
+
+// Counts the records the reader decodes: it stores each one in its cache, and reads a cached one
+// back without decoding it again.
+const cacheSizes: number[] = []
+let decodedRecords = 0
+
+class CountingCache extends Map<string | number, unknown> {
+  override set(key: string | number, value: unknown): this {
+    decodedRecords++
+    return super.set(key, value)
+  }
+}
+
+void mock.module("tiny-lru", () => ({
+  lru: (max: number) => {
+    cacheSizes.push(max)
+    return new CountingCache()
+  },
+}))
 import {
   getEdgeCountry,
   loadGeoDatabase,
@@ -10,6 +29,24 @@ import {
 // MaxMind's published test databases, from github.com/maxmind/MaxMind-DB (Apache-2.0).
 const CITY = new URL("./fixtures/GeoLite2-City-Test.mmdb", import.meta.url).pathname
 const COUNTRY = new URL("./fixtures/GeoLite2-Country-Test.mmdb", import.meta.url).pathname
+
+describe("lookup cache", () => {
+  test.each([
+    ["openGeoDatabase", async () => openGeoDatabase(CITY)],
+    ["loadGeoDatabase", async () => loadGeoDatabase(CITY)],
+  ])("%s decodes a repeated lookup once", async (_name, open) => {
+    const geo = await open()
+    expect(cacheSizes.at(-1)).toBe(10_000)
+
+    decodedRecords = 0
+    geo.lookup("81.2.69.142")
+    const firstLookup = decodedRecords
+    geo.lookup("81.2.69.142")
+
+    expect(firstLookup).toBeGreaterThan(0)
+    expect(decodedRecords).toBe(firstLookup)
+  })
+})
 
 describe("loadGeoDatabase", () => {
   test("gives the same answers as openGeoDatabase", async () => {
