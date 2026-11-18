@@ -1,6 +1,6 @@
 {
   "name": "@underpin/analytics-react",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "React icons for analytics dimensions: browser, OS and device marks, country flags and favicons",
   "keywords": [
     "analytics",
