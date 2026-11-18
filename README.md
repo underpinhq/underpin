@@ -19,8 +19,6 @@ Upgrading from `@dirstack/ui` 1.x: [`packages/ui/MIGRATION.md`](packages/ui/MIGR
 
 To underpin something is to support it from below. These packages sit under every product built on them: the UI, the utilities, the analytics, and the lint and release configs. The logo shows the same idea, with two posts pinned into the base that holds them up.
 
-Underpin replaced the `@dirstack` scope in November 2026, once the packages covered more than directory sites.
-
 ## Contributing
 
 `packages/ui` is developed in a private monorepo and synced here one way, so a change to it made here is overwritten by the next sync. Issues about it are welcome. Every other package is developed in this repository.
