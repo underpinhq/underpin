@@ -76,7 +76,9 @@ export interface ReferrerClassifierOptions {
   passThroughHosts?: ReadonlySet<string>
   /**
    * A source for a utm_source that no host or name matches, such as an MCP client name
-   * (`claude-code`) that stands for its assistant. Gets the lowercased tag. Checked last.
+   * (`claude-code`) that stands for its assistant. Gets the lowercased tag. Checked last. A visit
+   * with no utm_source passes its utm_medium instead, and keeps the result only when its medium
+   * is "chatbot".
    */
   findSource?: (utmSource: string) => ReferrerEntry | undefined
 }
@@ -292,7 +294,7 @@ function resolveChannel(
  * `@underpin/analytics/referrer-dataset` and commit the result in your own repository.
  * @param dataset - Source names and mediums by host.
  * @param options - Replacements for the built-in overrides, renames and pass-through hosts, and
- *   a lookup of your own for utm_source.
+ *   a lookup of your own for a utm_source or utm_medium tag.
  * @returns The classifier.
  * @example
  * import dataset from "./data/referers.json" with { type: "json" }
