@@ -506,11 +506,14 @@ function isInRanges(ip: string, ranges: readonly string[]): boolean {
 
 /** The `x-forwarded-for` entry the trusted proxies point at, when the header holds one. */
 function findForwardedIp(
-  header: HeaderReader,
+  readHeader: HeaderReader,
   trustedProxies: number | readonly string[],
   socket: string | undefined,
 ): string | undefined {
-  const hops = (header("x-forwarded-for") ?? "").split(",").map(normalizeClientIp).filter(Boolean)
+  const hops = (readHeader("x-forwarded-for") ?? "")
+    .split(",")
+    .map(normalizeClientIp)
+    .filter(Boolean)
 
   if (typeof trustedProxies === "number") {
     // The entry that many hops from the right, or the first entry when the chain is shorter.
@@ -529,15 +532,15 @@ function findForwardedIp(
 
 /** The rules for a caller that names its proxies or its socket. */
 function resolveStrictClientIp(
-  header: HeaderReader,
+  readHeader: HeaderReader,
   options: GetClientIpOptions,
 ): ClientIp | undefined {
   const socket = parseClientIp(options.socketAddress)
-  const forwarded = findForwardedIp(header, options.trustedProxies ?? 0, socket)
+  const forwarded = findForwardedIp(readHeader, options.trustedProxies ?? 0, socket)
   const peer = forwarded ?? socket
 
   if (options.trust === "cloudflare" && peer && isCloudflareIp(peer)) {
-    const visitor = parseClientIp(header("cf-connecting-ip"))
+    const visitor = parseClientIp(readHeader("cf-connecting-ip"))
     if (visitor) return { ip: visitor, source: "cf-connecting-ip" }
   }
 
@@ -550,19 +553,19 @@ function resolveStrictClientIp(
  * `x-forwarded-for` entry is whatever the client sent, so only the last one is read.
  */
 function resolveProxiedClientIp(
-  header: HeaderReader,
+  readHeader: HeaderReader,
   options: GetClientIpOptions,
 ): ClientIp | undefined {
-  const peer = header("x-forwarded-for")?.split(",").at(-1)?.trim()
+  const peer = readHeader("x-forwarded-for")?.split(",").at(-1)?.trim()
 
   if (options.trust === "cloudflare" && peer && isCloudflareIp(peer)) {
-    const visitor = header("cf-connecting-ip")?.trim()
+    const visitor = readHeader("cf-connecting-ip")?.trim()
     if (visitor && isIp(visitor)) return { ip: visitor, source: "cf-connecting-ip" }
   }
 
   if (peer && isIp(peer)) return { ip: peer, source: "x-forwarded-for" }
 
-  const realIp = header("x-real-ip")?.trim()
+  const realIp = readHeader("x-real-ip")?.trim()
   if (realIp && isIp(realIp)) return { ip: realIp, source: "x-real-ip" }
 }
 
@@ -590,12 +593,14 @@ export function resolveClientIp(
   headers: Headers | HeaderReader,
   options: GetClientIpOptions = {},
 ): ClientIp | undefined {
-  const header = toHeaderReader(headers)
+  const readHeader = toHeaderReader(headers)
   // The key decides, not its value: a caller whose server could not read the socket passes
   // `socketAddress: undefined`, and must still get the strict rules rather than the lenient ones.
   const isStrict = "trustedProxies" in options || "socketAddress" in options
 
-  return isStrict ? resolveStrictClientIp(header, options) : resolveProxiedClientIp(header, options)
+  return isStrict
+    ? resolveStrictClientIp(readHeader, options)
+    : resolveProxiedClientIp(readHeader, options)
 }
 
 /**

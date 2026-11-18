@@ -85,21 +85,12 @@ function toFavicon(body: Uint8Array, maxBytes: number): Favicon | null {
   return contentType && body.byteLength <= maxBytes ? { body, contentType } : null
 }
 
-/** The limits every provider takes. */
-export interface ProviderLimits {
+/** The options every provider takes. */
+export interface ProviderOptions {
   /** The largest icon to accept, in bytes. Defaults to 128 KB. */
   maxBytes?: number
   /** The time limit in milliseconds. Defaults to 4 seconds. */
   timeout?: number
-}
-
-/** True for a DNS answer that the host does not exist, which is as final as a 404. */
-function isUnknownHost(error: unknown): boolean {
-  return error instanceof Error && "code" in error && error.code === "ENOTFOUND"
-}
-
-/** The options every provider takes. */
-export interface ProviderOptions extends ProviderLimits {
   /** Replaces `downloadPublicUrl`, such as in tests. Keep its address checks in any replacement. */
   download?: typeof downloadPublicUrl
 }
@@ -137,6 +128,11 @@ async function downloadIcon(
     if (isMiss) return null
     throw error
   }
+}
+
+/** True for a DNS answer that the host does not exist, which is as final as a 404. */
+function isUnknownHost(error: unknown): boolean {
+  return error instanceof Error && "code" in error && error.code === "ENOTFOUND"
 }
 
 /**
