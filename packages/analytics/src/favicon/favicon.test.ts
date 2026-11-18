@@ -210,7 +210,7 @@ describe("logoDevProvider", () => {
     const url = new URL(fake.urls[0] ?? "")
 
     expect(favicon?.contentType).toBe("image/png")
-    expect(url.origin + url.pathname).toBe("https://img.logo.dev/example.com")
+    expect(`${url.origin}${url.pathname}`).toBe("https://img.logo.dev/example.com")
     expect(Object.fromEntries(url.searchParams)).toEqual({
       token: "pk_test",
       format: "png",

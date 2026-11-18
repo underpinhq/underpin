@@ -12,14 +12,15 @@ export interface Favicon {
   contentType: string
 }
 
-/**
- * Finds the favicon of one host.
- *
- * Resolves to null when the host has no icon, which a caller may cache as a miss. Rejects when
- * the provider failed (an outage, a rate limit, a timeout), which says nothing about the icon.
- */
+/** A source of favicons, such as a site itself or a third-party icon service. */
 export interface FaviconProvider {
   name: string
+  /**
+   * Finds the favicon of one host.
+   *
+   * Resolves to null when the host has no icon, which a caller may cache as a miss. Rejects when
+   * the provider failed (an outage, a rate limit, a timeout), which says nothing about the icon.
+   */
   find(hostname: string, signal?: AbortSignal): Promise<Favicon | null>
 }
 
@@ -116,15 +117,7 @@ async function readCapped(response: Response, maxBytes: number): Promise<Uint8Ar
     chunks.push(value)
   }
 
-  const body = new Uint8Array(size)
-  let offset = 0
-
-  for (const chunk of chunks) {
-    body.set(chunk, offset)
-    offset += chunk.byteLength
-  }
-
-  return body
+  return new Uint8Array(Buffer.concat(chunks, size))
 }
 
 /** Reads a third-party response with a size limit, as {@link FaviconProvider.find} reports it. */
@@ -132,7 +125,6 @@ async function readResponse(response: Response, maxBytes: number): Promise<Favic
   if (!response.ok) {
     await response.body?.cancel()
     if (isMissingStatus(response.status)) return null
-    // A rate limit or an outage says nothing about the icon, so it must not be cached as a miss.
     throw new HttpStatusError(response.status)
   }
 
@@ -140,20 +132,20 @@ async function readResponse(response: Response, maxBytes: number): Promise<Favic
   return body ? toFavicon(body, maxBytes) : null
 }
 
-function withTimeout(signal: AbortSignal | undefined, timeout: number): AbortSignal {
+function timeoutSignal(signal: AbortSignal | undefined, timeout: number): AbortSignal {
   const deadline = AbortSignal.timeout(timeout)
   return signal ? AbortSignal.any([signal, deadline]) : deadline
 }
 
 /** The limits every provider takes. */
 export interface ProviderLimits {
-  /** The largest icon to accept. Defaults to 128 KB. */
+  /** The largest icon to accept, in bytes. Defaults to 128 KB. */
   maxBytes?: number
-  /** Defaults to 4 seconds. */
+  /** The time limit in milliseconds. Defaults to 4 seconds. */
   timeout?: number
 }
 
-/** The limits of a provider that calls a third-party service. */
+/** The options of a provider that calls a third-party service. */
 export interface ServiceProviderOptions extends ProviderLimits {
   /** Replaces `fetch`, such as in tests. */
   fetch?: FetchFunction
@@ -170,7 +162,7 @@ async function fetchIcon(
     timeout = DEFAULT_TIMEOUT_MS,
     fetch: fetchFunction = fetch,
   } = options
-  const response = await fetchFunction(url, { signal: withTimeout(signal, timeout) })
+  const response = await fetchFunction(url, { signal: timeoutSignal(signal, timeout) })
 
   return readResponse(response, maxBytes)
 }
@@ -327,7 +319,7 @@ export async function findFavicon(
 }
 
 export interface LandingHostOptions {
-  /** Defaults to 4 seconds. */
+  /** The time limit in milliseconds. Defaults to 4 seconds. */
   timeout?: number
   signal?: AbortSignal
   /** Replaces `downloadPublicUrl`, such as in tests. Keep its address checks in any replacement. */
