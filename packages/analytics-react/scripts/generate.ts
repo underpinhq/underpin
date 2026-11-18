@@ -58,13 +58,13 @@ async function writeImages(
 }
 
 /** The `d` of every `<path>` in a Simple Icons SVG. */
-async function simpleIcon(slug: string) {
+async function readSimpleIcon(slug: string) {
   const svg = await readFile(path.join(packageDir("simple-icons"), "icons", `${slug}.svg`), "utf8")
   return [...svg.matchAll(/<path d="([^"]+)"/g)].map(match => match[1])
 }
 
 /** The child elements of a Lucide SVG, as tag names and attributes. */
-async function lucideIcon(name: string) {
+async function readLucideIcon(name: string) {
   const svg = await readFile(path.join(packageDir("lucide-static"), "icons", `${name}.svg`), "utf8")
   return [...svg.matchAll(/<(path|rect|line|circle|polyline)\s([^>]*?)\/>/g)].map(
     ([, tag, attributes]) => ({
@@ -102,30 +102,29 @@ const logoKeys = await writeImages("browsers", logoFiles, async file => [
 ])
 
 const osMarks = {
-  apple: await simpleIcon("apple"),
-  android: await simpleIcon("android"),
-  linux: await simpleIcon("linux"),
-  ubuntu: await simpleIcon("ubuntu"),
-  chrome: await simpleIcon("googlechrome"),
-  harmonyos: await simpleIcon("harmonyos"),
-  fedora: await simpleIcon("fedora"),
-  debian: await simpleIcon("debian"),
-  freebsd: await simpleIcon("freebsd"),
-  playstation: await simpleIcon("playstation"),
-  // Four panes, drawn here.
+  apple: await readSimpleIcon("apple"),
+  android: await readSimpleIcon("android"),
+  linux: await readSimpleIcon("linux"),
+  ubuntu: await readSimpleIcon("ubuntu"),
+  chrome: await readSimpleIcon("googlechrome"),
+  harmonyos: await readSimpleIcon("harmonyos"),
+  fedora: await readSimpleIcon("fedora"),
+  debian: await readSimpleIcon("debian"),
+  freebsd: await readSimpleIcon("freebsd"),
+  playstation: await readSimpleIcon("playstation"),
   windows: ["M0 0h11.4v11.4H0zM12.6 0H24v11.4H12.6zM0 12.6h11.4V24H0zM12.6 12.6H24V24H12.6z"],
 }
 
 const deviceGlyphs = {
-  desktop: await lucideIcon("monitor"),
-  mobile: await lucideIcon("smartphone"),
-  tablet: await lucideIcon("tablet"),
-  smarttv: await lucideIcon("tv"),
-  console: await lucideIcon("gamepad-2"),
-  wearable: await lucideIcon("watch"),
-  xr: await lucideIcon("glasses"),
-  globe: await lucideIcon("globe"),
-  browser: await lucideIcon("app-window"),
+  desktop: await readLucideIcon("monitor"),
+  mobile: await readLucideIcon("smartphone"),
+  tablet: await readLucideIcon("tablet"),
+  smarttv: await readLucideIcon("tv"),
+  console: await readLucideIcon("gamepad-2"),
+  wearable: await readLucideIcon("watch"),
+  xr: await readLucideIcon("glasses"),
+  globe: await readLucideIcon("globe"),
+  browser: await readLucideIcon("app-window"),
 }
 
 await writeFile(path.join(out, "flags.ts"), loaderMap("FLAG_LOADERS", "flags", flagKeys))
@@ -137,7 +136,7 @@ await writeFile(
     'import type { OsMark } from "../names.js"',
     "",
     "/** Filled 24×24 marks from Simple Icons (CC0-1.0), as path data. */",
-    `export const OS_MARKS: Record<OsMark, string[]> = ${JSON.stringify(osMarks, null, 2)} satisfies Record<OsMark, string[]>`,
+    `export const OS_MARKS: Record<OsMark, string[]> = ${JSON.stringify(osMarks, null, 2)}`,
     "",
     "/** Stroked 24×24 glyphs from Lucide (ISC), as elements. */",
     `export const LINE_GLYPHS: Record<string, { tag: string; attributes: Record<string, string> }[]> = ${JSON.stringify(deviceGlyphs, null, 2)}`,

@@ -19,8 +19,18 @@ interface FallbackProps {
   fallback?: ReactNode
 }
 
-function accessibility(title: string | undefined) {
+function getAccessibilityProps(title: string | undefined) {
   return title ? { role: "img", "aria-label": title } : { "aria-hidden": true }
+}
+
+/** Lucide writes SVG attributes in kebab case. React wants camel case for the multi-word ones. */
+function toReactAttributes(attributes: Record<string, string>): Record<string, string> {
+  return Object.fromEntries(
+    Object.entries(attributes).map(([key, value]) => [
+      key.replace(/-(\w)/g, (_, letter: string) => letter.toUpperCase()),
+      value,
+    ]),
+  )
 }
 
 interface LineGlyphProps extends IconProps {
@@ -43,22 +53,12 @@ function LineGlyph({ name, size = 16, className, title }: LineGlyphProps) {
       strokeLinecap="round"
       strokeLinejoin="round"
       className={className}
-      {...accessibility(title)}
+      {...getAccessibilityProps(title)}
     >
       {elements.map(({ tag, attributes }, index) =>
         createElement(tag, { key: index, ...toReactAttributes(attributes) }),
       )}
     </svg>
-  )
-}
-
-/** Lucide writes SVG attributes in kebab case. React wants camel case for the multi-word ones. */
-function toReactAttributes(attributes: Record<string, string>): Record<string, string> {
-  return Object.fromEntries(
-    Object.entries(attributes).map(([key, value]) => [
-      key.replace(/-(\w)/g, (_, letter: string) => letter.toUpperCase()),
-      value,
-    ]),
   )
 }
 
@@ -78,17 +78,13 @@ function Placeholder({ width, height, className, title }: PlaceholderProps) {
     <span
       style={{ display: "inline-block", width, height }}
       className={className}
-      {...accessibility(title)}
+      {...getAccessibilityProps(title)}
     />
   )
 }
 
-interface DataImageProps {
+interface DataImageProps extends PlaceholderProps {
   src: string
-  width: number
-  height: number
-  className?: string
-  title?: string
   onError?: () => void
 }
 
@@ -159,7 +155,7 @@ export function OsIcon({ name, size = 16, className, title, fallback }: OsIconPr
       height={size}
       fill="currentColor"
       className={className}
-      {...accessibility(title)}
+      {...getAccessibilityProps(title)}
     >
       {paths.map(path => (
         <path key={path} d={path} />
@@ -209,7 +205,7 @@ export interface FaviconProps extends IconProps, FallbackProps {
   domain: string | null | undefined
   /**
    * Your own favicon endpoint, as a URL or a function of the domain, such as
-   * `domain => "/api/favicon/" + domain`. Serve it from your origin with
+   * ``domain => `/api/favicon/${domain}` ``. Serve it from your origin with
    * `@underpin/analytics/favicon`: this component never builds a third-party URL.
    */
   src: string | ((domain: string) => string)

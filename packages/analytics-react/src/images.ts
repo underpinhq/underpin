@@ -139,7 +139,8 @@ function useIsHydrated(): boolean {
 }
 
 /**
- * The image a loader gives: `undefined` while it loads, `null` when there is no loader.
+ * The image a loader gives: `undefined` while it loads, `null` when there is no loader or the
+ * load failed.
  * A cached image comes back on the first client render, so a preloaded one never flickers.
  */
 function useImage(loader: Loader | undefined): string | null | undefined {
