@@ -93,7 +93,7 @@ function findBrand(hints: ClientHints | Headers): Brand | undefined {
 
 /**
  * Windows reports its release as a platform version: 13 and later is Windows 11, 1 to 12 is
- * Windows 10. Earlier releases send no hints.
+ * Windows 10. Windows 7 to 8.1 report 0, which reads as unknown.
  */
 function toWindowsVersion(platformVersion: string): string {
   const major = Number(platformVersion.split(".")[0])

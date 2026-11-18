@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test"
-import { getEdgeCountry, openGeoDatabase, sanitizeCountry } from "./geo.js"
+import { getEdgeCountry, openGeoDatabase, resolveGeo, sanitizeCountry } from "./geo.js"
 
 // MaxMind's published test databases, from github.com/maxmind/MaxMind-DB (Apache-2.0).
 const CITY = new URL("./fixtures/GeoLite2-City-Test.mmdb", import.meta.url).pathname
@@ -69,5 +69,37 @@ describe("getEdgeCountry", () => {
   test("ignores the header for an IP from anywhere else", () => {
     expect(getEdgeCountry(headers, "x-forwarded-for")).toBe("")
     expect(getEdgeCountry(headers, undefined)).toBe("")
+  })
+})
+
+describe("resolveGeo", () => {
+  const london = { country: "GB", region: "ENG", city: "London", latitude: 51.5, longitude: -0.09 }
+
+  test("keeps the database's place when the edge gave no country", () => {
+    expect(resolveGeo("", london)).toEqual(london)
+  })
+
+  test("keeps the database's place when both agree on the country", () => {
+    expect(resolveGeo("GB", london)).toEqual(london)
+  })
+
+  test("takes the edge's country and drops a place in another country", () => {
+    expect(resolveGeo("PL", london)).toEqual({
+      country: "PL",
+      region: "",
+      city: "",
+      latitude: null,
+      longitude: null,
+    })
+  })
+
+  test("returns empty fields when neither source knows", () => {
+    expect(resolveGeo("", null)).toEqual({
+      country: "",
+      region: "",
+      city: "",
+      latitude: null,
+      longitude: null,
+    })
   })
 })

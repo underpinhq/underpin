@@ -69,6 +69,7 @@ const geo = openGeoDatabase("data/GeoLite2-City.mmdb")
 geo.lookup("81.2.69.142") // { country: "GB", region: "ENG", city: "London", latitude: 51.5142, longitude: -0.0931 }
 geo.lookupCountry("81.2.69.142") // "GB"
 getEdgeCountry(request.headers, clientIp.source) // Cloudflare's `cf-ipcountry`, when it gave the IP
+resolveGeo(edgeCountry, geo.lookup(clientIp.ip)) // the edge's country, with the database's city only where both agree
 ```
 
 `openGeoDatabase` reads any MMDB file: MaxMind GeoLite2 or GeoIP2, or DB-IP, Country or City. The package bundles no database. Download one, pass its path, and open it once at startup. A missing or broken file throws, so a server that runs without geo data catches the error. Unknown countries (DB-IP's "ZZ", "XX", Cloudflare's Tor code "T1") come back as an empty string.

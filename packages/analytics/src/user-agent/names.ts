@@ -53,7 +53,7 @@ function toBrowser(name: string, userAgent: string): string {
   const mobileBuild = MOBILE_BUILDS[name.toLowerCase()]
   if (!mobileBuild?.test(userAgent)) return name
 
-  return MOBILE_PREFIX + name.charAt(0).toUpperCase() + name.slice(1)
+  return `${MOBILE_PREFIX}${name.charAt(0).toUpperCase()}${name.slice(1)}`
 }
 
 function toOs(name: string, version: string, userAgent: string): [name: string, version: string] {

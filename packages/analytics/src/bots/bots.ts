@@ -31,6 +31,10 @@ const VERSION_PATTERNS: [family: BrowserFamily, pattern: RegExp][] = [
   ["android", /Android (\d+)/],
 ]
 
+// Real user agents stay well under this, and a client can send a far longer header. Only this
+// much is matched, so a huge header costs the regular expressions no more than a normal one.
+const MAX_USER_AGENT_LENGTH = 512
+
 // The default user agent of a backend HTTP client: Node's `fetch` (`node`, or `undici` in older
 // releases), Bun, Deno and the common libraries of other languages.
 const BACKEND_CLIENT =
@@ -71,8 +75,10 @@ export function isBackendClient(userAgent: string): boolean {
  */
 export function detectBot(userAgent: string | null | undefined): BotReason | null {
   if (!userAgent) return "missing"
-  if (isbot(userAgent)) return "crawler"
-  if (isAncientBrowser(userAgent)) return "spoofed"
+
+  const text = userAgent.slice(0, MAX_USER_AGENT_LENGTH)
+  if (isbot(text)) return "crawler"
+  if (isAncientBrowser(text)) return "spoofed"
 
   return null
 }

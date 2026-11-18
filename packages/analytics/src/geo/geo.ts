@@ -49,10 +49,14 @@ export function sanitizeCountry(code: string | null | undefined): string {
   return upper
 }
 
+/** An address with no country of its own is placed where its block is registered. */
+function readCountry(record: CityResponse | null): string {
+  return sanitizeCountry(record?.country?.iso_code ?? record?.registered_country?.iso_code)
+}
+
 function toGeoLocation(record: CityResponse): GeoLocation {
   return {
-    // An address with no country of its own is placed where its block is registered.
-    country: sanitizeCountry(record.country?.iso_code ?? record.registered_country?.iso_code),
+    country: readCountry(record),
     region: record.subdivisions?.[0]?.iso_code ?? "",
     city: record.city?.names?.en ?? "",
     latitude: record.location?.latitude ?? null,
@@ -90,8 +94,7 @@ export function openGeoDatabase(path: string): GeoDatabase {
       return record ? toGeoLocation(record) : null
     },
     lookupCountry(ip) {
-      const record = find(ip)
-      return sanitizeCountry(record?.country?.iso_code ?? record?.registered_country?.iso_code)
+      return readCountry(find(ip))
     },
   }
 }
@@ -108,4 +111,27 @@ export function getEdgeCountry(headers: Headers, ipSource: ClientIpSource | unde
   if (ipSource !== "cf-connecting-ip") return ""
 
   return sanitizeCountry(headers.get("cf-ipcountry"))
+}
+
+/**
+ * Merges the edge's country with a database lookup into the place to store. The edge's country
+ * wins, since it saw the visitor. Cloudflare sends no region, city or coordinates, so those come
+ * from the database, and only when it places the IP in the same country: a database place in
+ * another country would store one that does not exist, such as "United States / Kraków".
+ * @param edgeCountry - The country from {@link getEdgeCountry}, or "" when the edge gave none.
+ * @param ipGeo - The database's answer for the client IP.
+ * @returns The location, with empty fields where neither source knows.
+ * @example
+ * const location = resolveGeo(getEdgeCountry(request.headers, client.source), geo.lookup(client.ip))
+ */
+export function resolveGeo(edgeCountry: string, ipGeo: GeoLocation | null): GeoLocation {
+  const matchingIpGeo = !edgeCountry || ipGeo?.country === edgeCountry ? ipGeo : null
+
+  return {
+    country: edgeCountry || (ipGeo?.country ?? ""),
+    region: matchingIpGeo?.region ?? "",
+    city: matchingIpGeo?.city ?? "",
+    latitude: matchingIpGeo?.latitude ?? null,
+    longitude: matchingIpGeo?.longitude ?? null,
+  }
 }
