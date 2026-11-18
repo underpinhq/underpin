@@ -1,4 +1,4 @@
 {
-  "packages": ["ui", "utils", "config"],
+  "packages": ["ui", "utils", "config", "fetch", "analytics", "analytics-react"],
   "releaseTag": "package"
 }
