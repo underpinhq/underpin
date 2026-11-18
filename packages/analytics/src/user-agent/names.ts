@@ -1,3 +1,4 @@
+import { ucFirst } from "@underpin/utils/string"
 import type { IResult } from "ua-parser-js"
 
 /** The names a user agent gives, as Highseat and Wend store them. */
@@ -53,7 +54,7 @@ function toBrowser(name: string, userAgent: string): string {
   const mobileBuild = MOBILE_BUILDS[name.toLowerCase()]
   if (!mobileBuild?.test(userAgent)) return name
 
-  return `${MOBILE_PREFIX}${name.charAt(0).toUpperCase()}${name.slice(1)}`
+  return `${MOBILE_PREFIX}${ucFirst(name)}`
 }
 
 function toOs(name: string, version: string, userAgent: string): [name: string, version: string] {

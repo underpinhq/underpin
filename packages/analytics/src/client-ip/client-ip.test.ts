@@ -37,9 +37,7 @@ describe("getClientIp", () => {
     test("skips the hops of each trusted proxy", () => {
       const result = getClientIp(
         headers({ "x-forwarded-for": `${SPOOFED}, ${VISITOR}, 10.0.0.2` }),
-        {
-          trustedProxies: 2,
-        },
+        { trustedProxies: 2 },
       )
 
       expect(result?.ip).toBe(VISITOR)

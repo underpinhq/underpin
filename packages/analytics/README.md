@@ -62,7 +62,7 @@ The trusted proxies are always config. With none, `x-forwarded-for` is ignored a
 ## `@underpin/analytics/geo`
 
 ```ts
-import { getEdgeCountry, openGeoDatabase } from "@underpin/analytics/geo"
+import { getEdgeCountry, openGeoDatabase, resolveGeo } from "@underpin/analytics/geo"
 
 const geo = openGeoDatabase("data/GeoLite2-City.mmdb")
 

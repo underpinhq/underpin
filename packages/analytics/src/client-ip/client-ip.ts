@@ -33,14 +33,16 @@ export interface ClientIpOptions {
   socketAddress?: string | null
 }
 
+const IPV4_MAPPED_PREFIX = "::ffff:"
+
 /**
  * Trims an address and unwraps an IPv4-mapped IPv6 one: Node reports an IPv4 peer as
  * `::ffff:1.2.3.4`.
  */
 function normalizeIp(value: string): string {
   const trimmed = value.trim()
-  return trimmed.toLowerCase().startsWith("::ffff:") && trimmed.includes(".")
-    ? trimmed.slice(7)
+  return trimmed.toLowerCase().startsWith(IPV4_MAPPED_PREFIX) && trimmed.includes(".")
+    ? trimmed.slice(IPV4_MAPPED_PREFIX.length)
     : trimmed
 }
 
