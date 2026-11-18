@@ -11,10 +11,8 @@ export default defineConfig({
   fixedExtension: false,
   // Keep readable names in stack traces; the consumer's bundler minifies.
   minify: false,
-  // `src/` ships with the package, so maps point at it instead of embedding the source again.
-  sourcemap: true,
-  outputOptions: { sourcemapExcludeSources: true },
-  dts: { sourcemap: true },
+  // Only `dist` ships, and the generated image modules would make every map as large as its image.
+  sourcemap: false,
   publint: { level: "error", strict: true },
   attw: { level: "error", profile: "esm-only" },
 })

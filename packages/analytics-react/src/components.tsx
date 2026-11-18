@@ -23,8 +23,12 @@ function accessibility(title: string | undefined) {
   return title ? { role: "img", "aria-label": title } : { "aria-hidden": true }
 }
 
+interface LineGlyphProps extends IconProps {
+  name: string
+}
+
 /** A stroked 24×24 glyph from Lucide, in the current text color. */
-function LineGlyph({ name, size = 16, className, title }: IconProps & { name: string }) {
+function LineGlyph({ name, size = 16, className, title }: LineGlyphProps) {
   const elements = LINE_GLYPHS[name] ?? []
 
   return (
@@ -58,34 +62,38 @@ function toReactAttributes(attributes: Record<string, string>): Record<string, s
   )
 }
 
-/** A space of the icon's size, so a row keeps its layout while an image loads. */
-function Placeholder({
-  width,
-  height,
-  className,
-}: {
+interface PlaceholderProps {
   width: number
   height: number
   className?: string
-}) {
+  title?: string
+}
+
+/**
+ * A space of the icon's size, so a row keeps its layout while an image loads. With a `title` it
+ * keeps the icon's accessible name.
+ */
+function Placeholder({ width, height, className, title }: PlaceholderProps) {
   return (
-    <span aria-hidden style={{ display: "inline-block", width, height }} className={className} />
+    <span
+      style={{ display: "inline-block", width, height }}
+      className={className}
+      {...accessibility(title)}
+    />
   )
 }
 
-function Image({
-  src,
-  width,
-  height,
-  className,
-  title,
-}: {
+interface DataImageProps {
   src: string
   width: number
   height: number
   className?: string
   title?: string
-}) {
+  onError?: () => void
+}
+
+/** An image that loads lazily. It is decorative unless it has a `title`. */
+function DataImage({ src, width, height, className, title, onError }: DataImageProps) {
   return (
     <img
       src={src}
@@ -95,6 +103,7 @@ function Image({
       loading="lazy"
       decoding="async"
       className={className}
+      onError={onError}
     />
   )
 }
@@ -117,9 +126,12 @@ export function BrowserIcon({
 }: BrowserIconProps): ReactNode {
   const logo = useBrowserLogo(name)
 
-  if (logo === undefined) return <Placeholder width={size} height={size} className={className} />
+  if (logo === undefined) {
+    return <Placeholder width={size} height={size} className={className} title={title} />
+  }
+
   if (logo) {
-    return <Image src={logo} width={size} height={size} className={className} title={title} />
+    return <DataImage src={logo} width={size} height={size} className={className} title={title} />
   }
 
   return fallback ?? <LineGlyph name="browser" size={size} className={className} title={title} />
@@ -181,9 +193,12 @@ export function Flag({ code, size = 16, className, title, fallback }: FlagProps)
   const flag = useFlag(code)
   const height = Math.round((size * 3) / 4)
 
-  if (flag === undefined) return <Placeholder width={size} height={height} className={className} />
+  if (flag === undefined) {
+    return <Placeholder width={size} height={height} className={className} title={title} />
+  }
+
   if (flag) {
-    return <Image src={flag} width={size} height={height} className={className} title={title} />
+    return <DataImage src={flag} width={size} height={height} className={className} title={title} />
   }
 
   return fallback ?? <LineGlyph name="globe" size={size} className={className} title={title} />
@@ -200,6 +215,15 @@ export interface FaviconProps extends IconProps, FallbackProps {
   src: string | ((domain: string) => string)
 }
 
+/** The favicon URL for a domain, or an empty string without a domain. */
+function getFaviconUrl(domain: string | null | undefined, src: FaviconProps["src"]): string {
+  if (!domain) {
+    return ""
+  }
+
+  return typeof src === "function" ? src(domain) : src
+}
+
 /** A site's favicon from your own endpoint, or a globe when it has none or fails to load. */
 export function Favicon({
   domain,
@@ -209,7 +233,7 @@ export function Favicon({
   title,
   fallback,
 }: FaviconProps): ReactNode {
-  const url = domain ? (typeof src === "function" ? src(domain) : src) : ""
+  const url = getFaviconUrl(domain, src)
   const [failedUrl, setFailedUrl] = useState<string>()
 
   if (!url || failedUrl === url) {
@@ -217,14 +241,12 @@ export function Favicon({
   }
 
   return (
-    <img
+    <DataImage
       src={url}
-      alt={title ?? ""}
       width={size}
       height={size}
-      loading="lazy"
-      decoding="async"
       className={className}
+      title={title}
       onError={() => setFailedUrl(url)}
     />
   )

@@ -1,11 +1,30 @@
 import { describe, expect, test } from "bun:test"
+import { parseUserAgent } from "@underpin/analytics/user-agent"
 import corpus from "../../analytics/src/user-agent/fixtures/highseat-corpus.json" with { type: "json" }
 import names from "./fixtures/parser-names.json" with { type: "json" }
 import { LOGO_LOADERS } from "./generated/browsers.js"
 import { DEVICE_TYPES, findBrowserLogo, findOsMark } from "./names.js"
 
-const browsers = new Set([...names.browser, ...corpus.map(entry => entry.browser)].filter(Boolean))
-const systems = new Set([...names.os, ...corpus.map(entry => entry.os)].filter(Boolean))
+// The names the parser returns now, over the corpus, with the names it returned over a larger set
+// of public user agents.
+const parsed = corpus.map(entry => parseUserAgent(entry.userAgent))
+
+function collect(listed: string[], found: string[]): Set<string> {
+  return new Set([...listed, ...found].filter(Boolean))
+}
+
+const browsers = collect(
+  names.browser,
+  parsed.map(result => result.browser),
+)
+const systems = collect(
+  names.os,
+  parsed.map(result => result.os),
+)
+const deviceTypes = collect(
+  names.deviceType,
+  parsed.map(result => result.deviceType),
+)
 
 // A name without a logo gets the generic glyph. The snapshots below list every such name, so a
 // new parser name or a dropped logo shows up in review as a deliberate fallback.
@@ -68,6 +87,8 @@ describe("OS marks", () => {
 
 describe("device types", () => {
   test("cover every type the parser returns", () => {
-    for (const type of names.deviceType) expect(DEVICE_TYPES).toContain(type)
+    for (const type of deviceTypes) {
+      expect(DEVICE_TYPES).toContain(type)
+    }
   })
 })

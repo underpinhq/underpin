@@ -26,7 +26,9 @@ import { BrowserIcon, DeviceIcon, Favicon, Flag, OsIcon } from "@underpin/analyt
 
 Each flag and each browser logo is its own ES module that holds the image as a data URI, loaded with `import()`. Any bundler splits them into separate chunks, so a page downloads only the images it shows, from its own origin. Nothing loads from a CDN, and nothing needs `import.meta.glob` or an asset loader.
 
-An image that has not loaded yet renders as an empty space of its size, so rows keep their layout. To render images at once, such as on the server, load them first:
+An image that has not loaded yet renders as an empty space of its size, so rows keep their layout. A server render and the client's hydration always render that space, so their markup matches. The client swaps in each image after hydration.
+
+`preloadImages` warms the client's cache, so a client render shows the images without a gap. Call it before a list of rows appears:
 
 ```ts
 import { preloadImages } from "@underpin/analytics-react"

@@ -94,7 +94,10 @@ export function findOsMark(name: string): OsMark | undefined {
   return OS_PATTERNS.find(([, pattern]) => pattern.test(name.trim()))?.[0]
 }
 
-/** The device types `parseUserAgent` returns, each with a glyph of its own. */
+/**
+ * The device types `parseUserAgent` returns. Each has a glyph of its own, except "embedded", which
+ * `DeviceIcon` draws with the desktop glyph.
+ */
 export const DEVICE_TYPES: readonly string[] = [
   "desktop",
   "mobile",

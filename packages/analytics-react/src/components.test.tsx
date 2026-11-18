@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test"
 import { renderToStaticMarkup } from "react-dom/server"
 import { BrowserIcon, DeviceIcon, Favicon, Flag, OsIcon } from "./components.js"
-import { loadBrowserLogo, loadFlag, preloadImages } from "./images.js"
+import { loadBrowserLogo, loadFlag, loadImage, preloadImages, selectImage } from "./images.js"
 
 describe("loaders", () => {
   test("load a flag in any case as a data URI", async () => {
@@ -19,23 +19,73 @@ describe("loaders", () => {
     expect(await loadFlag("")).toBeUndefined()
     expect(await loadBrowserLogo("Lynx")).toBeUndefined()
   })
+
+  test("retry a load that failed", async () => {
+    let attempts = 0
+    async function loader() {
+      attempts += 1
+
+      if (attempts === 1) {
+        throw new Error("Offline")
+      }
+
+      return { default: "data:image/png;base64,AA==" }
+    }
+
+    await expect(loadImage(loader)).rejects.toThrow("Offline")
+    expect(await loadImage(loader)).toBe("data:image/png;base64,AA==")
+    expect(attempts).toBe(2)
+  })
+})
+
+describe("image selection", () => {
+  async function loader() {
+    return { default: "data:image/png;base64,AA==" }
+  }
+
+  test("show the placeholder until hydration ends, even for a cached image", async () => {
+    await loadImage(loader)
+
+    expect(selectImage(loader, false, undefined)).toBeUndefined()
+    expect(selectImage(loader, true, undefined)).toBe("data:image/png;base64,AA==")
+  })
+
+  test("show no image without a loader, on the server too", () => {
+    expect(selectImage(undefined, false, undefined)).toBeNull()
+    expect(selectImage(undefined, true, undefined)).toBeNull()
+  })
+
+  test("show the last finished load only for its own loader", async () => {
+    async function other() {
+      return { default: "data:image/png;base64,BB==" }
+    }
+
+    expect(selectImage(other, true, { loader: other, image: null })).toBeNull()
+    expect(selectImage(other, true, { loader, image: "stale" })).toBeUndefined()
+  })
 })
 
 describe("components", () => {
-  test("render a preloaded flag and logo on the first render", async () => {
+  test("render the placeholder on the server even for a preloaded image, as hydration does", async () => {
     await preloadImages({ flags: ["de"], browsers: ["Firefox"] })
 
-    expect(renderToStaticMarkup(<Flag code="DE" />)).toMatch(
-      /^<img src="data:image\/svg\+xml;base64,[^"]+" alt="" width="16" height="12"/,
+    expect(renderToStaticMarkup(<Flag code="DE" />)).toBe(
+      '<span style="display:inline-block;width:16px;height:12px" aria-hidden="true"></span>',
     )
-    expect(renderToStaticMarkup(<BrowserIcon name="Firefox" size={20} />)).toMatch(
-      /^<img src="data:image\/png;base64,[^"]+" alt="" width="20" height="20"/,
+    expect(renderToStaticMarkup(<BrowserIcon name="Firefox" size={20} />)).toBe(
+      '<span style="display:inline-block;width:20px;height:20px" aria-hidden="true"></span>',
     )
   })
 
   test("hold the space while an image has not loaded", () => {
     expect(renderToStaticMarkup(<Flag code="jp" />)).toBe(
-      '<span aria-hidden="true" style="display:inline-block;width:16px;height:12px"></span>',
+      '<span style="display:inline-block;width:16px;height:12px" aria-hidden="true"></span>',
+    )
+  })
+
+  test("keep the accessible name on the placeholder", () => {
+    expect(renderToStaticMarkup(<Flag code="jp" title="Japan" />)).toBe(
+      '<span style="display:inline-block;width:16px;height:12px" role="img" aria-label="Japan"></span>',
     )
   })
 

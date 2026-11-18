@@ -7,5 +7,6 @@ export type {
   OsIconProps,
 } from "./components.js"
 export { loadBrowserLogo, loadFlag, preloadImages, useBrowserLogo, useFlag } from "./images.js"
+export type { PreloadedImages } from "./images.js"
 export { DEVICE_TYPES, findBrowserLogo, findOsMark } from "./names.js"
 export type { OsMark } from "./names.js"
