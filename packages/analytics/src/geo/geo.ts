@@ -1,6 +1,8 @@
 import { readFileSync } from "node:fs"
+import { readFile } from "node:fs/promises"
 import type { ClientIpSource } from "@underpin/utils/http"
 import { type CityResponse, Reader } from "maxmind"
+import { lru } from "tiny-lru"
 
 /** Where an IP address is, as far as the database knows. Unknown fields are empty or null. */
 export interface GeoLocation {
@@ -64,20 +66,11 @@ function toGeoLocation(record: CityResponse): GeoLocation {
   }
 }
 
-/**
- * Opens an MMDB file: MaxMind's GeoLite2 or GeoIP2, or DB-IP's Lite or paid databases, Country or
- * City. The whole file is read into memory, so open it once at startup and reuse the result. The
- * package bundles no database: download one and pass its path.
- * @param path - The path of the `.mmdb` file.
- * @returns The database.
- * @throws When the file is missing or is not an MMDB database. A caller that runs without geo
- * data catches the error.
- * @example
- * const geo = openGeoDatabase("data/GeoLite2-City.mmdb")
- * geo.lookup("81.2.69.142") // { country: "GB", region: "ENG", city: "London", ... }
- */
-export function openGeoDatabase(path: string): GeoDatabase {
-  const reader = new Reader<CityResponse>(readFileSync(path))
+// The size of `maxmind.open`'s default cache of decoded records.
+const CACHE_SIZE = 10_000
+
+function createGeoDatabase(file: Buffer): GeoDatabase {
+  const reader = new Reader<CityResponse>(file, { cache: lru(CACHE_SIZE) })
 
   function find(ip: string): CityResponse | null {
     try {
@@ -97,6 +90,36 @@ export function openGeoDatabase(path: string): GeoDatabase {
       return readCountry(find(ip))
     },
   }
+}
+
+/**
+ * Opens an MMDB file: MaxMind's GeoLite2 or GeoIP2, or DB-IP's Lite or paid databases, Country or
+ * City. The whole file is read into memory, so open it once at startup and reuse the result. The
+ * package bundles no database: download one and pass its path. Lookups keep the last 10,000
+ * decoded records in memory.
+ * @param path - The path of the `.mmdb` file.
+ * @returns The database.
+ * @throws When the file is missing or is not an MMDB database. A caller that runs without geo
+ * data catches the error.
+ * @example
+ * const geo = openGeoDatabase("data/GeoLite2-City.mmdb")
+ * geo.lookup("81.2.69.142") // { country: "GB", region: "ENG", city: "London", ... }
+ */
+export function openGeoDatabase(path: string): GeoDatabase {
+  return createGeoDatabase(readFileSync(path))
+}
+
+/**
+ * Opens an MMDB file like {@link openGeoDatabase}, but reads it without blocking the event loop.
+ * Use it to load a fresh copy while the server runs, then swap it in.
+ * @param path - The path of the `.mmdb` file.
+ * @returns The database.
+ * @throws When the file is missing or is not an MMDB database, as a rejected promise.
+ * @example
+ * geo = await loadGeoDatabase("data/GeoLite2-City.mmdb")
+ */
+export async function loadGeoDatabase(path: string): Promise<GeoDatabase> {
+  return createGeoDatabase(await readFile(path))
 }
 
 /**

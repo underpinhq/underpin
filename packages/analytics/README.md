@@ -54,7 +54,17 @@ getEdgeCountry(request.headers, clientIp?.source) // Cloudflare's `cf-ipcountry`
 resolveGeo(edgeCountry, geo.lookup(clientIp?.ip ?? "")) // the edge's country, with the database's city only where both agree
 ```
 
-`openGeoDatabase` reads any MMDB file: MaxMind GeoLite2 or GeoIP2, or DB-IP, Country or City. The package bundles no database. Download one, pass its path, and open it once at startup. A missing or broken file throws, so a server that runs without geo data catches the error. Unknown countries (DB-IP's "ZZ", "XX", Cloudflare's Tor code "T1") come back as an empty string.
+`openGeoDatabase` reads any MMDB file: MaxMind GeoLite2 or GeoIP2, or DB-IP, Country or City. The package bundles no database. Download one, pass its path, and open it once at startup. A missing or broken file throws, so a server that runs without geo data catches the error. Unknown countries (DB-IP's "ZZ", "XX", Cloudflare's Tor code "T1") come back as an empty string. Lookups keep the last 10,000 decoded records in memory, as `maxmind.open` does.
+
+`loadGeoDatabase(path)` opens the same file without blocking the event loop and returns a promise. Use it in a job that downloads a fresh copy while the server runs, then swap the result in. A missing or broken file rejects the promise.
+
+```ts
+let geo = openGeoDatabase("data/GeoLite2-City.mmdb")
+
+async function refreshGeo() {
+  geo = await loadGeoDatabase("data/GeoLite2-City.mmdb")
+}
+```
 
 ## `@underpin/analytics/favicon`
 
