@@ -1,5 +1,11 @@
 # @underpin/config
 
+## 1.12.2
+
+### Patch Changes
+
+- `underpin publish` resolves `workspace:` ranges for a package that publishes from its own directory. It writes the siblings' versions into `package.json` for the publish, and restores the file afterwards. Before this fix, such a package reached npm with `workspace:^` in its dependencies, and every install outside the monorepo failed. ([ba47043](https://github.com/underpinhq/underpin/commit/ba47043283d5c6f75b6002b632a3e22d8c2a4d36))
+
 ## 1.12.1
 
 ### Patch Changes

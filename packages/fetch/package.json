@@ -1,6 +1,6 @@
 {
   "name": "@underpin/fetch",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Server-side download of a URL that refuses every private address, redirects included",
   "keywords": [
     "dns-rebinding",
