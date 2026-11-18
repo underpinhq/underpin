@@ -1,0 +1,59 @@
+{
+  "name": "@underpin/fetch",
+  "version": "0.0.0",
+  "description": "Server-side download of a URL that refuses every private address, redirects included",
+  "keywords": [
+    "dns-rebinding",
+    "fetch",
+    "security",
+    "ssrf"
+  ],
+  "homepage": "https://github.com/underpinhq/underpin/tree/main/packages/fetch#readme",
+  "bugs": "https://github.com/underpinhq/underpin/issues",
+  "license": "MIT",
+  "author": {
+    "name": "Piotr Kulpinski",
+    "email": "piotr@kulpinski.pl",
+    "url": "https://kulpinski.pl"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/underpinhq/underpin.git",
+    "directory": "packages/fetch"
+  },
+  "files": [
+    "dist",
+    "src",
+    "!src/**/*.test.ts"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "check-types": "tsc --noEmit",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "@underpin/utils": "workspace:^"
+  },
+  "devDependencies": {
+    "@arethetypeswrong/core": "^0.18.5",
+    "@types/bun": "^1.2.21",
+    "publint": "^0.3.25",
+    "tsdown": "^0.23.0",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=22.12"
+  }
+}

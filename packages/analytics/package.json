@@ -1,0 +1,68 @@
+{
+  "name": "@underpin/analytics",
+  "version": "0.0.0",
+  "description": "Server-side analytics helpers: user-agent parsing, bot detection, geo lookup, favicons and referrers",
+  "keywords": [
+    "analytics",
+    "bots",
+    "favicon",
+    "geoip",
+    "referrer",
+    "user-agent"
+  ],
+  "homepage": "https://github.com/underpinhq/underpin/tree/main/packages/analytics#readme",
+  "bugs": "https://github.com/underpinhq/underpin/issues",
+  "license": "MIT",
+  "author": {
+    "name": "Piotr Kulpinski",
+    "email": "piotr@kulpinski.pl",
+    "url": "https://kulpinski.pl"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/underpinhq/underpin.git",
+    "directory": "packages/analytics"
+  },
+  "bin": {
+    "underpin-referers": "./dist/referrer-dataset/cli.js"
+  },
+  "files": [
+    "dist",
+    "src",
+    "!src/**/*.test.ts",
+    "!src/**/fixtures"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    "./*": "./dist/*/*.js",
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "check-types": "tsc --noEmit",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "@underpin/fetch": "workspace:^",
+    "@underpin/utils": "workspace:^",
+    "isbot": "^5.2.2",
+    "maxmind": "^5.0.7",
+    "ua-parser-js": "^1.0.41",
+    "yaml": "^2.9.1"
+  },
+  "devDependencies": {
+    "@arethetypeswrong/core": "^0.18.5",
+    "@types/bun": "^1.2.21",
+    "@types/ua-parser-js": "^0.7.39",
+    "publint": "^0.3.25",
+    "tsdown": "^0.23.0",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=22.12"
+  }
+}

@@ -4,9 +4,11 @@ import {
   CLOUDFLARE_IP_RANGES,
   getClientIp,
   getDomain,
+  getParentDomains,
   isCloudflareIp,
   isExternalUrl,
   isHostname,
+  isHostnameAllowed,
   isIp,
   isIpInRange,
   isPublicIp,
@@ -17,6 +19,7 @@ import {
   normalizeHostname,
   removeProtocol,
   removeQueryParams,
+  resolveClientIp,
   setQueryParams,
   stripWildcard,
 } from "./http"
@@ -279,6 +282,11 @@ describe("isHostname", () => {
   it("accepts a hostname with a top-level domain", () => {
     expect(isHostname("example.com")).toBe(true)
     expect(isHostname("app.9tools.io")).toBe(true)
+  })
+
+  it("accepts a punycode top-level domain", () => {
+    expect(isHostname("xn--e1afmkfd.xn--p1ai")).toBe(true)
+    expect(isHostname("example.xn--")).toBe(false)
   })
 
   it("rejects names, URLs and leading hyphens", () => {
@@ -670,6 +678,229 @@ describe("getClientIp", () => {
     expect(getClientIp(new Headers({ "x-real-ip": "localhost" }))).toBeUndefined()
     expect(
       getClientIp(new Headers({ "cf-connecting-ip": "198.51.100.7" }), { trust: "cloudflare" }),
+    ).toBeUndefined()
+  })
+})
+
+// 173.245.48.1 is inside Cloudflare's published 173.245.48.0/20.
+const CLOUDFLARE_PEER = "173.245.48.1"
+const VISITOR = "203.0.113.7"
+const SPOOFED = "198.51.100.66"
+
+function headers(values: Record<string, string>): Headers {
+  return new Headers(values)
+}
+
+describe("resolveClientIp with trusted proxies or a socket", () => {
+  it("uses the socket and ignores x-forwarded-for by default", () => {
+    const result = resolveClientIp(headers({ "x-forwarded-for": SPOOFED }), {
+      socketAddress: VISITOR,
+    })
+
+    expect(result).toEqual({ ip: VISITOR, source: "socket" })
+  })
+
+  it("returns undefined when no address is known", () => {
+    expect(resolveClientIp(headers({}))).toBeUndefined()
+  })
+
+  it("unwraps an IPv4-mapped socket address", () => {
+    expect(resolveClientIp(headers({}), { socketAddress: "::ffff:203.0.113.7" })?.ip).toBe(VISITOR)
+  })
+
+  describe("with a proxy count", () => {
+    it("reads the entry the last proxy appended", () => {
+      const result = resolveClientIp(headers({ "x-forwarded-for": `${SPOOFED}, ${VISITOR}` }), {
+        trustedProxies: 1,
+      })
+
+      expect(result).toEqual({ ip: VISITOR, source: "x-forwarded-for" })
+    })
+
+    it("skips the hops of each trusted proxy", () => {
+      const result = resolveClientIp(
+        headers({ "x-forwarded-for": `${SPOOFED}, ${VISITOR}, 10.0.0.2` }),
+        { trustedProxies: 2 },
+      )
+
+      expect(result?.ip).toBe(VISITOR)
+    })
+
+    it("takes the first entry when the chain is shorter than the count", () => {
+      const result = resolveClientIp(headers({ "x-forwarded-for": VISITOR }), { trustedProxies: 3 })
+
+      expect(result?.ip).toBe(VISITOR)
+    })
+
+    it("falls back to the socket when the entry is not an address", () => {
+      const result = resolveClientIp(headers({ "x-forwarded-for": "unknown" }), {
+        trustedProxies: 1,
+        socketAddress: "10.0.0.2",
+      })
+
+      expect(result).toEqual({ ip: "10.0.0.2", source: "socket" })
+    })
+  })
+
+  describe("with trusted ranges", () => {
+    it("returns the rightmost entry outside the ranges", () => {
+      const result = resolveClientIp(
+        headers({ "x-forwarded-for": `${SPOOFED}, ${VISITOR}, 10.0.0.3, 10.0.0.2` }),
+        { trustedProxies: ["10.0.0.0/8"], socketAddress: "10.0.0.1" },
+      )
+
+      expect(result).toEqual({ ip: VISITOR, source: "x-forwarded-for" })
+    })
+
+    it("accepts a bare address as a range", () => {
+      const result = resolveClientIp(headers({ "x-forwarded-for": VISITOR }), {
+        trustedProxies: ["192.0.2.10"],
+        socketAddress: "192.0.2.10",
+      })
+
+      expect(result?.ip).toBe(VISITOR)
+    })
+
+    it("ignores the header when the socket is unknown", () => {
+      const result = resolveClientIp(headers({ "x-forwarded-for": SPOOFED }), {
+        trustedProxies: ["10.0.0.0/8"],
+      })
+
+      expect(result).toBeUndefined()
+    })
+
+    it("ignores the header when the socket is outside the ranges", () => {
+      const result = resolveClientIp(headers({ "x-forwarded-for": SPOOFED }), {
+        trustedProxies: ["10.0.0.0/8"],
+        socketAddress: VISITOR,
+      })
+
+      expect(result).toEqual({ ip: VISITOR, source: "socket" })
+    })
+  })
+
+  describe("with Cloudflare", () => {
+    it("believes cf-connecting-ip from a Cloudflare peer", () => {
+      const result = resolveClientIp(headers({ "cf-connecting-ip": VISITOR }), {
+        trust: "cloudflare",
+        socketAddress: CLOUDFLARE_PEER,
+      })
+
+      expect(result).toEqual({ ip: VISITOR, source: "cf-connecting-ip" })
+    })
+
+    it("believes it when a trusted proxy forwarded Cloudflare's address", () => {
+      const result = resolveClientIp(
+        headers({ "cf-connecting-ip": VISITOR, "x-forwarded-for": CLOUDFLARE_PEER }),
+        { trust: "cloudflare", trustedProxies: 1, socketAddress: "10.0.0.2" },
+      )
+
+      expect(result?.source).toBe("cf-connecting-ip")
+    })
+
+    it("ignores cf-connecting-ip from any other peer", () => {
+      const result = resolveClientIp(headers({ "cf-connecting-ip": SPOOFED }), {
+        trust: "cloudflare",
+        socketAddress: VISITOR,
+      })
+
+      expect(result).toEqual({ ip: VISITOR, source: "socket" })
+    })
+
+    it("keeps the peer when cf-connecting-ip is not an address", () => {
+      const result = resolveClientIp(headers({ "cf-connecting-ip": "nope" }), {
+        trust: "cloudflare",
+        socketAddress: CLOUDFLARE_PEER,
+      })
+
+      expect(result).toEqual({ ip: CLOUDFLARE_PEER, source: "socket" })
+    })
+  })
+
+  it("reads headers through a function", () => {
+    const values: Record<string, string> = { "x-forwarded-for": VISITOR }
+    const result = resolveClientIp(name => values[name], { trustedProxies: 1 })
+
+    expect(result?.ip).toBe(VISITOR)
+  })
+
+  it("never reads x-real-ip", () => {
+    const result = resolveClientIp(headers({ "x-real-ip": SPOOFED }), {
+      trustedProxies: 1,
+      socketAddress: VISITOR,
+    })
+
+    expect(result?.ip).toBe(VISITOR)
+  })
+})
+
+describe("resolveClientIp without trusted proxies", () => {
+  it("names the header the address came from", () => {
+    expect(
+      resolveClientIp(new Headers({ "x-forwarded-for": "198.51.100.7, 203.0.113.9" })),
+    ).toEqual({
+      ip: "203.0.113.9",
+      source: "x-forwarded-for",
+    })
+    expect(resolveClientIp(new Headers({ "x-real-ip": "203.0.113.9" }))).toEqual({
+      ip: "203.0.113.9",
+      source: "x-real-ip",
+    })
+  })
+
+  it("matches getClientIp", () => {
+    const headers = new Headers({ "x-forwarded-for": "203.0.113.9" })
+    expect(getClientIp(headers)).toBe(resolveClientIp(headers)?.ip)
+  })
+})
+
+describe("getParentDomains", () => {
+  it("lists the hostname and every parent domain", () => {
+    expect(getParentDomains("a.b.example.co.uk")).toEqual([
+      "a.b.example.co.uk",
+      "b.example.co.uk",
+      "example.co.uk",
+      "co.uk",
+    ])
+  })
+
+  it("returns nothing for a single label", () => {
+    expect(getParentDomains("localhost")).toEqual([])
+  })
+})
+
+describe("isHostnameAllowed", () => {
+  const site = { domain: "example.com", extraHostnames: ["shop.example.net", "*.example.org"] }
+
+  it("accepts the domain and its subdomains", () => {
+    expect(isHostnameAllowed("example.com", site)).toBe(true)
+    expect(isHostnameAllowed("App.Example.com", site)).toBe(true)
+  })
+
+  it("matches an extra hostname exactly unless it has a wildcard", () => {
+    expect(isHostnameAllowed("shop.example.net", site)).toBe(true)
+    expect(isHostnameAllowed("www.shop.example.net", site)).toBe(false)
+    expect(isHostnameAllowed("example.org", site)).toBe(true)
+    expect(isHostnameAllowed("blog.example.org", site)).toBe(true)
+  })
+
+  it("refuses any other hostname", () => {
+    expect(isHostnameAllowed("example.com.evil.test", site)).toBe(false)
+    expect(isHostnameAllowed("notexample.com", site)).toBe(false)
+  })
+})
+
+describe("resolveClientIp when the socket cannot be read", () => {
+  const spoofed = new Headers({ "x-forwarded-for": "198.51.100.66", "x-real-ip": "198.51.100.66" })
+
+  it("keeps the strict rules for an empty socketAddress", () => {
+    expect(resolveClientIp(spoofed, { socketAddress: undefined })).toBeUndefined()
+    expect(resolveClientIp(spoofed, { socketAddress: null })).toBeUndefined()
+  })
+
+  it("trusts no header from proxies in a range list without a socket", () => {
+    expect(
+      resolveClientIp(spoofed, { trustedProxies: ["10.0.0.0/8"], socketAddress: undefined }),
     ).toBeUndefined()
   })
 })

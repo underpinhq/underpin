@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "../../tsconfig.base.json",
+  "include": ["src"],
+  "compilerOptions": {
+    // tsdown emits the published declarations, so every export carries an explicit type.
+    "isolatedDeclarations": true,
+    "declaration": true
+  }
+}

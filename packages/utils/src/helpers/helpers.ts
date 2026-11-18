@@ -84,6 +84,20 @@ export async function withTimeout<T>(
 }
 
 /**
+ * Creates a signal that aborts after a timeout, or when a caller's own signal aborts first. Pass it
+ * to `fetch` or any other API that takes an `AbortSignal`.
+ * @param ms - The timeout in milliseconds.
+ * @param signal - The caller's signal, if any.
+ * @returns The combined signal.
+ * @example
+ * await fetch(url, { signal: timeoutSignal(4 * SECOND_MS, request.signal) })
+ */
+export function timeoutSignal(ms: number, signal?: AbortSignal): AbortSignal {
+  const deadline = AbortSignal.timeout(ms)
+  return signal ? AbortSignal.any([signal, deadline]) : deadline
+}
+
+/**
  * Options for {@link retry}.
  */
 export interface RetryOptions {

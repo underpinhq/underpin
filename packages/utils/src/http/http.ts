@@ -157,8 +157,9 @@ export function isValidImageSrc(src?: string | null): src is string {
   }
 }
 
-// Dot-separated labels ending in an alphabetic top-level domain: a hostname, not a brand name.
-const HOSTNAME = /^(?!-)[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{2,}$/i
+// Dot-separated labels ending in a top-level domain of letters, or its punycode form (`xn--p1ai`):
+// a hostname, not a brand name.
+const HOSTNAME = /^(?!-)[a-z0-9-]+(\.[a-z0-9-]+)*\.(?:[a-z]{2,}|xn--[a-z0-9-]+)$/i
 
 /**
  * Checks if a string is a bare hostname, such as "example.com", rather than a name like "Reddit".
@@ -201,6 +202,47 @@ export function isWithinDomain(hostname: string, domain: string): boolean {
   if (!host || !base) return false
 
   return host === base || host.endsWith(`.${base}`)
+}
+
+/**
+ * Lists a hostname and each domain above it, most specific first, without the bare top-level
+ * domain.
+ * @param hostname - The hostname, already normalized.
+ * @returns The hostname and its parent domains.
+ * @example
+ * getParentDomains("m.facebook.com") // ["m.facebook.com", "facebook.com"]
+ */
+export function getParentDomains(hostname: string): string[] {
+  const labels = hostname.split(".")
+  return labels.slice(0, -1).map((_, index) => labels.slice(index).join("."))
+}
+
+/** The hostnames a site counts as its own. */
+export interface SiteHostnames {
+  /** The site's domain. Its subdomains count too. */
+  domain: string
+  /** Counted besides the domain: an exact hostname, or `*.example.com` for it and its subdomains. */
+  extraHostnames?: string[]
+}
+
+/**
+ * Checks if a hostname belongs to a site: its domain or a subdomain, or one of its extra hostnames.
+ * An extra hostname is matched exactly unless it starts with `*.`.
+ * @param hostname - The hostname to check.
+ * @param site - The site's domain and extra hostnames.
+ * @returns True if the site counts the hostname as its own.
+ * @example
+ * isHostnameAllowed("app.example.com", { domain: "example.com" }) // true
+ * isHostnameAllowed("shop.example.net", { domain: "example.com", extraHostnames: ["*.example.net"] }) // true
+ */
+export function isHostnameAllowed(hostname: string, site: SiteHostnames): boolean {
+  if (isWithinDomain(hostname, site.domain)) return true
+
+  return (site.extraHostnames ?? []).some(entry =>
+    entry.startsWith("*.")
+      ? isWithinDomain(hostname, entry)
+      : normalizeHostname(hostname) === entry,
+  )
 }
 
 /**
@@ -394,39 +436,185 @@ export function isPublicIp(ip: string): boolean {
   return !NON_PUBLIC_IP_RANGES.some(range => isIpInRange(ip, range))
 }
 
-/** Options for {@link getClientIp}. */
+/** Which header, or the socket, a client IP came from. */
+export type ClientIpSource = "cf-connecting-ip" | "x-forwarded-for" | "x-real-ip" | "socket"
+
+/** A client IP and where it came from. */
+export interface ClientIp {
+  ip: string
+  source: ClientIpSource
+}
+
+/** Reads one request header by its lowercase name. */
+export type HeaderReader = (name: string) => string | null | undefined
+
+/** Options for {@link getClientIp} and {@link resolveClientIp}. */
 export interface GetClientIpOptions {
   /**
    * Read `cf-connecting-ip` when the request came through Cloudflare. Set it when the site sits
    * behind proxied Cloudflare records. Off by default.
    */
   trust?: "cloudflare"
+  /**
+   * The proxies between the visitor and this server, which each append the address they saw to
+   * `x-forwarded-for`. Only the entries they wrote are read, from the right:
+   * - A number: how many proxies sit in front. The client is that many entries from the right.
+   * - A list of addresses or CIDR ranges: every entry from the right inside one of them is a
+   *   proxy, and the first entry outside them is the client. The header is read only when
+   *   `socketAddress` is inside the ranges too.
+   *
+   * Passing this or `socketAddress`, even as `undefined`, turns on the strict rules: `x-real-ip`
+   * is never read, and without a trusted proxy the socket address is the client.
+   */
+  trustedProxies?: number | readonly string[]
+  /**
+   * The address of the TCP peer. Pass the key even when the server could not read it: with an
+   * empty value, a range list trusts no header and the result is undefined.
+   */
+  socketAddress?: string | null
+}
+
+const IPV4_MAPPED_PREFIX = "::ffff:"
+
+/**
+ * Trims an address and unwraps an IPv4-mapped IPv6 one: Node reports an IPv4 peer as
+ * `::ffff:1.2.3.4`.
+ */
+function normalizeClientIp(value: string): string {
+  const trimmed = value.trim()
+  return trimmed.toLowerCase().startsWith(IPV4_MAPPED_PREFIX) && trimmed.includes(".")
+    ? trimmed.slice(IPV4_MAPPED_PREFIX.length)
+    : trimmed
+}
+
+/** The normalized address, or undefined when the value is not an IP address. */
+function parseClientIp(value: string | null | undefined): string | undefined {
+  const ip = value ? normalizeClientIp(value) : ""
+  return isIp(ip) ? ip : undefined
+}
+
+function toHeaderReader(headers: Headers | HeaderReader): HeaderReader {
+  return typeof headers === "function" ? headers : name => headers.get(name)
+}
+
+/** Checks if an address is inside one of the ranges. A bare address is a range of one. */
+function isInRanges(ip: string, ranges: readonly string[]): boolean {
+  return ranges.some(range =>
+    range.includes("/") ? isIpInRange(ip, range) : parseClientIp(range) === ip,
+  )
+}
+
+/** The `x-forwarded-for` entry the trusted proxies point at, when the header holds one. */
+function findForwardedIp(
+  readHeader: HeaderReader,
+  trustedProxies: number | readonly string[],
+  socket: string | undefined,
+): string | undefined {
+  const hops = (readHeader("x-forwarded-for") ?? "")
+    .split(",")
+    .map(normalizeClientIp)
+    .filter(Boolean)
+
+  if (typeof trustedProxies === "number") {
+    // The entry that many hops from the right, or the first entry when the chain is shorter.
+    return trustedProxies > 0
+      ? parseClientIp(hops[Math.max(hops.length - trustedProxies, 0)])
+      : undefined
+  }
+
+  // Only a peer inside the trusted ranges may speak for the client. A socket outside them is a
+  // client that reached this server directly, and an unknown socket proves nothing, so in both
+  // cases the header it sent says nothing.
+  if (!trustedProxies.length || !socket || !isInRanges(socket, trustedProxies)) return
+
+  return parseClientIp(hops.findLast(hop => !isInRanges(hop, trustedProxies)) ?? hops[0])
+}
+
+/** The rules for a caller that names its proxies or its socket. */
+function resolveStrictClientIp(
+  readHeader: HeaderReader,
+  options: GetClientIpOptions,
+): ClientIp | undefined {
+  const socket = parseClientIp(options.socketAddress)
+  const forwarded = findForwardedIp(readHeader, options.trustedProxies ?? 0, socket)
+  const peer = forwarded ?? socket
+
+  if (options.trust === "cloudflare" && peer && isCloudflareIp(peer)) {
+    const visitor = parseClientIp(readHeader("cf-connecting-ip"))
+    if (visitor) return { ip: visitor, source: "cf-connecting-ip" }
+  }
+
+  if (forwarded) return { ip: forwarded, source: "x-forwarded-for" }
+  if (socket) return { ip: socket, source: "socket" }
 }
 
 /**
- * Gets the visitor's IP address from request headers set by a reverse proxy such as Traefik.
+ * The rules for a caller behind one proxy that appends the TCP peer, such as Traefik. The first
+ * `x-forwarded-for` entry is whatever the client sent, so only the last one is read.
+ */
+function resolveProxiedClientIp(
+  readHeader: HeaderReader,
+  options: GetClientIpOptions,
+): ClientIp | undefined {
+  const peer = readHeader("x-forwarded-for")?.split(",").at(-1)?.trim()
+
+  if (options.trust === "cloudflare" && peer && isCloudflareIp(peer)) {
+    const visitor = readHeader("cf-connecting-ip")?.trim()
+    if (visitor && isIp(visitor)) return { ip: visitor, source: "cf-connecting-ip" }
+  }
+
+  if (peer && isIp(peer)) return { ip: peer, source: "x-forwarded-for" }
+
+  const realIp = readHeader("x-real-ip")?.trim()
+  if (realIp && isIp(realIp)) return { ip: realIp, source: "x-real-ip" }
+}
+
+/**
+ * Finds the visitor's IP address from request headers, without trusting one the visitor could set,
+ * and says where it came from.
  *
- * The first `x-forwarded-for` entry is whatever the client sent, so it is never read. The proxy
- * appends the TCP peer as the last entry, and that peer is the address returned. With
- * `trust: "cloudflare"`, `cf-connecting-ip` is returned instead, but only when the peer is a
- * Cloudflare address, because a direct request to the origin can set that header to anything.
- * @param headers - The request headers.
- * @param options - Which CDN to trust for the visitor's address.
+ * Without `trustedProxies` or `socketAddress`, it assumes one proxy that appends the TCP peer to
+ * `x-forwarded-for`, such as Traefik, and returns that last entry. It then falls back to
+ * `x-real-ip`, which is safe only behind a proxy that overwrites that header.
+ *
+ * With either option, the strict rules apply: only the entries the trusted proxies wrote are
+ * read, the socket address is the fallback, and `x-real-ip` is never read.
+ *
+ * With `trust: "cloudflare"`, `cf-connecting-ip` wins, but only when the peer is a Cloudflare
+ * address, because a direct request to the origin can set that header to anything.
+ * @param headers - The request headers, or a function that reads one by its lowercase name.
+ * @param options - The CDN and proxies to trust, and the socket address.
+ * @returns The address and its source, or undefined when none is known.
+ * @example
+ * resolveClientIp(request.headers, { trust: "cloudflare", trustedProxies: 1 })
+ * resolveClientIp(request.headers, { trustedProxies: ["10.0.0.0/8"], socketAddress: peer })
+ */
+export function resolveClientIp(
+  headers: Headers | HeaderReader,
+  options: GetClientIpOptions = {},
+): ClientIp | undefined {
+  const readHeader = toHeaderReader(headers)
+  // The key decides, not its value: a caller whose server could not read the socket passes
+  // `socketAddress: undefined`, and must still get the strict rules rather than the lenient ones.
+  const isStrict = "trustedProxies" in options || "socketAddress" in options
+
+  return isStrict
+    ? resolveStrictClientIp(readHeader, options)
+    : resolveProxiedClientIp(readHeader, options)
+}
+
+/**
+ * Gets the visitor's IP address from request headers, as {@link resolveClientIp} finds it.
+ * @param headers - The request headers, or a function that reads one by its lowercase name.
+ * @param options - The CDN and proxies to trust, and the socket address.
  * @returns The client IP, or undefined when no header holds a valid IP address.
  * @example
  * getClientIp(request.headers) ?? "127.0.0.1"
  * getClientIp(request.headers, { trust: "cloudflare" })
  */
-export function getClientIp(headers: Headers, options?: GetClientIpOptions): string | undefined {
-  const peer = headers.get("x-forwarded-for")?.split(",").at(-1)?.trim()
-
-  if (options?.trust === "cloudflare" && peer && isCloudflareIp(peer)) {
-    const visitor = headers.get("cf-connecting-ip")?.trim()
-    if (visitor && isIp(visitor)) return visitor
-  }
-
-  if (peer && isIp(peer)) return peer
-
-  const realIp = headers.get("x-real-ip")?.trim()
-  if (realIp && isIp(realIp)) return realIp
+export function getClientIp(
+  headers: Headers | HeaderReader,
+  options?: GetClientIpOptions,
+): string | undefined {
+  return resolveClientIp(headers, options)?.ip
 }

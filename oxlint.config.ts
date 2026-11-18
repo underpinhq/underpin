@@ -6,7 +6,13 @@ export default defineConfig({
   // `packages/ui` is developed and linted in Highseat and arrives here through a one-way
   // sync, so a finding in it could only be fixed there. The config sources are the config
   // package's deliverables: they export defaults, which the shared rules forbid in app code.
-  ignorePatterns: ["packages/ui/**", "packages/config/configs/**", "**/dist/**"],
+  ignorePatterns: [
+    "packages/ui/**",
+    "packages/config/configs/**",
+    "**/dist/**",
+    // Written by `packages/analytics-react/scripts/generate.ts`.
+    "packages/analytics-react/src/generated/**",
+  ],
   rules: {
     // Published declarations come from tsc or tsdown, which keep a `~/*` alias as written,
     // so packages import relatively.

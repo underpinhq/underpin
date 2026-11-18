@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest"
-import { isTruthy, retry, sleep, tryCatch, withTimeout } from "./helpers"
+import { isTruthy, retry, sleep, timeoutSignal, tryCatch, withTimeout } from "./helpers"
 
 describe("isTruthy", () => {
   it("checks if a value is truthy", () => {
@@ -297,5 +297,24 @@ describe("withTimeout", () => {
 
     expect(clearTimeoutSpy).toHaveBeenCalledTimes(1)
     clearTimeoutSpy.mockRestore()
+  })
+})
+
+describe("timeoutSignal", () => {
+  it("aborts after the timeout", async () => {
+    const signal = timeoutSignal(10)
+    expect(signal.aborted).toBe(false)
+    await sleep(30)
+    expect(signal.aborted).toBe(true)
+  })
+
+  it("aborts at once with the caller's signal", () => {
+    const controller = new AbortController()
+    const signal = timeoutSignal(10_000, controller.signal)
+
+    controller.abort(new Error("cancelled"))
+
+    expect(signal.aborted).toBe(true)
+    expect(signal.reason).toEqual(new Error("cancelled"))
   })
 })
