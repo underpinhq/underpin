@@ -1,6 +1,6 @@
 # @underpin/analytics
 
-Server-side helpers for analytics ingest: user-agent parsing, bot detection, a geo lookup, favicons and referrer classification. Plain TypeScript with no framework. Each feature is its own subpath, so a server bundles only what it imports.
+Server-side helpers for analytics ingest: user-agent parsing, bot detection, a geo lookup and referrer classification. The favicon lookup is its own package, [`@underpin/favicon`](../favicon). Plain TypeScript with no framework. Each feature is its own subpath, so a server bundles only what it imports.
 
 ```bash
 bun add @underpin/analytics
@@ -65,30 +65,6 @@ async function refreshGeo() {
   geo = await loadGeoDatabase("data/GeoLite2-City.mmdb")
 }
 ```
-
-## `@underpin/analytics/favicon`
-
-```ts
-import { directProvider, findFavicon, googleProvider, logoDevProvider } from "@underpin/analytics/favicon"
-
-const providers = [directProvider(), googleProvider()]
-const favicon = await findFavicon("example.com", providers)
-// { body: Uint8Array, contentType: "image/png" } or null
-```
-
-`findFavicon` asks each provider in turn and returns the first icon. Storage and caching stay with you.
-
-- **It resolves to null** only when every provider answered that the host has no icon, so you may cache the miss.
-- **It rejects** when no icon was found and a provider failed (an outage, a rate limit, a timeout), so the next request asks again.
-- **A miss** is a 4xx answer other than 408 and 429, a host that does not exist, a private address, or a body that is no image or is too large. A cancelled call rejects with the abort reason.
-
-| Provider | Source | Notes |
-| --- | --- | --- |
-| `directProvider()` | The site's own `/favicon.ico` | Downloads through `@underpin/fetch`, so every address, redirects included, must be public. The host never leaves your server. |
-| `googleProvider()` | Google's s2 favicon service | The widest coverage. Its grey-globe 404 counts as a miss. Proxy the icon, so browsers never contact Google. |
-| `logoDevProvider({ token })` | logo.dev | Asks for `fallback=404`, so no generated monogram, at logo.dev's default size unless you pass `size`. Re-host the icon, so your key stays private. |
-
-Every provider reads the image type from the bytes and accepts PNG, ICO, GIF, JPEG and WebP up to 128 KB. An SVG can carry script, so it is never accepted. `resolveLandingHost(url)` follows a short link's redirects with guarded `HEAD` requests and returns the host it lands on, to ask a provider about. A landing site that refuses `HEAD` still counts.
 
 ## `@underpin/analytics/referrer`
 

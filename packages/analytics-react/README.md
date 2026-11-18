@@ -49,7 +49,7 @@ await preloadImages({ flags: ["pl", "de"], browsers: ["Chrome", "Safari"] })
 
 `BrowserIcon`, `OsIcon`, `Flag` and `Favicon` take a `fallback` to render your own icon instead. OS marks and glyphs draw in `currentColor`.
 
-`Favicon` never builds a third-party URL. Serve icons from your own endpoint with `findFavicon` from `@underpin/analytics/favicon`, and pass its URL as `src`.
+`Favicon` never builds a third-party URL. Serve icons from your own endpoint with `findFavicon` from `@underpin/favicon`, and pass its URL as `src`.
 
 ## Licences
 

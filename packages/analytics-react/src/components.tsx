@@ -206,7 +206,7 @@ export interface FaviconProps extends IconProps, FallbackProps {
   /**
    * Your own favicon endpoint, as a URL or a function of the domain, such as
    * ``domain => `/api/favicon/${domain}` ``. Serve it from your origin with
-   * `@underpin/analytics/favicon`: this component never builds a third-party URL.
+   * `@underpin/favicon`: this component never builds a third-party URL.
    */
   src: string | ((domain: string) => string)
 }

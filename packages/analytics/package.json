@@ -1,11 +1,10 @@
 {
   "name": "@underpin/analytics",
   "version": "0.2.0",
-  "description": "Server-side analytics helpers: user-agent parsing, bot detection, geo lookup, favicons and referrers",
+  "description": "Server-side analytics helpers: user-agent parsing, bot detection, geo lookup and referrers",
   "keywords": [
     "analytics",
     "bots",
-    "favicon",
     "geoip",
     "referrer",
     "user-agent"
@@ -47,7 +46,6 @@
     "test": "bun test"
   },
   "dependencies": {
-    "@underpin/fetch": "workspace:^",
     "@underpin/utils": "workspace:^",
     "isbot": "^5.2.2",
     "maxmind": "^5.0.7",
