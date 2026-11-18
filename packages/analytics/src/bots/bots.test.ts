@@ -25,9 +25,11 @@ describe("detectBot", () => {
     expect(detectBot("curl/8.7.1")).toBe("crawler")
   })
 
-  test("reads only the first 512 characters of a long header", () => {
+  test("finds a crawler token anywhere in a long header", () => {
+    const padded = `${CHROME} ${"x".repeat(600)} Googlebot/2.1`
+    expect(padded.indexOf("Googlebot")).toBeGreaterThan(512)
+    expect(detectBot(padded)).toBe("crawler")
     expect(detectBot(`${CHROME} ${"x".repeat(100_000)}`)).toBeNull()
-    expect(detectBot(`${CHROME} ${"x".repeat(600)} Googlebot/2.1`)).toBeNull()
   })
 
   test("flags a browser too old for real traffic", () => {
