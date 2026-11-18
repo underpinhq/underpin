@@ -77,7 +77,7 @@
         "@types/d3-shape": "3",
         "@types/react": "^19.3.0",
         "@types/react-dom": "^19.3.0",
-        "@underpin/config": "1.12.0",
+        "@underpin/config": "1.12.1",
         "axe-core": "^4.14.0",
         "react": "^19.3.1",
         "react-dom": "^19.3.1",
@@ -915,7 +915,7 @@
 
     "@underpin/config/typescript": ["typescript@6.0.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-y2TvuxSZPDyQakkFRPZHKFm+KKVqIisdg9/CZwm9ftvKXLP8NRWj38/ODjNbr43SsoXqNuAisEf1GdCxqWcdBw=="],
 
-    "@underpin/ui/@underpin/config": ["@underpin/config@1.12.0", "", { "peerDependencies": { "@commitlint/cli": ">=21", "@commitlint/config-conventional": ">=21", "conventional-changelog-conventionalcommits": ">=10", "eslint-plugin-better-tailwindcss": ">=4", "lefthook": ">=2", "oxfmt": ">=0.58", "oxlint": ">=1.73", "semantic-release": ">=25", "typescript": ">=5" }, "optionalPeers": ["@commitlint/cli", "@commitlint/config-conventional", "conventional-changelog-conventionalcommits", "eslint-plugin-better-tailwindcss", "lefthook", "oxfmt", "oxlint", "semantic-release", "typescript"], "bin": { "kodeks": "dist/cli/underpin.js", "underpin": "dist/cli/underpin.js" } }, "sha512-F6GfdKuMUHQs08xTXYU6XOeM7u61kdYrCLCCUV5yDP1W8lCPMojX7gOYSkInLBGXvLErle7bPhEKyOGRiAM8aw=="],
+    "@underpin/ui/@underpin/config": ["@underpin/config@1.12.1", "", { "peerDependencies": { "@commitlint/cli": ">=21", "@commitlint/config-conventional": ">=21", "conventional-changelog-conventionalcommits": ">=10", "eslint-plugin-better-tailwindcss": ">=4", "lefthook": ">=2", "oxfmt": ">=0.58", "oxlint": ">=1.73", "semantic-release": ">=25", "typescript": ">=5" }, "optionalPeers": ["@commitlint/cli", "@commitlint/config-conventional", "conventional-changelog-conventionalcommits", "eslint-plugin-better-tailwindcss", "lefthook", "oxfmt", "oxlint", "semantic-release", "typescript"], "bin": { "kodeks": "bin/underpin.js", "underpin": "bin/underpin.js" } }, "sha512-fMmo1g5b9kajSyRDH8YXrSwOKeaqAzMshskSLL+dXP+OmwRzh4oMHRtpLPtS+P0/etFG13aA+X858f2QD7OhzA=="],
 
     "@underpin/utils/typescript": ["typescript@5.9.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw=="],
 
