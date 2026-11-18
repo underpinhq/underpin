@@ -24,6 +24,9 @@
     "url": "git+https://github.com/underpinhq/underpin.git",
     "directory": "packages/analytics"
   },
+  "bin": {
+    "underpin-referers": "./dist/referrer-dataset/cli.js"
+  },
   "files": [
     "dist",
     "src",

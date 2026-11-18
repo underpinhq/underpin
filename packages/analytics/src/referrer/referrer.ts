@@ -1,10 +1,8 @@
 import { isHostname, isWithinDomain, normalizeHostname } from "@underpin/utils/http"
 
-export { downloadReferrerDataset, parseReferrerDataset, REFERER_PARSER_URL } from "./dataset.js"
-
 /**
  * Referrer classification: a referrer dataset the consumer supplies (Snowplow's referer-parser,
- * see `downloadReferrerDataset`) plus a hand-maintained layer, folded into a canonical source
+ * see `@underpin/analytics/referrer-dataset`) plus a hand-maintained layer, folded into a canonical source
  * name and a GA4-style default channel.
  */
 
@@ -15,8 +13,6 @@ export type ReferrerEntry = [source: string, medium: Medium]
 
 /** Source names and mediums keyed by lowercase host, such as `{ "google.com": ["Google", "search"] }`. */
 export type ReferrerDataset = Record<string, ReferrerEntry>
-
-type Entry = ReferrerEntry
 
 export type Channel =
   | "Direct"
@@ -46,6 +42,11 @@ export interface Attribution {
   ttclid?: string
   li_fat_id?: string
   twclid?: string
+}
+
+/** The campaign parameters and the raw `Referer` of a visit. */
+export interface ReferrerInput extends Attribution {
+  referrer?: string
 }
 
 export interface ReferrerClassification {
@@ -86,10 +87,7 @@ export interface ReferrerClassifier {
    * self-referral (a host the site counts) and a return from a sign-in or checkout host fold to
    * Direct.
    */
-  resolveReferrer(
-    attribution: Attribution & { referrer?: string },
-    site?: SiteHostnames,
-  ): ResolvedReferrer
+  resolveReferrer(attribution: ReferrerInput, site?: SiteHostnames): ResolvedReferrer
 }
 
 // Layered on top of the dataset: platforms it lacks or lists incompletely, such as AI
@@ -171,7 +169,7 @@ export const PASS_THROUGH_HOSTS: ReadonlySet<string> = new Set([
 // arrives with no Referer, so with neither a referrer nor a utm_source the id names the
 // source. `fbclid` and `igshid` ride on organic shares too, so they name the platform
 // without making the visit paid.
-const CLICK_IDS: [param: keyof Attribution, source: Entry, channel?: Channel][] = [
+const CLICK_IDS: [param: keyof Attribution, source: ReferrerEntry, channel?: Channel][] = [
   ["gclid", ["Google", "search"], "Paid Search"],
   ["gclsrc", ["Google", "search"], "Paid Search"],
   ["wbraid", ["Google", "search"], "Paid Search"],
@@ -203,6 +201,11 @@ const EMAIL_MEDIUM = /^e[-_ ]?mail$/
 const DISPLAY_MEDIUM = /^(display|cpm|banner)$/
 // GA4 tags its own AI Assistant channel `ai-assistant`; the rest are common hand-written forms.
 const AI_MEDIUM = /^(ai|ai-assistant|ai-chat|ai-search|chatbot|llm)$/
+
+// An own entry only, so a host such as `constructor` never reads the prototype.
+function ownEntry(dataset: ReferrerDataset, key: string): ReferrerEntry | undefined {
+  return Object.hasOwn(dataset, key) ? dataset[key] : undefined
+}
 
 function nameKey(name: string) {
   return name.toLowerCase().replace(/[^a-z0-9]/g, "")
@@ -297,8 +300,8 @@ function resolveChannel(
 
 /**
  * Builds a referrer classifier over a dataset you supply. The package bundles none: Snowplow's
- * referer-parser list is GPL-3.0, so download it with `downloadReferrerDataset` and commit the
- * result in your own repository.
+ * referer-parser list is GPL-3.0, so download it with `underpin-referers` or
+ * `@underpin/analytics/referrer-dataset` and commit the result in your own repository.
  * @param dataset - Source names and mediums by host.
  * @param options - Replacements for the built-in overrides, renames and pass-through hosts.
  * @returns The classifier.
@@ -319,7 +322,7 @@ export function createReferrerClassifier(
 
   // Canonical names by a loose key ("producthunt", "hackernews"), so a utm_source that names
   // a platform folds onto the same row as a plain referral from it.
-  const byName = new Map<string, Entry>()
+  const byName = new Map<string, ReferrerEntry>()
   for (const [name, medium] of [...Object.values(dataset), ...Object.values(overrides)]) {
     const canonical = renames[name] ?? name
     byName.set(nameKey(canonical), [canonical, medium])
@@ -329,7 +332,7 @@ export function createReferrerClassifier(
   // A Google host that is neither search nor ads (Docs, Drive, Search Console) keeps its own name
   // rather than reading as Google. The dataset names a few of them "Google" outright, and lists
   // every google.<tld> as search, so the walk up would hand that to all the rest.
-  function isGoogleProduct(host: string, key: string, [name, medium]: Entry) {
+  function isGoogleProduct(host: string, key: string, [name, medium]: ReferrerEntry) {
     if (name !== "Google") return false
     if (medium === "unknown") return true
     if (medium !== "search" || !key.startsWith("google.") || host === key) return false
@@ -339,11 +342,9 @@ export function createReferrerClassifier(
   // Walk up the labels (m.facebook.com → facebook.com) like referer-parser does. Matching is
   // host-only: the dataset's path-qualified entries (google.com/products) are treated as plain
   // hosts.
-  function lookup(host: string): Entry | undefined {
+  function lookup(host: string): ReferrerEntry | undefined {
     for (const key of domainLabels(host)) {
-      const hit =
-        (Object.hasOwn(overrides, key) ? overrides[key] : undefined) ??
-        (Object.hasOwn(dataset, key) ? dataset[key] : undefined)
+      const hit = ownEntry(overrides, key) ?? ownEntry(dataset, key)
       if (!hit) continue
       if (isGoogleProduct(host, key, hit)) return
       return [renames[hit[0]] ?? hit[0], hit[1]]
@@ -352,7 +353,7 @@ export function createReferrerClassifier(
 
   // utm_source is free text: a host ("news.ycombinator.com"), a bare domain ("producthunt"),
   // or a name ("twitter", "Product Hunt"). Try each reading before keeping it raw.
-  function lookupSource(utmSource: string): Entry | undefined {
+  function lookupSource(utmSource: string): ReferrerEntry | undefined {
     if (!utmSource) return
     return lookup(utmSource) ?? lookup(`${utmSource}.com`) ?? byName.get(nameKey(utmSource))
   }
@@ -383,10 +384,7 @@ export function createReferrerClassifier(
     }
   }
 
-  function resolveReferrer(
-    attribution: Attribution & { referrer?: string },
-    site?: SiteHostnames,
-  ): ResolvedReferrer {
+  function resolveReferrer(attribution: ReferrerInput, site?: SiteHostnames): ResolvedReferrer {
     // The site is matched on the full host: a site registered as `www.example.com` counts
     // `www.example.com`, which the stored form below drops the `www.` from.
     const fullHost = attribution.referrer ? parseHost(attribution.referrer) : ""

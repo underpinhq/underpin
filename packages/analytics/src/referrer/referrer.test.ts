@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test"
 import storedJson from "./fixtures/highseat-referrers.json" with { type: "json" }
 import dataset from "./fixtures/referers-subset.json" with { type: "json" }
-import { createReferrerClassifier, parseReferrerDataset, type ReferrerDataset } from "./referrer.js"
+import { createReferrerClassifier, type ReferrerDataset } from "./referrer.js"
 
 interface StoredReferrer {
   domain: string
@@ -48,43 +48,18 @@ describe("classifyReferrer", () => {
     // The built-in overrides are replaced, not merged.
     expect(custom.classifyReferrer("claude.ai").source).toBe("claude.ai")
   })
-})
 
-describe("parseReferrerDataset", () => {
-  const yaml = `
-unknown:
-  Google:
-    domains:
-      - support.google.com
-search:
-  Google:
-    parameters:
-      - q
-    domains:
-      - Google.com
-      - support.google.com
-social:
-  Hacker News:
-    domains:
-      - news.ycombinator.com
-email:
-  Gmail:
-    domains: []
-`
+  test("takes pass-through hosts from the options", () => {
+    const custom = createReferrerClassifier({}, { passThroughHosts: new Set(["auth.example"]) })
 
-  test("flattens mediums, sources and domains, lowercased", () => {
-    expect(parseReferrerDataset(yaml)).toEqual({
-      "google.com": ["Google", "search"],
-      "support.google.com": ["Google", "search"],
-      "news.ycombinator.com": ["Hacker News", "social"],
+    expect(custom.resolveReferrer({ referrer: "https://login.auth.example/" })).toEqual({
+      domain: "",
+      source: "",
+      channel: "Direct",
     })
-  })
-
-  test("lets a later medium win on a duplicate domain", () => {
-    expect(parseReferrerDataset(yaml)["support.google.com"]?.[1]).toBe("search")
-  })
-
-  test("skips a medium it does not know", () => {
-    expect(parseReferrerDataset("video:\n  YouTube:\n    domains: [youtube.com]\n")).toEqual({})
+    // The built-in pass-through hosts are replaced, not merged.
+    expect(custom.resolveReferrer({ referrer: "https://checkout.stripe.com/" }).domain).toBe(
+      "checkout.stripe.com",
+    )
   })
 })

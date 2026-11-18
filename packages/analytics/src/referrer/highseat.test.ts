@@ -1,7 +1,7 @@
+// Highseat's referrer unit cases: the classifier must name each source and channel as Highseat
+// does. They run on `fixtures/referers-subset.json`, the part of referer-parser's list these cases
+// and the stored ones in `referrer.test.ts` reach.
 import { test } from "bun:test"
-// Highseat's own unit tests for its referrer code, run against this package. Highseat's dataset
-// is the full referer-parser list, and these run on `fixtures/referers-subset.json`, the part of it
-// these cases and the stored ones below reach.
 import assert from "node:assert/strict"
 import dataset from "./fixtures/referers-subset.json" with { type: "json" }
 import {

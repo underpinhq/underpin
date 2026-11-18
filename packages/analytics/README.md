@@ -114,16 +114,15 @@ resolveReferrer({ utm_source: "newsletter", utm_medium: "email" })
 
 It names the source of a visit (Google, Hacker News, the raw host when unknown) and a GA4-style default channel: Direct, Organic Search, Paid Search, Organic Social, Paid Social, Email, Referral, Affiliate, Display, AI or Other. `resolveReferrer` folds a self-referral, and a return from a sign-in or checkout host, to Direct. Campaign parameters and ad click ids (`gclid`, `msclkid`, `fbclid` and others) decide paid channels.
 
-**You supply the referrer list.** The usual one, Snowplow's [referer-parser](https://github.com/snowplow-referer-parser/referer-parser), is GPL-3.0, so this MIT package cannot bundle it. Download it once, commit the JSON, and refresh it every few months:
+**You supply the referrer list.** The usual one, Snowplow's [referer-parser](https://github.com/snowplow-referer-parser/referer-parser), is GPL-3.0, so this MIT package cannot bundle it. Download it once with the `underpin-referers` command, commit both files it writes, and run it again every few months:
 
-```ts
-// scripts/update-referers.ts
-import { downloadReferrerDataset } from "@underpin/analytics/referrer"
-
-await Bun.write("src/data/referers.json", JSON.stringify(await downloadReferrerDataset()))
+```bash
+bunx underpin-referers src/data/referers.json
 ```
 
-Keep the list's licence notice next to the file. `parseReferrerDataset(yaml)` flattens a copy you already have. The package's own layer (`REFERRER_OVERRIDES` for AI assistants, X, Bluesky and developer communities, `REFERRER_RENAMES` and `PASS_THROUGH_HOSTS`) is MIT, and each can be replaced through the options.
+It writes the flattened list to `src/data/referers.json` and the list's licence notice to `src/data/NOTICE.md`. `--url <yaml url>` downloads another copy of `referers.yml`.
+
+`@underpin/analytics/referrer-dataset` holds the same steps for a script of your own: `downloadReferrerDataset(url?)` downloads and flattens the list, `parseReferrerDataset(yaml)` flattens a copy you already have, and `REFERER_PARSER_NOTICE` is the notice text. It is a separate subpath, so the classifier never loads the YAML parser. The package's own layer (`REFERRER_OVERRIDES` for AI assistants, X, Bluesky and developer communities, `REFERRER_RENAMES` and `PASS_THROUGH_HOSTS`) is MIT, and each can be replaced through the options.
 
 ## License
 
