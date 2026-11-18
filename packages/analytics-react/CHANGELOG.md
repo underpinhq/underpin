@@ -1,5 +1,11 @@
 # @underpin/analytics-react
 
+## 0.1.1
+
+### Patch Changes
+
+- `BrowserIcon` now draws the Tor logo, from alrra/browser-logos, for a browser stored as "Tor". Tor Browser sends a plain Firefox user agent, so `parseUserAgent` never returns that name. The name comes from rows another tool stored. ([21bbcb5](https://github.com/underpinhq/underpin/commit/21bbcb542b142e0b4d9c735e30ff6e9cd307f092))
+
 ## 0.1.0
 
 ### Minor Changes
