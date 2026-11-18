@@ -42,7 +42,7 @@ await preloadImages({ flags: ["pl", "de"], browsers: ["Chrome", "Safari"] })
 
 | Component | Without an image |
 | --- | --- |
-| `BrowserIcon` | A browser-window glyph. 24 logos cover Chrome, Safari, Firefox, Edge, Opera, Samsung Internet, Brave, Vivaldi, Yandex and UC Browser in their mobile and webview forms, and Tor in imported rows. |
+| `BrowserIcon` | A browser-window glyph. 14 logos cover Chrome, Chromium, Safari (desktop and iOS), Firefox, Edge, Opera, Opera GX, Samsung Internet, Brave, Vivaldi, Yandex, UC Browser and Tor. Mobile and webview names use their browser's logo. |
 | `OsIcon` | A desktop glyph. Marks cover Apple systems, Android, Windows, Chrome OS, HarmonyOS, Linux, Ubuntu, Fedora, Debian, FreeBSD and PlayStation. |
 | `Flag` | A globe, for an empty code or a code flag-icons has no flag for. |
 | `Favicon` | A globe, for an empty domain or an image that fails to load. |
