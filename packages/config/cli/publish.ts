@@ -1,4 +1,4 @@
-import { access, readFile } from "node:fs/promises"
+import { access, readFile, writeFile } from "node:fs/promises"
 import path from "node:path"
 import { runCommand } from "./command.ts"
 import type { ReleaseTag } from "./config.ts"
@@ -10,8 +10,13 @@ import {
   hasGitHubRelease,
   parseGitHubRepository,
 } from "./github.ts"
-import { readJson } from "./json.ts"
+import { formatJson, readJson } from "./json.ts"
 import type { PackageJson } from "./prepare-package.ts"
+import {
+  getWorkspaceVersions,
+  hasWorkspaceRange,
+  resolveManifestWorkspaceRanges,
+} from "./prepare-package.ts"
 
 export interface PublishTarget {
   directory: string // The directory that gets published, the built `dist` or the package itself.
@@ -131,6 +136,32 @@ async function readChangelog(packageDirectory: string, version: string) {
   )
 
   return changelog === undefined ? undefined : getChangelogSection(changelog, version)
+}
+
+/**
+ * Runs a publish with the directory's `workspace:` ranges resolved to the siblings' versions,
+ * and restores `package.json` afterwards. `npm publish` ships the manifest as it is, and a
+ * `workspace:` range on npm fails every install outside this repository. A prepared `dist`
+ * manifest is resolved already, so it passes through unchanged.
+ */
+export async function withPublishableManifest<T>(
+  directory: string,
+  run: () => T | Promise<T>,
+): Promise<T> {
+  const manifestPath = path.join(directory, "package.json")
+  const original = await readFile(manifestPath, "utf8")
+  const manifest = JSON.parse(original) as PackageJson
+
+  if (!hasWorkspaceRange(manifest)) return run()
+
+  const resolved = resolveManifestWorkspaceRanges(manifest, await getWorkspaceVersions(directory))
+  await writeFile(manifestPath, formatJson(resolved), "utf8")
+
+  try {
+    return await run()
+  } finally {
+    await writeFile(manifestPath, original, "utf8")
+  }
 }
 
 export async function readPublishTargets(
@@ -357,10 +388,9 @@ export async function publish(options: PublishOptions): Promise<void> {
     // Auth comes from trusted publishing, so there is no token. --provenance makes a publish
     // that cannot attest provenance fail instead of quietly succeeding without it.
     const args = ["publish", "--access", "public", "--tag", decision.tag, "--provenance"]
-    const result = runCommand("npm", args, {
-      cwd: decision.directory,
-      inherit: true,
-    })
+    const result = await withPublishableManifest(decision.directory, () =>
+      runCommand("npm", args, { cwd: decision.directory, inherit: true }),
+    )
 
     if (result.status !== 0) throw new Error(`npm publish failed for ${label}.`)
     published++

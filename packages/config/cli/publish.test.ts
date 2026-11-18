@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test"
-import { mkdir, mkdtemp, writeFile } from "node:fs/promises"
+import { mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises"
 import { tmpdir } from "node:os"
 import path from "node:path"
 import type { PublishDecision, PublishTarget, Registry, ReleaseSources } from "./publish.ts"
@@ -13,6 +13,7 @@ import {
   isVersionAtLeast,
   planPublish,
   readPublishTargets,
+  withPublishableManifest,
 } from "./publish.ts"
 
 async function createRepository(files: Record<string, string>) {
@@ -387,6 +388,70 @@ describe("readPublishTargets", () => {
 
     await expect(readPublishTargets(root, ".", ["."])).rejects.toThrow(
       "package.json is private and cannot be published.",
+    )
+  })
+})
+
+describe("withPublishableManifest", () => {
+  const fetchManifest = manifest("@acme/fetch", "0.1.0", {
+    dependencies: { "@acme/utils": "workspace:^", yaml: "^2.0.0" },
+    devDependencies: { "@acme/config": "workspace:*" },
+  })
+
+  async function createWorkspace() {
+    return createRepository({
+      "packages/utils/package.json": manifest("@acme/utils", "3.5.0"),
+      "packages/config/package.json": manifest("@acme/config", "1.2.0"),
+      "packages/fetch/package.json": fetchManifest,
+    })
+  }
+
+  it("should publish with each workspace range resolved to the sibling's version", async () => {
+    const directory = path.join(await createWorkspace(), "packages/fetch")
+
+    const published = await withPublishableManifest(directory, () =>
+      readFile(path.join(directory, "package.json"), "utf8"),
+    )
+
+    expect(JSON.parse(published)).toMatchObject({
+      dependencies: { "@acme/utils": "^3.5.0", yaml: "^2.0.0" },
+      devDependencies: { "@acme/config": "1.2.0" },
+    })
+  })
+
+  it("should restore the manifest after the publish, and after a failed one", async () => {
+    const directory = path.join(await createWorkspace(), "packages/fetch")
+    const manifestPath = path.join(directory, "package.json")
+
+    await withPublishableManifest(directory, () => undefined)
+    expect(await readFile(manifestPath, "utf8")).toBe(fetchManifest)
+
+    await expect(
+      withPublishableManifest(directory, () => {
+        throw new Error("npm publish failed")
+      }),
+    ).rejects.toThrow("npm publish failed")
+    expect(await readFile(manifestPath, "utf8")).toBe(fetchManifest)
+  })
+
+  it("should refuse a workspace range no sibling package can resolve", async () => {
+    const root = await createRepository({
+      "packages/fetch/package.json": manifest("@acme/fetch", "0.1.0", {
+        dependencies: { "@acme/missing": "workspace:^" },
+      }),
+    })
+
+    await expect(
+      withPublishableManifest(path.join(root, "packages/fetch"), () => undefined),
+    ).rejects.toThrow('Cannot resolve "@acme/missing"')
+  })
+
+  it("should leave a manifest without workspace ranges untouched", async () => {
+    const root = await createRepository({ "package.json": manifest("@acme/utils", "3.5.0") })
+
+    expect(await withPublishableManifest(root, () => "published")).toBe("published")
+    expect(await readFile(path.join(root, "package.json"), "utf8")).toBe(
+      manifest("@acme/utils", "3.5.0"),
     )
   })
 })
