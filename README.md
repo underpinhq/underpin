@@ -1,3 +1,5 @@
+<img src="assets/logo/icon.svg" alt="" width="64" height="64">
+
 # Underpin
 
 The source of the `@underpin` npm packages, shared by the products built on them.
@@ -12,6 +14,12 @@ The source of the `@underpin` npm packages, shared by the products built on them
 | [`@underpin/config`](packages/config) | Shared lint, format and commit configs, and the `underpin` release CLI and workflows, renamed from `@dirstack/kodeks` ([npm](https://www.npmjs.com/package/@underpin/config)) |
 
 Upgrading from `@dirstack/ui` 1.x: [`packages/ui/MIGRATION.md`](packages/ui/MIGRATION.md).
+
+## The name
+
+To underpin something is to support it from below. These packages sit under every product built on them: the UI, the utilities, the analytics, and the lint and release configs. The logo shows the same idea, with two posts pinned into the base that holds them up.
+
+Underpin replaced the `@dirstack` scope in November 2026, once the packages covered more than directory sites.
 
 ## Contributing
 
