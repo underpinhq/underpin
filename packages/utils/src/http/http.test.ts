@@ -889,3 +889,18 @@ describe("isHostnameAllowed", () => {
     expect(isHostnameAllowed("notexample.com", site)).toBe(false)
   })
 })
+
+describe("resolveClientIp when the socket cannot be read", () => {
+  const spoofed = new Headers({ "x-forwarded-for": "198.51.100.66", "x-real-ip": "198.51.100.66" })
+
+  it("keeps the strict rules for an empty socketAddress", () => {
+    expect(resolveClientIp(spoofed, { socketAddress: undefined })).toBeUndefined()
+    expect(resolveClientIp(spoofed, { socketAddress: null })).toBeUndefined()
+  })
+
+  it("trusts no header from proxies in a range list without a socket", () => {
+    expect(
+      resolveClientIp(spoofed, { trustedProxies: ["10.0.0.0/8"], socketAddress: undefined }),
+    ).toBeUndefined()
+  })
+})

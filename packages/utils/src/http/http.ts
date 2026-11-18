@@ -463,11 +463,14 @@ export interface GetClientIpOptions {
    *   proxy, and the first entry outside them is the client. The header is read only when
    *   `socketAddress` is inside the ranges too.
    *
-   * Setting this or `socketAddress` turns on the strict rules: `x-real-ip` is never read, and
-   * without a trusted proxy the socket address is the client.
+   * Passing this or `socketAddress`, even as `undefined`, turns on the strict rules: `x-real-ip`
+   * is never read, and without a trusted proxy the socket address is the client.
    */
   trustedProxies?: number | readonly string[]
-  /** The address of the TCP peer, when the server can read it. */
+  /**
+   * The address of the TCP peer. Pass the key even when the server could not read it: with an
+   * empty value, a range list trusts no header and the result is undefined.
+   */
   socketAddress?: string | null
 }
 
@@ -588,7 +591,9 @@ export function resolveClientIp(
   options: GetClientIpOptions = {},
 ): ClientIp | undefined {
   const header = toHeaderReader(headers)
-  const isStrict = options.trustedProxies !== undefined || options.socketAddress !== undefined
+  // The key decides, not its value: a caller whose server could not read the socket passes
+  // `socketAddress: undefined`, and must still get the strict rules rather than the lenient ones.
+  const isStrict = "trustedProxies" in options || "socketAddress" in options
 
   return isStrict ? resolveStrictClientIp(header, options) : resolveProxiedClientIp(header, options)
 }
