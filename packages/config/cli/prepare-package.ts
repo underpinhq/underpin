@@ -8,6 +8,7 @@ export interface PackageJson {
   private?: boolean
   dependencies?: Record<string, string>
   devDependencies?: Record<string, string>
+  optionalDependencies?: Record<string, string>
   exports?: unknown
   main?: unknown
   files?: string[]
@@ -226,6 +227,40 @@ export function generateDistManifest(
   return distPackage
 }
 
+// Every manifest field that can hold a `workspace:` range.
+const DEPENDENCY_FIELDS = [
+  "dependencies",
+  "peerDependencies",
+  "optionalDependencies",
+  "devDependencies",
+] as const
+
+/** True when any dependency field of a manifest still holds a `workspace:` range. */
+export function hasWorkspaceRange(packageJson: PackageJson): boolean {
+  return DEPENDENCY_FIELDS.some(field =>
+    Object.values(packageJson[field] ?? {}).some(range => range.startsWith(WORKSPACE_PROTOCOL)),
+  )
+}
+
+/**
+ * The manifest with every `workspace:` range replaced by the sibling's version, for a package
+ * that publishes from its own directory instead of a prepared `dist`.
+ */
+export function resolveManifestWorkspaceRanges(
+  packageJson: PackageJson,
+  workspaceVersions: Map<string, string>,
+): PackageJson {
+  const resolved: PackageJson = { ...packageJson }
+
+  for (const field of DEPENDENCY_FIELDS) {
+    if (packageJson[field]) {
+      resolved[field] = resolveWorkspaceDependencies(packageJson[field], workspaceVersions)
+    }
+  }
+
+  return resolved
+}
+
 function hasWorkspaceDependency(packageJson: PackageJson): boolean {
   return [packageJson.dependencies, packageJson.peerDependencies].some(dependencies =>
     Object.values(dependencies ?? {}).some(range => range.startsWith(WORKSPACE_PROTOCOL)),
@@ -233,7 +268,7 @@ function hasWorkspaceDependency(packageJson: PackageJson): boolean {
 }
 
 // Maps each sibling package's name to its version, so `workspace:` ranges can be pinned.
-async function getWorkspaceVersions(packageDirectory: string): Promise<Map<string, string>> {
+export async function getWorkspaceVersions(packageDirectory: string): Promise<Map<string, string>> {
   const parentDirectory = path.dirname(packageDirectory)
   const entries = await readdir(parentDirectory, { withFileTypes: true })
   const versions = new Map<string, string>()
