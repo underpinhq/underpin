@@ -65,9 +65,10 @@ function toOs(name: string, version: string, userAgent: string): [name: string, 
   if (name === "HarmonyOS" && !/\bharmonyos[ /;]*\d/i.test(userAgent)) return [name, ""]
 
   // Safari 26 and later keeps the OS token at 18.x and sends its own release as "Version/26.x",
-  // which is the iOS release it ships with.
+  // which is the iOS release it ships with. Safari writes it right after "(KHTML, like Gecko)".
+  // An app that appends its own "Version/" later in the string keeps the OS token.
   if (name === "iOS" && /^18(?:\.|$)/.test(version)) {
-    const release = /\bVersion\/(\d+(?:\.\d+)*)/.exec(userAgent)?.[1]
+    const release = /\(KHTML, like Gecko\) Version\/(\d+(?:\.\d+)*)/.exec(userAgent)?.[1]
     if (release && Number.parseInt(release, 10) >= 26) return [name, release]
   }
 
