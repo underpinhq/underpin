@@ -1,5 +1,11 @@
 # @underpin/analytics
 
+## 0.3.0
+
+### Minor Changes
+
+- Remove `@underpin/analytics/favicon`. The favicon lookup moved to `@underpin/favicon`, with the same exports. Change the import from `@underpin/analytics/favicon` to `@underpin/favicon`. `@underpin/analytics` no longer depends on `@underpin/fetch`. ([d99221f](https://github.com/underpinhq/underpin/commit/d99221fbb0691bdba48e2ad5e0aa53c34b74d577))
+
 ## 0.2.0
 
 ### Minor Changes
