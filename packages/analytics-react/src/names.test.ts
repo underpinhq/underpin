@@ -65,6 +65,11 @@ describe("browser logos", () => {
     expect(findBrowserLogo("chrome")).toBe("chrome")
     expect(findBrowserLogo("OPERA")).toBe("opera")
   })
+
+  test("covers the names other tools store", () => {
+    expect(findBrowserLogo("Microsoft Edge")).toBe("edge")
+    expect(findBrowserLogo("Tor")).toBe("tor")
+  })
 })
 
 describe("OS marks", () => {
