@@ -58,6 +58,7 @@ describe("parseFaviconHost", () => {
     ["https://www.example.com/page?q=1", "www.example.com"],
     ["example.com.", "example.com"],
     ["example.com:8080", "example.com"],
+    ["пример.рф", "xn--e1afmkfd.xn--p1ai"],
   ])("reads %s", (value, host) => {
     expect(parseFaviconHost(value)).toBe(host)
   })
@@ -111,6 +112,26 @@ describe("directProvider", () => {
     expect(await provider.find("example.com")).toBeNull()
   })
 
+  test("counts a host that does not exist as a miss", async () => {
+    const provider = directProvider({
+      download: async () => {
+        throw Object.assign(new Error("getaddrinfo ENOTFOUND"), { code: "ENOTFOUND" })
+      },
+    })
+
+    expect(await provider.find("gone.example")).toBeNull()
+  })
+
+  test("counts a rate limit as a failure, so the miss is not cached", async () => {
+    const provider = directProvider({
+      download: async () => {
+        throw new HttpStatusError(429)
+      },
+    })
+
+    await expect(provider.find("example.com")).rejects.toThrow(HttpStatusError)
+  })
+
   test("counts a 404 as a miss and a 503 as a failure", async () => {
     function answering(status: number) {
       return directProvider({
@@ -148,6 +169,21 @@ describe("googleProvider", () => {
     )
   })
 
+  test("stops a body without a declared length as soon as it passes the limit", async () => {
+    const stream = new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(PNG)
+        controller.enqueue(new Uint8Array(2048))
+        controller.close()
+      },
+    })
+    const fake = fakeFetch(() => new Response(stream))
+
+    expect(
+      await googleProvider({ fetch: fake.fetch, maxBytes: 1024 }).find("example.com"),
+    ).toBeNull()
+  })
+
   test("refuses a body over the size limit", async () => {
     const big = new Uint8Array(2048)
     big.set(PNG)
@@ -177,7 +213,6 @@ describe("logoDevProvider", () => {
     expect(url.origin + url.pathname).toBe("https://img.logo.dev/example.com")
     expect(Object.fromEntries(url.searchParams)).toEqual({
       token: "pk_test",
-      size: "64",
       format: "png",
       fallback: "404",
     })
@@ -220,6 +255,23 @@ describe("findFavicon", () => {
     expect(await findFavicon("example.com", [missing, missing])).toBeNull()
   })
 
+  test("rethrows when the caller cancels, rather than reporting an outage", async () => {
+    const controller = new AbortController()
+    const cancelled: FaviconProvider = {
+      name: "cancelled",
+      find: async () => {
+        controller.abort()
+        throw new DOMException("Aborted", "AbortError")
+      },
+    }
+
+    const error = await findFavicon("example.com", [cancelled, found], controller.signal).catch(
+      (caught: unknown) => caught,
+    )
+
+    expect(error).toBeInstanceOf(DOMException)
+  })
+
   test("rejects when no icon was found and a provider failed", async () => {
     await expect(findFavicon("example.com", [missing, failing])).rejects.toThrow(AggregateError)
   })
@@ -254,11 +306,38 @@ describe("findFavicon", () => {
 })
 
 describe("resolveLandingHost", () => {
-  test("keeps the link's own host when its redirects cannot be followed", async () => {
-    // localhost is refused before any request, so the link's host comes back unchanged.
+  function landing(finalUrl: string | Error) {
+    return async (url: string | URL) => {
+      if (finalUrl instanceof Error) throw finalUrl
+      return { body: new Uint8Array(), contentType: "", url: new URL(finalUrl || String(url)) }
+    }
+  }
+
+  test("returns the host the redirects land on", async () => {
+    const host = await resolveLandingHost("https://go.example.com/bunny", {
+      download: landing("https://bunny.net/"),
+    })
+
+    expect(host).toBe("bunny.net")
+  })
+
+  test("keeps the landing host when it refuses HEAD", async () => {
+    const refused = new HttpStatusError(405, new URL("https://bunny.net/"))
+
+    expect(
+      await resolveLandingHost("https://go.example.com/bunny", { download: landing(refused) }),
+    ).toBe("bunny.net")
+  })
+
+  test("keeps the link's own host when a redirect points to a private address", async () => {
+    const host = await resolveLandingHost("https://go.example.com/internal", {
+      download: landing(new PrivateAddressError()),
+    })
+
+    expect(host).toBe("go.example.com")
+  })
+
+  test("refuses a private link without a request through the real download", async () => {
     expect(await resolveLandingHost("http://localhost/x")).toBeUndefined()
-    expect(await resolveLandingHost("https://go.invalid/bunny", { timeout: 500 })).toBe(
-      "go.invalid",
-    )
   })
 })
