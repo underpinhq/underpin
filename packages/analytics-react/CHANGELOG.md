@@ -1,5 +1,11 @@
 # @underpin/analytics-react
 
+## 0.1.2
+
+### Patch Changes
+
+- The `Favicon` docs now point to `@underpin/favicon` for serving icons, since `@underpin/analytics/favicon` moved there. ([c48ad02](https://github.com/underpinhq/underpin/commit/c48ad023f3ea07d210b6556de59c8ccde3715915))
+
 ## 0.1.1
 
 ### Patch Changes

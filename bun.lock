@@ -19,7 +19,7 @@
     },
     "packages/analytics": {
       "name": "@underpin/analytics",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "bin": {
         "underpin-referers": "./dist/referrer-dataset/cli.js",
       },
@@ -42,7 +42,7 @@
     },
     "packages/analytics-react": {
       "name": "@underpin/analytics-react",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "devDependencies": {
         "@arethetypeswrong/core": "^0.18.5",
         "@types/bun": "^1.2.21",
@@ -101,7 +101,7 @@
     },
     "packages/favicon": {
       "name": "@underpin/favicon",
-      "version": "0.0.0",
+      "version": "0.1.0",
       "dependencies": {
         "@underpin/fetch": "workspace:^",
         "@underpin/utils": "workspace:^",
