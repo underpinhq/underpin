@@ -19,7 +19,7 @@
     },
     "packages/analytics": {
       "name": "@underpin/analytics",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "bin": {
         "underpin-referers": "./dist/referrer-dataset/cli.js",
       },
@@ -64,7 +64,7 @@
     },
     "packages/config": {
       "name": "@underpin/config",
-      "version": "1.12.1",
+      "version": "1.12.2",
       "bin": {
         "kodeks": "./bin/underpin.js",
         "underpin": "./bin/underpin.js",
@@ -101,7 +101,7 @@
     },
     "packages/fetch": {
       "name": "@underpin/fetch",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@underpin/utils": "workspace:^",
       },

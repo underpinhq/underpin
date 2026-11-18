@@ -1,6 +1,6 @@
 {
   "name": "@underpin/analytics",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Server-side analytics helpers: user-agent parsing, bot detection, geo lookup, favicons and referrers",
   "keywords": [
     "analytics",

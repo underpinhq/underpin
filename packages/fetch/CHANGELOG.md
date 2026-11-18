@@ -1,5 +1,11 @@
 # @underpin/fetch
 
+## 0.1.1
+
+### Patch Changes
+
+- Install outside the monorepo. 0.1.0 listed its `@underpin` dependencies as `workspace:^`, which no package manager can resolve from npm. This release lists real version ranges. ([ba47043](https://github.com/underpinhq/underpin/commit/ba47043283d5c6f75b6002b632a3e22d8c2a4d36))
+
 ## 0.1.0
 
 ### Minor Changes
