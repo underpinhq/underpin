@@ -39,7 +39,7 @@ const { body, contentType, url } = await downloadPublicUrl(userUrl, {
 | --- | --- |
 | `PrivateAddressError` | The URL, a redirect or a resolved address is not public |
 | `DownloadTooLargeError` | The body passes `maxBytes` (its `maxBytes` field holds the limit) |
-| `HttpStatusError` | The response is neither a success nor a redirect (its `status` field holds the code) |
+| `HttpStatusError` | The response is neither a success nor a redirect (its `status` field holds the code, and `url` the URL that answered) |
 | `Error` | A protocol or credentials check failed, there were too many redirects, or the network failed |
 
 ## License

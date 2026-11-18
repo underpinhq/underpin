@@ -42,11 +42,14 @@ export class DownloadTooLargeError extends Error {
 /** Thrown when a response is neither a success nor a redirect. */
 export class HttpStatusError extends Error {
   readonly status: number
+  /** The URL that answered, after the redirects followed so far. */
+  readonly url: URL | undefined
 
-  constructor(status: number) {
+  constructor(status: number, url?: URL) {
     super(`HTTP ${status}`)
     this.name = "HttpStatusError"
     this.status = status
+    this.url = url
   }
 }
 
@@ -145,8 +148,11 @@ function createLookup(guard: Guard): LookupFunction {
           return
         }
 
+        // IPv4 first, as a server may have no route to IPv6.
         const family = options.family
-        const usable = family ? addresses.filter(address => address.family === family) : addresses
+        const usable = (
+          family ? addresses.filter(address => address.family === family) : addresses
+        ).toSorted((a, b) => a.family - b.family)
 
         if (options.all) {
           callback(null, usable)
@@ -154,15 +160,23 @@ function createLookup(guard: Guard): LookupFunction {
         }
 
         const [first] = usable
-        if (first) callback(null, first.address, first.family)
-        else callback(new PrivateAddressError(), "", 4)
+        if (first) {
+          callback(null, first.address, first.family)
+          return
+        }
+
+        // Every address is public, but none is of the family the connection asked for.
+        const error = Object.assign(new Error(`${hostname} has no IPv${family} address`), {
+          code: "ENOTFOUND",
+        })
+        callback(error, "", 4)
       },
       error => callback(error, "", 4),
     )
   }
 }
 
-/** Sends one GET request through the guarded lookup, without following redirects. */
+/** Sends one request through the guarded lookup, without following redirects. */
 function requestOnce(
   url: URL,
   method: "GET" | "HEAD",
@@ -250,13 +264,18 @@ export async function download(
 
     if (status < 200 || status >= 300) {
       response.resume()
-      throw new HttpStatusError(status)
+      throw new HttpStatusError(status, current)
     }
 
+    const contentType = response.headers["content-type"] ?? ""
+
     // A HEAD response has no body, whatever its `content-length` says.
-    const body = method === "HEAD" ? new Uint8Array() : await readBody(response, maxBytes)
-    if (method === "HEAD") response.resume()
-    return { body, contentType: response.headers["content-type"] ?? "", url: current }
+    if (method === "HEAD") {
+      response.resume()
+      return { body: new Uint8Array(), contentType, url: current }
+    }
+
+    return { body: await readBody(response, maxBytes), contentType, url: current }
   }
 
   throw new Error("Too many redirects")

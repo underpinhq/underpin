@@ -64,6 +64,12 @@ beforeAll(async () => {
     } else if (path === "/large") {
       response.writeHead(200, { "content-length": "2048" })
       response.end(Buffer.alloc(2048))
+    } else if (path === "/to-missing") {
+      next("/missing")
+    } else if (path === "/drip") {
+      // Headers, then a body that never ends.
+      response.writeHead(200)
+      response.write("a")
     } else if (path === "/large-chunked") {
       response.write(Buffer.alloc(600))
       response.end(Buffer.alloc(600))
@@ -143,6 +149,21 @@ describe("download", () => {
     await expect(download(url("/ok"), { maxBytes: 1024 }, mixed)).rejects.toThrow(
       PrivateAddressError,
     )
+  })
+
+  test("connects to the address it checked, never resolving the name again", async () => {
+    let calls = 0
+    const rebinding = guard(async () => {
+      calls++
+      return [{ address: calls === 1 ? SERVER : PRIVATE, family: 4 }]
+    })
+
+    // `site.test` exists only in the test resolver, so the download succeeds only when the
+    // connection uses the one answer that was checked.
+    const result = await download(url("/ok"), { maxBytes: 1024 }, rebinding)
+
+    expect(new TextDecoder().decode(result.body)).toBe("hello")
+    expect(calls).toBe(1)
   })
 
   test("refuses DNS rebinding: a name that turns private after its first answer", async () => {
@@ -248,6 +269,21 @@ describe("download", () => {
     const headers = JSON.parse(new TextDecoder().decode(result.body))
 
     expect(headers.authorization).toBe("Bearer secret")
+  })
+
+  test("names the URL that answered with a failed status", async () => {
+    const error = await download(url("/to-missing"), { maxBytes: 1024 }, publicNames).catch(
+      (caught: unknown) => caught,
+    )
+
+    expect(error).toBeInstanceOf(HttpStatusError)
+    expect((error as HttpStatusError).url?.pathname).toBe("/missing")
+  })
+
+  test("stops a body that never ends at the timeout", async () => {
+    await expect(
+      download(url("/drip"), { maxBytes: 1024, timeout: 200 }, publicNames),
+    ).rejects.toThrow()
   })
 
   test("stops at the timeout", async () => {
