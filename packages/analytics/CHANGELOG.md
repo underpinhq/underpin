@@ -1,5 +1,18 @@
 # @underpin/analytics
 
+## 0.2.0
+
+### Minor Changes
+
+- `detectBot` now passes the whole user agent to `isbot`, so a crawler token after the first 512 characters gives "crawler" again. The version checks still read only the first 512 characters. ([2868b7d](https://github.com/underpinhq/underpin/commit/2868b7d22f7287ab4452c88e28f359ccafd793af))
+
+  `openGeoDatabase` now keeps the last 10,000 decoded records in memory, as `maxmind.open` does, so repeated lookups no longer decode the same record again. The new `loadGeoDatabase(path)` reads the file without blocking the event loop and returns a promise, for a job that refreshes the database while the server runs.
+- `utm_medium=mcp` now gives the channel "AI". It used to give "Paid Search", because the paid rule matches any medium that contains "cp". A new `findSource` option of `createReferrerClassifier` resolves a `utm_source` the referrer list does not know, such as an MCP client name like `claude-code`, to a source and medium of your own. It runs after the built-in lookups. ([84e66ab](https://github.com/underpinhq/underpin/commit/84e66abc81c22d85030c4da50cb9d7d76ed0df86))
+
+### Patch Changes
+
+- `parseUserAgent` now reads the real iOS version from Safari on iOS 26 and later. Safari freezes the OS token at `iPhone OS 18_6` or `18_7` and writes the real version after `Version/`, so an iOS 26.2 visit used to come back as `osVersion` "18.7". It now comes back as "26.2". ([e98141d](https://github.com/underpinhq/underpin/commit/e98141df203a57a321e08653e12ef4686e14309f))
+
 ## 0.1.1
 
 ### Patch Changes
