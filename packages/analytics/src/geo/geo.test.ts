@@ -1,9 +1,32 @@
 import { describe, expect, test } from "bun:test"
-import { getEdgeCountry, openGeoDatabase, resolveGeo, sanitizeCountry } from "./geo.js"
+import {
+  getEdgeCountry,
+  loadGeoDatabase,
+  openGeoDatabase,
+  resolveGeo,
+  sanitizeCountry,
+} from "./geo.js"
 
 // MaxMind's published test databases, from github.com/maxmind/MaxMind-DB (Apache-2.0).
 const CITY = new URL("./fixtures/GeoLite2-City-Test.mmdb", import.meta.url).pathname
 const COUNTRY = new URL("./fixtures/GeoLite2-Country-Test.mmdb", import.meta.url).pathname
+
+describe("loadGeoDatabase", () => {
+  test("gives the same answers as openGeoDatabase", async () => {
+    const loaded = await loadGeoDatabase(CITY)
+    const opened = openGeoDatabase(CITY)
+
+    for (const ip of ["81.2.69.142", "2001:218::1", "1.1.1.1", "not an ip", ""]) {
+      expect(loaded.lookup(ip)).toEqual(opened.lookup(ip))
+      expect(loaded.lookupCountry(ip)).toBe(opened.lookupCountry(ip))
+    }
+    expect(loaded.lookup("81.2.69.142")?.city).toBe("London")
+  })
+
+  test("rejects a missing file", async () => {
+    await expect(loadGeoDatabase("missing.mmdb")).rejects.toThrow()
+  })
+})
 
 describe("openGeoDatabase", () => {
   test("reads a city database", () => {
