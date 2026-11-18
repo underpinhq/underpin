@@ -77,6 +77,10 @@ describe("parseUserAgent", () => {
     expect(chromeIos).toMatchObject({ browser: "Mobile Chrome", os: "iOS" })
   })
 
+  // Observed user agents, from Highseat and from public listings (whatmyuseragent.com,
+  // useragents.io). Edge on iOS writes "EdgiOS/" before "Version/" and sends the real OS token.
+  // LINE writes "Safari Line/" with no "Version/" or "Safari/" token, so it keeps the frozen one.
+  // The "MyApp" case is written by hand: an app's own "Version/" with no "Safari/" token.
   test.each([
     {
       userAgent:
@@ -101,6 +105,36 @@ describe("parseUserAgent", () => {
     {
       userAgent:
         "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 YaBrowser/26.4.3.680.10 YaApp_iOS/2604.3 YaApp_iOS_Browser/2604.3 YazekaApp/2604.3 Safari/604.1 SA/3 SAPublic/0 Version/26.5",
+      osVersion: "18.7",
+    },
+    {
+      userAgent:
+        "Mozilla/5.0 (iPhone; CPU iPhone OS 18_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/30.1 MyApp/30.1 Mobile/15E148",
+      osVersion: "18.6",
+    },
+    {
+      userAgent:
+        "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1 Ddg/26.6",
+      osVersion: "26.6",
+    },
+    {
+      userAgent:
+        "Mozilla/5.0 (iPad; CPU OS 18_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.7 Mobile/15E148 Safari/604.1 Ddg/26.7",
+      osVersion: "26.7",
+    },
+    {
+      userAgent:
+        "Mozilla/5.0 (iPhone; CPU iPhone OS 26_6_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) EdgiOS/148.0.3967.55 Version/26.0 Mobile/15E148 Safari/604.1",
+      osVersion: "26.6.0",
+    },
+    {
+      userAgent:
+        "Mozilla/5.0 (iPhone; CPU iPhone OS 18_3_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) EdgiOS/146.0.3856.85 Version/18.0 Mobile/15E148 Safari/604.1",
+      osVersion: "18.3.2",
+    },
+    {
+      userAgent:
+        "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Safari Line/26.2.0",
       osVersion: "18.7",
     },
     {
