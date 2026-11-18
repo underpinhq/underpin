@@ -64,6 +64,12 @@ function toOs(name: string, version: string, userAgent: string): [name: string, 
   // An Android phone running HarmonyOS reports the Android version, which is not HarmonyOS's own.
   if (name === "HarmonyOS" && !/\bharmonyos[ /;]*\d/i.test(userAgent)) return [name, ""]
 
+  // Since iOS 26, Safari freezes the OS token at 18.x and writes the real version after "Version/".
+  if (name === "iOS" && /^1[89][^\d]/.test(version)) {
+    const safariVersion = /\) Version\/((\d+)[\d.]*)/.exec(userAgent)
+    if (safariVersion?.[1] && Number(safariVersion[2]) >= 26) return [name, safariVersion[1]]
+  }
+
   return [OS_NAMES[name] ?? name, version]
 }
 

@@ -77,6 +77,36 @@ describe("parseUserAgent", () => {
     expect(chromeIos).toMatchObject({ browser: "Mobile Chrome", os: "iOS" })
   })
 
+  test.each([
+    {
+      userAgent:
+        "Mozilla/5.0 (iPhone; CPU iPhone OS 18_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.0 Mobile/15E148 Safari/604.1",
+      osVersion: "26.0",
+    },
+    {
+      userAgent:
+        "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Mobile/15E148 Safari/604.1",
+      osVersion: "26.2",
+    },
+    {
+      userAgent:
+        "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.0 Mobile/15E148 Safari/604.1 Ddg/18.7",
+      osVersion: "26.0",
+    },
+    {
+      userAgent:
+        "Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Mobile/15E148 Safari/604.1",
+      osVersion: "18.5",
+    },
+    {
+      userAgent:
+        "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/141.0.7390.96 Mobile/15E148 Safari/604.1",
+      osVersion: "18.7",
+    },
+  ])("reads the iOS version $osVersion behind a frozen OS token", ({ userAgent, osVersion }) => {
+    expect(parseUserAgent(userAgent)).toMatchObject({ os: "iOS", osVersion })
+  })
+
   test("names Chrome OS as Highseat stores it", () => {
     const parsed = parseUserAgent(
       "Mozilla/5.0 (X11; CrOS x86_64 14541.0.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
