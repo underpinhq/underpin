@@ -64,7 +64,7 @@
     },
     "packages/config": {
       "name": "@underpin/config",
-      "version": "1.12.2",
+      "version": "1.12.3",
       "bin": {
         "kodeks": "./bin/underpin.js",
         "underpin": "./bin/underpin.js",
