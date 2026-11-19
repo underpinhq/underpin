@@ -83,7 +83,39 @@ npm install        # npm
 
 If install fails on peer-dep conflicts, surface the conflict to the user — do not silently add `--legacy-peer-deps` or overrides.
 
-## 6. Verify nothing broke
+### Duplicate transitive copies
+
+An incremental install can leave two copies of a shared transitive package: the bumped one nested under its parent, and a stale hoisted one still satisfying some other package's peer range. Symptom is a type error claiming two identically-named types are incompatible, usually ending in `Property '#private' in type 'X' refers to a different member`, with two paths differing only by a `node_modules/<parent>/node_modules/` segment. The versions can even be identical. TypeScript nominally distinguishes classes with private fields, so two physical copies are two types.
+
+`bun update <pkg>` does not fix this: it bumps the hoisted copy but leaves both on disk. A clean reinstall does:
+
+```bash
+rm -rf node_modules && bun install
+```
+
+Then confirm one copy remains:
+
+```bash
+find node_modules -path "*<pkg>/package.json" -exec grep -H '"version"' {} \;
+```
+
+Real case: `@tanstack/react-query` 5.101.2 → 5.101.4 left `@tanstack/query-core` 5.101.4 nested under react-query and 5.101.2 hoisted for `@orpc/tanstack-query`'s `>=5.80.2` peer, breaking every `mutationOptions()` call site.
+
+## 6. Exact pins
+
+Treat an exact version (no `^`) as a question, not a rule. Find out why before honoring it:
+
+```bash
+git log -S'"<pkg>": "<version>"' --oneline -- package.json
+```
+
+- **Dependabot bump:** the pin is an artifact of its default range style, not a decision. Unpin.
+- **A commit that deliberately changed `^x.y.z` to `x.y.z`:** a workaround. Check whether the underlying cause still applies (often it's the duplicate-copy problem above, which a clean reinstall now solves). If it does not, unpin.
+- **A comment or note explaining the pin:** leave it, and say why in the report.
+
+After unpinning, verify from `rm -rf node_modules && bun install`, not an incremental one. A fresh clone and CI install that way.
+
+## 7. Verify nothing broke
 
 Run whatever the project provides, in this rough order — stop on the first failure and report it:
 
@@ -106,7 +138,7 @@ bun run build
 
 Inspect `package.json` `scripts` first — don't invent script names. In a monorepo with turbo/nx, prefer the root-level orchestrated script (`bun run build`, `turbo run build`) over per-package runs.
 
-## 7. Handle breaking changes
+## 8. Handle breaking changes
 
 For each major bump, check the package's CHANGELOG or migration guide before assuming the upgrade is clean. Common ones to watch for:
 
@@ -117,7 +149,7 @@ For each major bump, check the package's CHANGELOG or migration guide before ass
 
 If a breaking change requires more than a trivial fix, stop and surface it to the user before proceeding.
 
-## 8. Security audit
+## 9. Security audit
 
 After upgrading, verify no known vulnerabilities remain:
 
@@ -152,6 +184,7 @@ When done, summarize:
 - Package manager used
 - Number of workspaces touched
 - Major version bumps (list them)
+- Exact pins unpinned, and any left pinned with the reason
 - Any verification step that failed
 - Any breaking changes the user needs to review
 
