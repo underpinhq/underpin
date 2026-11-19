@@ -1,5 +1,11 @@
 # @underpin/config
 
+## 1.12.3
+
+### Patch Changes
+
+- The `dependencies` skill covers two more cases. "Duplicate transitive copies" explains how to clear a stale hoisted copy with a clean reinstall. "Exact pins" says to find out why a version is pinned before keeping the pin. ([9fee332](https://github.com/underpinhq/underpin/commit/9fee3324aff196ee5da93dd6b3d63a57f15da072))
+
 ## 1.12.2
 
 ### Patch Changes
