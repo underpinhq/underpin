@@ -1,5 +1,11 @@
 # @underpin/config
 
+## 1.12.4
+
+### Patch Changes
+
+- The `commits` and `formatting` skills match the versions agents use day to day. `commits` asks for a subject line only and explains when to fold a follow-up into the previous commit. `formatting` brings the current rules on function declarations, exports, braces and reusing shared helpers. ([b8fd520](https://github.com/underpinhq/underpin/commit/b8fd5206724db9007d9757a07c1915b731ea9c3d))
+
 ## 1.12.3
 
 ### Patch Changes
