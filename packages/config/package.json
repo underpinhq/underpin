@@ -1,6 +1,6 @@
 {
   "name": "@underpin/config",
-  "version": "1.12.3",
+  "version": "1.12.4",
   "description": "Shared linter configurations and release tooling for TypeScript projects.",
   "homepage": "https://github.com/underpinhq/underpin/tree/main/packages/config#readme",
   "bugs": {
