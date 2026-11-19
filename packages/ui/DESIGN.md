@@ -8,7 +8,7 @@ design work happens.
 
 Figma, team "Piotr Kulpinski's team" (Professional plan):
 
-- **Dirstack UI** (folder Libraries, `qSk2ZbuEa4iZLQqgqQvuzV`): the published library. Its
+- **Underpin UI** (folder Libraries, `qSk2ZbuEa4iZLQqgqQvuzV`): the published library. Its
   variables and styles mirror `src/tokens.json` (see below). Components mirror `src/components`:
   the controls sit on the Controls page, the rest on the `Components · …` pages. The Foundations
   board sits on the Boards page. Only components that exist in this package belong here.
@@ -31,7 +31,7 @@ then in the library, then gets published.
   tracking, radii and spacing. The library takes every value from that file, and nobody types a
   value into Figma by hand.
 - **Syncing is one MCP call.** After `bun run tokens`, `bun run figma:sync` in this package
-  prints a script for the `use_figma` tool on Dirstack UI. It creates, updates and deletes
+  prints a script for the `use_figma` tool on Underpin UI. It creates, updates and deletes
   variables and styles until they match the file, and returns what it changed. The script
   carries a checksum of its payload and stops before changing anything if a copy altered it.
 - **Names follow code by one rule**: the CSS prefix becomes the group. `--color-ink-muted` is
@@ -52,7 +52,7 @@ then in the library, then gets published.
 
 ## Working in Figma
 
-- **Publishing is manual.** An edit to Dirstack UI reaches Highseat · App only after someone
+- **Publishing is manual.** An edit to Underpin UI reaches Highseat · App only after someone
   publishes the library (Assets, Libraries, Publish) and accepts the update in the app file
   (Updates button at the bottom of the left rail, "Show updates for all pages" on, Update all).
   The API can do neither.
@@ -158,7 +158,7 @@ a table where the frame has prose), and only as part of design work on that scre
 ## Recipes
 
 - **Page header**: every route opens with one `SectionHeader` at `size="page"`, the "Page header"
-  component in Dirstack UI. Its parts map one to one: the Back link is the `back` slot (the app's
+  component in Underpin UI. Its parts map one to one: the Back link is the `back` slot (the app's
   `BackLink`: 13px, muted, a 14px chevron, the same on every detail page, admin included), then
   `title`, `description` and the `actions` slot. On desktop the actions sit beside the title
   block. On a phone (the component's `Size=Phone`) they stay on the title line, the description

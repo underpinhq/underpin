@@ -1,7 +1,7 @@
 /* global figma, TOKENS, DESCRIPTIONS, CHECKSUM */
 
 // Runs inside Figma through the MCP `use_figma` tool, never in Node: `bun run figma:sync` prints
-// this file behind the token payload it reads. It makes the Dirstack UI library's variables,
+// this file behind the token payload it reads. It makes the Underpin UI library's variables,
 // effect styles and text styles match `src/tokens.json`. It writes only what differs, and returns
 // what it changed.
 

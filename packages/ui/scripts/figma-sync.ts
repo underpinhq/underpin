@@ -3,7 +3,7 @@ import { join } from "node:path"
 import type { DesignTokens } from "../src/lib/design-tokens"
 
 // Prints a script for the Figma MCP `use_figma` tool: the tokens from `src/tokens.json`, then
-// `figma-sync.js`, which applies them to the Dirstack UI library. A token's description repeats
+// `figma-sync.js`, which applies them to the Underpin UI library. A token's description repeats
 // across its group, so each one is sent once and referenced by index.
 const root = join(import.meta.dir, "..")
 const tokens = JSON.parse(readFileSync(join(root, "src/tokens.json"), "utf8")) as DesignTokens
