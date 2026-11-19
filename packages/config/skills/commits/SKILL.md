@@ -14,7 +14,7 @@ Guidelines for writing consistent and clear commit messages.
 ```
 
 - No scope required.
-- No body or footer for simple changes.
+- Subject line only: no body, no footer. Commit with a single `git commit -m "<subject>"`.
 - Max 72 characters for the subject line.
 
 ## Types
@@ -43,6 +43,18 @@ Guidelines for writing consistent and clear commit messages.
 ## Atomic Commits
 
 One logical change per commit. If the description requires "and", consider splitting the changes into separate commits.
+
+## Folding Into the Previous Commit
+
+If a change is small and belongs to the logical change you *just* committed — a
+follow-up tweak, a cleanup you missed, removing something the last commit made
+unused — fold it into that previous commit with `git commit --amend` instead of
+creating a new one. Don't leave a trail of tiny `fix: typo` / `refactor: drop
+unused x` commits behind a change that was really one unit of work.
+
+- Only fold into a commit that is genuinely part of the *same* logical change.
+- If the previous commit is already pushed, amend + `git push --force-with-lease`.
+- When it's a distinct logical change, keep it a separate commit (see Atomic Commits).
 
 ## Breaking Changes
 
