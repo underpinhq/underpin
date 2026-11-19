@@ -28,14 +28,20 @@ parseUserAgent(request.headers.get("user-agent"), request.headers)
 
 ### Your own `ua-parser-js` 2.x or PRO
 
-Only `ua-parser-js` 2.x gets new patterns. This package cannot ship it: the free 2.x build is AGPL-3.0, and the PRO license does not let an MIT package bundle it. An app that wants 2.x installs it itself and passes its `UAParser` class as `parser`:
+Only `ua-parser-js` 2.x gets new patterns. This package cannot ship it: the free 2.x build is AGPL-3.0, and the PRO license does not let an MIT package bundle it. An app that wants 2.x installs it itself and passes its `UAParser` class as `parser`. The free 2.x build is `ua-parser-js@2`:
+
+```bash
+bun add ua-parser-js@2
+```
 
 ```ts
 import { parseUserAgent } from "@underpin/analytics/user-agent"
-import { UAParser } from "ua-parser-js" // 2.x, or the PRO build
+import { UAParser } from "ua-parser-js"
 
 parseUserAgent(request.headers.get("user-agent"), request.headers, { parser: UAParser })
 ```
+
+A PRO build installs under the package name its license gives. Any class that fits `UserAgentParser` works, so the app passes the PRO class the same way.
 
 The app needs its own license for the parser it passes: the AGPL for the free 2.x build, which fits an app that is AGPL itself, or a PRO license for a closed-source app. This package never imports either, not even for types. `UserAgentParser` describes what it needs: a class that takes the user agent and has a `getResult()` method.
 

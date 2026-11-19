@@ -57,7 +57,8 @@ const EMPTY: ParsedUserAgent = {
  * @example
  * parseUserAgent(request.headers.get("user-agent"), request.headers)
  * @example
- * import { UAParser } from "ua-parser-js" // 2.x or PRO, under the app's own license
+ * // The free `ua-parser-js@2`, under the app's own AGPL license. A PRO class fits the same way.
+ * import { UAParser } from "ua-parser-js"
  * parseUserAgent(request.headers.get("user-agent"), request.headers, { parser: UAParser })
  */
 export function parseUserAgent(
