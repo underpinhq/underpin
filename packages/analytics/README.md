@@ -26,6 +26,21 @@ parseUserAgent(request.headers.get("user-agent"), request.headers)
 - `deviceType` is "desktop" when the user agent names no device. An empty user agent gives empty strings in every field.
 - The second argument takes the `Sec-CH-UA*` Client Hints, as a `Headers` object or a plain object with lowercase keys. They only fill in what a reduced user agent freezes or leaves out: Windows 11, the real macOS and Android versions, the phone model, and a Chromium browser such as Brave that sends a plain Chrome user agent. Without hints, the result is the same as before.
 
+### Your own `ua-parser-js` 2.x or PRO
+
+Only `ua-parser-js` 2.x gets new patterns. This package cannot ship it: the free 2.x build is AGPL-3.0, and the PRO license does not let an MIT package bundle it. An app that wants 2.x installs it itself and passes its `UAParser` class as `parser`:
+
+```ts
+import { parseUserAgent } from "@underpin/analytics/user-agent"
+import { UAParser } from "ua-parser-js" // 2.x, or the PRO build
+
+parseUserAgent(request.headers.get("user-agent"), request.headers, { parser: UAParser })
+```
+
+The app needs its own license for the parser it passes: the AGPL for the free 2.x build, which fits an app that is AGPL itself, or a PRO license for a closed-source app. This package never imports either, not even for types. `UserAgentParser` describes what it needs: a class that takes the user agent and has a `getResult()` method.
+
+With a parser passed in, `parseUserAgent` returns that parser's names as they are, without the 1.x patterns and renames. The rest stays the same: `browserFamily` drops the mobile prefix, `deviceType` is "desktop" when the user agent names no device, an empty user agent gives empty strings, and the Client Hints apply. Without a parser, the bundled 1.x parser runs as before.
+
 ## `@underpin/analytics/bots`
 
 ```ts

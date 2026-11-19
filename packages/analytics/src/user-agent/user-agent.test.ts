@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test"
 import parserManifest from "ua-parser-js/package.json" with { type: "json" }
 import corpus from "./fixtures/highseat-corpus.json" with { type: "json" }
-import { parseUserAgent } from "./user-agent.js"
+import { parseUserAgent, type UserAgentParserResult } from "./user-agent.js"
 
 const CHROME_MAC =
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
@@ -266,5 +266,108 @@ describe("parseUserAgent with Client Hints", () => {
 
     const edge = `${CHROME_WINDOWS} Edg/141.0.0.0`
     expect(parseUserAgent(edge, headers)).toMatchObject({ browser: "Edge", osVersion: "11" })
+  })
+})
+
+/**
+ * Results a caller's `ua-parser-js` 2.x parser gives, keyed by user agent. The package never
+ * imports 2.x, so a fake class with its constructor and `getResult()` stands in for it.
+ */
+const FAKE_RESULTS: Record<string, UserAgentParserResult> = {
+  [CHROME_ANDROID]: {
+    browser: { name: "Mobile Chrome", version: "141.0.0.0" },
+    os: { name: "Android", version: "10" },
+    device: { type: "mobile", vendor: "", model: "K" },
+  },
+  [CHROME_WINDOWS]: {
+    browser: { name: "Chrome", version: "141.0.0.0" },
+    os: { name: "Windows", version: "10" },
+    device: {},
+  },
+  // A spelling the 1.x mapping would rename, to show the caller's names come back as they are.
+  [CHROME_MAC]: {
+    browser: { name: "Chrome", version: "141.0.0.0" },
+    os: { name: "Mac OS", version: "10.15.7" },
+    device: { vendor: "Apple", model: "Macintosh" },
+  },
+}
+
+const parsedUserAgents: string[] = []
+
+class FakeParser {
+  readonly #userAgent: string
+
+  constructor(userAgent: string) {
+    this.#userAgent = userAgent
+    parsedUserAgents.push(userAgent)
+  }
+
+  getResult(): UserAgentParserResult {
+    return FAKE_RESULTS[this.#userAgent] ?? { browser: {}, os: {}, device: {} }
+  }
+}
+
+describe("parseUserAgent with the caller's parser", () => {
+  const options = { parser: FakeParser }
+
+  test("returns the names the parser gives, without the 1.x mapping", () => {
+    expect(parseUserAgent(CHROME_MAC, undefined, options)).toEqual({
+      browser: "Chrome",
+      browserFamily: "Chrome",
+      browserVersion: "141.0.0.0",
+      os: "Mac OS",
+      osVersion: "10.15.7",
+      deviceType: "desktop",
+      deviceVendor: "Apple",
+      deviceModel: "Macintosh",
+    })
+  })
+
+  test("skips the 1.x extensions", () => {
+    const norton = `${CHROME_WINDOWS} Norton/141.0.0`
+
+    expect(parseUserAgent(norton, undefined, options).browser).toBe("")
+  })
+
+  test("drops the mobile prefix for browserFamily", () => {
+    expect(parseUserAgent(CHROME_ANDROID, undefined, options)).toMatchObject({
+      browser: "Mobile Chrome",
+      browserFamily: "Chrome",
+      deviceType: "mobile",
+    })
+  })
+
+  test("calls a user agent that names no device a desktop", () => {
+    expect(parseUserAgent("curl/8.7.1", undefined, options).deviceType).toBe("desktop")
+  })
+
+  test("returns empty names for an empty user agent without calling the parser", () => {
+    parsedUserAgents.length = 0
+
+    expect(parseUserAgent("", undefined, options).deviceType).toBe("")
+    expect(parseUserAgent(null, undefined, options).browser).toBe("")
+    expect(parsedUserAgents).toEqual([])
+  })
+
+  test("applies Client Hints", () => {
+    const parsed = parseUserAgent(
+      CHROME_ANDROID,
+      {
+        "sec-ch-ua-model": '"Pixel 9"',
+        "sec-ch-ua-platform": '"Android"',
+        "sec-ch-ua-platform-version": '"16.0.0"',
+      },
+      options,
+    )
+
+    expect(parsed).toMatchObject({ osVersion: "16", deviceModel: "Pixel 9" })
+
+    const brave = parseUserAgent(
+      CHROME_WINDOWS,
+      { "sec-ch-ua": '"Brave";v="141", "Chromium";v="141"', "sec-ch-ua-platform": '"Windows"' },
+      options,
+    )
+
+    expect(brave).toMatchObject({ browser: "Brave", browserFamily: "Brave", os: "Windows" })
   })
 })
