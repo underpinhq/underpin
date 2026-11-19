@@ -78,6 +78,11 @@ function toOs(name: string, version: string, userAgent: string): [name: string, 
   return [OS_NAMES[name] ?? name, version]
 }
 
+/** Drops the mobile prefix, so "Mobile Safari" and "Safari" share the family "Safari". */
+function toBrowserFamily(browser: string): string {
+  return browser.startsWith(MOBILE_PREFIX) ? browser.slice(MOBILE_PREFIX.length) : browser
+}
+
 function toDeviceType(result: IResult): string {
   // 1.x types Xiaomi's Pad tablets as phones.
   if (/^(?:xiaomi|redmi) pad\b/i.test(result.device.model ?? "")) return "tablet"
@@ -92,13 +97,37 @@ export function toStoredNames(result: IResult): ParsedUserAgent {
 
   return {
     browser,
-    browserFamily: browser.startsWith(MOBILE_PREFIX)
-      ? browser.slice(MOBILE_PREFIX.length)
-      : browser,
+    browserFamily: toBrowserFamily(browser),
     browserVersion: result.browser.version ?? "",
     os,
     osVersion,
     deviceType: toDeviceType(result),
+    deviceVendor: result.device.vendor ?? "",
+    deviceModel: result.device.model ?? "",
+  }
+}
+
+/** The parts of a parser's result that `parseUserAgent` reads. `ua-parser-js` 2.x and PRO fit it. */
+export interface UserAgentParserResult {
+  browser: { name?: string; version?: string }
+  os: { name?: string; version?: string }
+  device: { type?: string; vendor?: string; model?: string }
+}
+
+/**
+ * Takes the names a caller's own parser gives as they are. Only the browser family and the
+ * "desktop" default are added, as on the 1.x path.
+ */
+export function fromParserResult(result: UserAgentParserResult): ParsedUserAgent {
+  const browser = result.browser.name ?? ""
+
+  return {
+    browser,
+    browserFamily: toBrowserFamily(browser),
+    browserVersion: result.browser.version ?? "",
+    os: result.os.name ?? "",
+    osVersion: result.os.version ?? "",
+    deviceType: result.device.type ?? "desktop",
     deviceVendor: result.device.vendor ?? "",
     deviceModel: result.device.model ?? "",
   }
