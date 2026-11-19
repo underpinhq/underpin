@@ -269,6 +269,8 @@ describe("parseUserAgent with Client Hints", () => {
   })
 })
 
+const NORTON = `${CHROME_WINDOWS} Norton/141.0.0`
+
 /**
  * Results a caller's `ua-parser-js` 2.x parser gives, keyed by user agent. The package never
  * imports 2.x, so a fake class with its constructor and `getResult()` stands in for it.
@@ -280,6 +282,12 @@ const FAKE_RESULTS: Record<string, UserAgentParserResult> = {
     device: { type: "mobile", vendor: "", model: "K" },
   },
   [CHROME_WINDOWS]: {
+    browser: { name: "Chrome", version: "141.0.0.0" },
+    os: { name: "Windows", version: "10" },
+    device: {},
+  },
+  // The 1.x extensions name this one "Norton Private Browser". The fake gives it a plain name.
+  [NORTON]: {
     browser: { name: "Chrome", version: "141.0.0.0" },
     os: { name: "Windows", version: "10" },
     device: {},
@@ -324,9 +332,9 @@ describe("parseUserAgent with the caller's parser", () => {
   })
 
   test("skips the 1.x extensions", () => {
-    const norton = `${CHROME_WINDOWS} Norton/141.0.0`
-
-    expect(parseUserAgent(norton, undefined, options).browser).toBe("")
+    // The 1.x path reads this user agent as "Norton Private Browser" through `extensions.ts`.
+    expect(parseUserAgent(NORTON).browser).toBe("Norton Private Browser")
+    expect(parseUserAgent(NORTON, undefined, options).browser).toBe("Chrome")
   })
 
   test("drops the mobile prefix for browserFamily", () => {
