@@ -232,6 +232,9 @@ description naming its code part.
   and every row take it as a subgrid. A row is a positioned box, so a `TableRowLink` on the name
   stretches over the whole row, in Safari too. The checkbox, the menu and any other control in a
   row sit above that link (`relative z-10`).
+- **Row menu.** `TableActionsMenu` in a `TableActionsCell`: a ghost, small, muted "…" trigger
+  that grows to 40px on a touch screen, opening a menu aligned to the row's end. Its `label`
+  names both the trigger and the menu ("Actions for figma.com").
 - **Row sizes.** Compact is 32px (a feed, a dense list), default 44px (one line), identity 52px
   (a name with a muted line under it). A skeleton row takes the size of the rows it stands in for.
 - **Lines.** The header is 40px on the surface, with one line under it in the card's edge
@@ -245,7 +248,8 @@ description naming its code part.
   still shown at each width leave it room.
 - **States.** Five skeleton rows on a first load. While a later page loads, keep the old rows
   and dim them. `TableMessage` replaces the rows: `empty` with the create action, `filtered`
-  with a way to clear the filters, `error` with a retry.
+  with a way to clear the filters, `error` with a retry. An `error` given `onRetry` draws the
+  "Try again" button itself (secondary, small, a refresh icon), its label a prop.
 - **Footer modes.** Paged: the `Pagination` band, "Showing 26–50 of 1,204", an optional
   per-page select, "Page 2 of 49" and the joined first, previous, next and last buttons. A
   single page keeps the count and drops the controls. Infinite: `PaginationInfinite`, the count,
@@ -269,7 +273,10 @@ description naming its code part.
   filters) is controlled: the package never reads the URL, and each app keeps it in its router's
   search params. `changeDataTableState` applies the paging rules (a new sort, search, filter or
   page size goes back to page 1), and the table moves a page past the end to the last page,
-  with `{ replace: true }` so the adapter replaces the history entry. The
+  with `{ replace: true }` so the adapter replaces the history entry. While `total` is
+  undefined (no page has arrived, or the page failed) the table draws no band and moves no
+  page, so a failed page keeps its error where the reader is. A short table with nothing to
+  page, sort or search leaves out `state` and `onStateChange`. The
   `pagination` prop picks the footer: `{ type: "pages", total }` or
   `{ type: "infinite", hasMore, isLoadingMore, onLoadMore }`. `getRowHref` makes rows open
   their record through `DataTableRowLink` in the name cell, `enableRowSelection` adds the

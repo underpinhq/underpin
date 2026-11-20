@@ -89,6 +89,11 @@ export interface DataTableLabels {
   pagination?: Partial<PaginationLabels>
 }
 
+/** The state of a table that pages, sorts and searches nothing, one object so it stays stable. */
+const STATIC_STATE: DataTableState = {}
+
+function ignoreStateChange() {}
+
 const DATA_TABLE_LABELS: DataTableLabels = {
   selectAll: "Select all",
   selectRow: name => `Select ${name}`,
@@ -104,8 +109,12 @@ const DATA_TABLE_LABELS: DataTableLabels = {
 /** The footer of a table whose rows come a page at a time. Page and page size live in `state`. */
 interface DataTablePages {
   type: "pages"
-  /** Every row the query matches, across all pages. */
-  total: number
+  /**
+   * Every row the query matches, across all pages. Undefined while no page has arrived (a first
+   * load, a failed page): the table then draws no band and leaves the page as the state asks,
+   * so a failed page keeps its error in place instead of moving the reader to page 1.
+   */
+  total: number | undefined
   /** The page sizes the reader picks from. Left out, the band has no per-page select. */
   perPageOptions?: number[]
 }
@@ -155,8 +164,12 @@ export interface DataTableProps<TData extends RowData> extends Pick<
   /** Names a row for a screen reader: its checkbox reads "Select <name>". Defaults to its id. */
   getRowLabel?: (row: TData) => string
   "aria-label": string
-  state: DataTableState
-  onStateChange: (state: DataTableState, options: DataTableChangeOptions) => void
+  /**
+   * The page, page size, sort, search and filters. Leave it and `onStateChange` out for a short
+   * table with nothing to page, sort or search.
+   */
+  state?: DataTableState
+  onStateChange?: (state: DataTableState, options: DataTableChangeOptions) => void
   pagination?: DataTablePagination
   /**
    * A request is in flight. With no rows yet the table shows skeleton rows; with rows, it keeps
@@ -250,11 +263,15 @@ function formatColumnLabel<TData extends RowData>(
 
 interface HeadProps<TData extends RowData> {
   header: Header<DataTableFeatures, TData, unknown>
+  /** False on a table with no `onStateChange`, where a sort would go nowhere. */
+  canSort: boolean
 }
 
-function DataTableHead<TData extends RowData>({ header }: HeadProps<TData>) {
+function DataTableHead<TData extends RowData>({ header, canSort }: HeadProps<TData>) {
   const { column } = header
-  const { align, priority, sortable } = getMeta(column)
+  const meta = getMeta(column)
+  const { align, priority } = meta
+  const sortable = canSort ? meta.sortable : undefined
   const sorted = column.getIsSorted()
 
   // A second click flips the order; the first takes the column's own first direction.
@@ -373,8 +390,8 @@ export function DataTable<TData extends RowData>({
   getRowId,
   getRowLabel,
   "aria-label": ariaLabel,
-  state,
-  onStateChange,
+  state = STATIC_STATE,
+  onStateChange: onStateChangeProp,
   pagination,
   loading = false,
   message,
@@ -394,6 +411,7 @@ export function DataTable<TData extends RowData>({
   containerClassName,
 }: DataTableProps<TData>) {
   const labels = { ...DATA_TABLE_LABELS, ...labelsProp }
+  const onStateChange = onStateChangeProp ?? ignoreStateChange
   const tableRef = useRef<HTMLTableElement>(null)
   const rangeRef = useRef(false)
 
@@ -498,12 +516,15 @@ export function DataTable<TData extends RowData>({
   const paged = pagination?.type === "pages" ? pagination : undefined
   const infinite = pagination?.type === "infinite" ? pagination : undefined
   const perPage = state.perPage ?? DEFAULT_PER_PAGE
-  const pageCount = paged ? getPageCount(paged.total, perPage) : 1
-  const page = clampPage(state.page ?? 1, pageCount)
+  const total = paged?.total
+  const requestedPage = state.page ?? 1
+  // With no total yet, the last page is unknown and only the first bounds the page.
+  const pageCount = total === undefined ? Infinity : getPageCount(total, perPage)
+  const page = clampPage(requestedPage, pageCount)
 
   // A page past the end (a stale link, rows deleted since) moves the state to the last page, so
-  // the app asks for rows that exist.
-  const pastEnd = paged !== undefined && !loading && (state.page ?? 1) !== page
+  // the app asks for rows that exist. With no total yet the end is unknown, so nothing moves.
+  const pastEnd = total !== undefined && !loading && requestedPage !== page
   useEffect(() => {
     if (pastEnd) onStateChange({ ...state, page }, { replace: true })
     // Only a new clamp asks again: the app's state catching up ends it.
@@ -544,30 +565,31 @@ export function DataTable<TData extends RowData>({
   const dimmed = loading && rows.length > 0
   const loadingMore = infinite?.isLoadingMore === true && rows.length > 0
 
-  const footer = paged ? (
-    <Pagination
-      page={page}
-      pageCount={pageCount}
-      total={paged.total}
-      perPage={perPage}
-      perPageOptions={paged.perPageOptions}
-      loading={loading}
-      format={format}
-      labels={labels.pagination}
-      onPageChange={onPageChange}
-      onPerPageChange={next => setState({ perPage: next })}
-    />
-  ) : infinite && rows.length > 0 ? (
-    <PaginationInfinite
-      count={infinite.count ?? labels.rowCount(format(rows.length))}
-      hasMore={infinite.hasMore}
-      loading={infinite.isLoadingMore}
-      enabled={infinite.enabled}
-      loadingLabel={labels.loadingMore}
-      endLabel={labels.endOfList}
-      onLoadMore={infinite.onLoadMore}
-    />
-  ) : undefined
+  const footer =
+    paged && total !== undefined ? (
+      <Pagination
+        page={page}
+        pageCount={pageCount}
+        total={total}
+        perPage={perPage}
+        perPageOptions={paged.perPageOptions}
+        loading={loading}
+        format={format}
+        labels={labels.pagination}
+        onPageChange={onPageChange}
+        onPerPageChange={next => setState({ perPage: next })}
+      />
+    ) : infinite && rows.length > 0 ? (
+      <PaginationInfinite
+        count={infinite.count ?? labels.rowCount(format(rows.length))}
+        hasMore={infinite.hasMore}
+        loading={infinite.isLoadingMore}
+        enabled={infinite.enabled}
+        loadingLabel={labels.loadingMore}
+        endLabel={labels.endOfList}
+        onLoadMore={infinite.onLoadMore}
+      />
+    ) : undefined
 
   const tableElement = (
     <SelectionContext value={selection}>
@@ -584,7 +606,11 @@ export function DataTable<TData extends RowData>({
       >
         <TableHeader>
           {headers.map(header => (
-            <DataTableHead key={header.id} header={header} />
+            <DataTableHead
+              key={header.id}
+              header={header}
+              canSort={onStateChangeProp !== undefined}
+            />
           ))}
         </TableHeader>
         <TableBody className={cn("transition-opacity", dimmed && "opacity-50")}>

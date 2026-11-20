@@ -284,6 +284,39 @@ describe("DataTable", () => {
     expect(view.onStateChange.mock.calls.length).toBe(calls)
   })
 
+  test("keeps a failed later page in place while the total is unknown", async () => {
+    const { TableMessage } = await import("./table")
+    const view = await renderExample({
+      data: [],
+      state: { page: 3, perPage: 25 },
+      pagination: { type: "pages", total: undefined },
+      message: <TableMessage kind="error" title="Couldn’t load the sites" onRetry={() => {}} />,
+    })
+
+    // The page that failed keeps its error: the table neither moves the reader nor draws a band.
+    expect(view.onStateChange).not.toHaveBeenCalled()
+    expect(document.querySelector('[data-kind="error"]')).not.toBeNull()
+
+    // Once a total arrives, a page past the end moves to the last one again.
+    await view.rerenderWith({ pagination: { type: "pages", total: 30 } })
+    expect(view.onStateChange.mock.lastCall).toEqual([{ page: 2, perPage: 25 }, { replace: true }])
+  })
+
+  test("draws a short table with no state to page, sort or search", async () => {
+    const { DataTable } = await import("./data-table")
+    const columns = await getColumns()
+    const view = await render(
+      <DataTable aria-label="Sites" columns={columns} data={SITES} getRowId={site => site.id} />,
+    )
+    mounted.push(view)
+
+    expect(getRows()).toHaveLength(4)
+    expect(document.body.textContent).not.toContain("Showing")
+    // A sort would go nowhere, so a sortable column's head is plain text.
+    expect(document.querySelectorAll("th button")).toHaveLength(0)
+    expect(document.querySelectorAll("th")[1]?.hasAttribute("aria-sort")).toBe(false)
+  })
+
   test("keeps the old rows dimmed while the next page loads, and skeleton rows on a first load", async () => {
     const view = await renderExample({ loading: true, pagination: { type: "pages", total: 100 } })
 

@@ -44,6 +44,12 @@ function getTable() {
   return table
 }
 
+function findButton(label: string) {
+  return [...document.querySelectorAll("button")].find(
+    button => button.getAttribute("aria-label") === label || button.textContent?.trim() === label,
+  )
+}
+
 describe("Table", () => {
   test("drops a column's track at the width its priority gives way", async () => {
     const { TableBody } = await import("./table")
@@ -525,6 +531,73 @@ describe("Table", () => {
 
       await view.unmount()
     }
+  })
+
+  test("draws a retry button on an error that can load again", async () => {
+    const { TableBody, TableMessage } = await import("./table")
+    const onRetry = mock(() => {})
+    const view = await renderTable(
+      <TableBody>
+        <TableMessage kind="error" title="Couldn’t load the sites" onRetry={onRetry} />
+      </TableBody>,
+    )
+
+    const retry = findButton("Try again")
+    expect(retry?.querySelector("svg")).not.toBeNull()
+    if (retry) await click(retry)
+    expect(onRetry).toHaveBeenCalledTimes(1)
+    expect(await listAxeViolations()).toEqual([])
+
+    await view.unmount()
+  })
+
+  test("takes the retry label as a prop and lets an action replace the button", async () => {
+    const { TableBody, TableMessage } = await import("./table")
+    const view = await renderTable(
+      <TableBody>
+        <TableMessage kind="error" title="Failed" retryLabel="Retry" onRetry={() => {}} />
+        <TableMessage
+          kind="error"
+          title="Failed"
+          action={<a href="/status">Status</a>}
+          onRetry={() => {}}
+        />
+        <TableMessage kind="filtered" title="No sites match" onRetry={() => {}} />
+      </TableBody>,
+    )
+
+    const buttons = [...document.querySelectorAll("tbody button")]
+    expect(buttons.map(button => button.textContent)).toEqual(["Retry"])
+    expect(document.querySelector('a[href="/status"]')).not.toBeNull()
+
+    await view.unmount()
+  })
+
+  test("opens the row's menu from a trigger its label names", async () => {
+    const { TableActionsCell, TableActionsMenu, TableBody, TableRow } = await import("./table")
+    const { MenuItem } = await import("./menu")
+    const view = await renderTable(
+      <TableBody>
+        <TableRow>
+          <TableActionsCell>
+            <TableActionsMenu label="Actions for figma.com">
+              <MenuItem>Archive</MenuItem>
+            </TableActionsMenu>
+          </TableActionsCell>
+        </TableRow>
+      </TableBody>,
+    )
+
+    const trigger = findButton("Actions for figma.com")
+    expect(trigger?.className).toContain("text-ink-muted")
+    expect(trigger?.className).toContain("pointer-coarse:size-10")
+    if (trigger) await click(trigger)
+
+    const menu = document.querySelector('[role="menu"]')
+    expect(menu?.getAttribute("aria-label")).toBe("Actions for figma.com")
+    expect(menu?.textContent).toContain("Archive")
+
+    await view.unmount()
   })
 
   test("puts the footer band inside the card, after the table", async () => {

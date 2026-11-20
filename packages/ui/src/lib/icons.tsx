@@ -21,7 +21,9 @@ import {
   InformationCircleIcon,
   Loading03Icon,
   Moon02Icon,
+  MoreHorizontalCircle01Icon,
   PlusSignCircleIcon,
+  Refresh01Icon,
   Remove01Icon,
   Search01Icon,
   Sun03Icon,
@@ -59,6 +61,9 @@ export const HelpIcon = icon(HelpCircleIcon, "HelpIcon")
 export const InfoIcon = icon(InformationCircleIcon, "InfoIcon")
 export const LoadingIcon = icon(Loading03Icon, "LoadingIcon")
 export const MoonIcon = icon(Moon02Icon, "MoonIcon")
+// Filled: a hollow dot all but disappears at the size a menu trigger draws it.
+export const MoreIcon = icon(MoreHorizontalCircle01Icon, "MoreIcon", { fill: "currentColor" })
 export const PlusCircleIcon = icon(PlusSignCircleIcon, "PlusCircleIcon")
+export const RefreshIcon = icon(Refresh01Icon, "RefreshIcon")
 export const SearchIcon = icon(Search01Icon, "SearchIcon")
 export const SunIcon = icon(Sun03Icon, "SunIcon")

@@ -10,11 +10,20 @@ import {
   use,
 } from "react"
 import { rowPressClasses } from "../lib/classes"
-import { AlertIcon, ArrowDownIcon, ArrowUpIcon, FilterIcon } from "../lib/icons"
+import {
+  AlertIcon,
+  ArrowDownIcon,
+  ArrowUpIcon,
+  FilterIcon,
+  MoreIcon,
+  RefreshIcon,
+} from "../lib/icons"
 import { cn, variants, type VariantProps } from "../lib/variants"
+import { Button } from "./button"
 import { Checkbox } from "./checkbox"
 import { CopyButton } from "./copy-button"
 import { EmptyState } from "./empty-state"
+import { Menu, MenuContent, MenuTrigger } from "./menu"
 import { Skeleton } from "./skeleton"
 import { Sparkline } from "./sparkline"
 
@@ -699,6 +708,39 @@ export function TableActionsCell({ align, className, children, ...props }: Table
   )
 }
 
+interface TableActionsMenuProps {
+  /** Names the menu and its trigger for a screen reader: "Actions for figma.com". */
+  label: string
+  /** Classes for the trigger, e.g. its place on a card. */
+  className?: string
+  children: ReactNode
+}
+
+/**
+ * The row's "…" menu, for a `TableActionsCell`: a quiet ghost trigger that grows to finger size
+ * on a touch screen, and a menu aligned to the row's end.
+ */
+export function TableActionsMenu({ label, className, children }: TableActionsMenuProps) {
+  return (
+    <Menu>
+      <MenuTrigger
+        render={
+          <Button
+            aria-label={label}
+            variant="ghost"
+            size="sm"
+            prefix={<MoreIcon />}
+            className={cn("text-ink-muted pointer-coarse:size-10", className)}
+          />
+        }
+      />
+      <MenuContent label={label} align="end">
+        {children}
+      </MenuContent>
+    </Menu>
+  )
+}
+
 interface TableCheckboxCellProps
   extends
     Omit<TableCellProps, "children" | "onChange">,
@@ -849,18 +891,36 @@ interface TableMessageProps {
   icon?: ReactNode
   title: ReactNode
   description?: ReactNode
+  /** The message's button. Left out, an `error` with `onRetry` draws the retry button. */
   action?: ReactNode
+  /** Loads the rows again, from the "Try again" button of an `error`. */
+  onRetry?: () => void
+  /** The retry button's label. */
+  retryLabel?: ReactNode
 }
 
 /**
  * Stands in for the rows: the small empty state across every column, under the header, which
  * keeps its line. Put it inside `TableBody`.
  */
-export function TableMessage({ kind, icon, title, description, action }: TableMessageProps) {
+export function TableMessage({
+  kind,
+  icon,
+  title,
+  description,
+  action,
+  onRetry,
+  retryLabel = "Try again",
+}: TableMessageProps) {
   const { layout } = use(TableContext)
   const list = layout === "list"
   const Row = list ? "div" : "tr"
   const Cell = list ? "div" : "td"
+  const retry = kind === "error" && onRetry && (
+    <Button variant="secondary" size="sm" prefix={<RefreshIcon />} onClick={onRetry}>
+      {retryLabel}
+    </Button>
+  )
 
   return (
     <Row
@@ -875,7 +935,7 @@ export function TableMessage({ kind, icon, title, description, action }: TableMe
           icon={icon ?? (kind === "empty" ? undefined : MESSAGE_ICONS[kind])}
           title={title}
           description={description}
-          action={action}
+          action={action ?? retry}
         />
       </Cell>
     </Row>
