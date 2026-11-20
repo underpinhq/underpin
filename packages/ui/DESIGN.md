@@ -240,8 +240,9 @@ description naming its code part.
 - **Hover.** Only a row that opens something takes the hover fill (the canvas). A row with no
   link keeps its background, and only its menu answers. A selected row keeps the subtle fill.
 - **Columns that give way.** A column with `priority: "medium"` drops below a 672px table, one
-  with `"low"` below 896px. Pass the same priority to the column's head and cells. The name
-  column never drops.
+  with `"low"` below 896px and one with `"lowest"` below 1152px. Pass the same priority to the
+  column's head and cells. The name column never drops: pick the priorities so the fixed columns
+  still shown at each width leave it room.
 - **States.** Five skeleton rows on a first load. While a later page loads, keep the old rows
   and dim them. `TableMessage` replaces the rows: `empty` with the create action, `filtered`
   with a way to clear the filters, `error` with a retry.

@@ -61,6 +61,53 @@ describe("Table", () => {
     await view.unmount()
   })
 
+  test("drops a lowest column below a 1152px table", async () => {
+    const { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } =
+      await import("./table")
+    const view = await render(
+      <Table
+        aria-label="Workspaces"
+        columns={[
+          { width: "minmax(0,1fr)" },
+          { width: "6rem", priority: "low" },
+          { width: "5rem", priority: "lowest" },
+        ]}
+      >
+        <TableHeader>
+          <TableHead>Workspace</TableHead>
+          <TableHead priority="low">Plan</TableHead>
+          <TableHead priority="lowest">Sites</TableHead>
+        </TableHeader>
+        <TableBody>
+          <TableRow>
+            <TableCell>Acme</TableCell>
+            <TableCell priority="low">Pro</TableCell>
+            <TableCell priority="lowest">6</TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>,
+    )
+
+    const { style } = getTable()
+    expect(style.getPropertyValue("--table-columns")).toBe("minmax(0,1fr)")
+    expect(style.getPropertyValue("--table-columns-md")).toBe("minmax(0,1fr)")
+    expect(style.getPropertyValue("--table-columns-lg")).toBe("minmax(0,1fr) 6rem")
+    expect(style.getPropertyValue("--table-columns-xl")).toBe("minmax(0,1fr) 6rem 5rem")
+    expect(getTable().className).toContain("@6xl:grid-cols-(--table-columns-xl)")
+
+    const [name, plan, sites] = document.querySelectorAll("td")
+    expect(sites?.className).toContain("@max-6xl:hidden")
+    expect(sites?.getAttribute("data-priority")).toBe("lowest")
+    // Below 1152px Plan ends the row and takes the trailing inset; below 896px the name does.
+    const lowestGone = "@max-6xl:[&:not(:has(~:not([data-priority=lowest])))]:pr-5"
+    expect(plan?.className).toContain(lowestGone)
+    expect(name?.className).toContain(
+      "@max-4xl:[&:not(:has(~:not([data-priority=low]):not([data-priority=lowest])))]:pr-5",
+    )
+
+    await view.unmount()
+  })
+
   test("gives the trailing inset to the last cell still shown as columns drop", async () => {
     const { Table, TableBody, TableCell, TableRow } = await import("./table")
     const view = await render(
@@ -85,7 +132,8 @@ describe("Table", () => {
     )
 
     const [time, page, country, device] = document.querySelectorAll("td")
-    const lowGone = "@max-4xl:[&:not(:has(~:not([data-priority=low])))]:pr-5"
+    const lowGone =
+      "@max-4xl:[&:not(:has(~:not([data-priority=low]):not([data-priority=lowest])))]:pr-5"
     const bothGone = "@max-2xl:[&:not(:has(~:not([data-priority])))]:pr-5"
     expect(country?.getAttribute("data-priority")).toBe("medium")
     expect(device?.getAttribute("data-priority")).toBe("low")
@@ -339,6 +387,52 @@ describe("Table", () => {
     expect(cells[9]?.textContent).toBe("AAlex Morgan")
 
     expect(await listAxeViolations()).toEqual([])
+    await view.unmount()
+  })
+
+  test("colours a meter by the tone it is given over its share", async () => {
+    const { TableBody, TableMeterCell, TableRow } = await import("./table")
+    const view = await renderTable(
+      <TableBody>
+        <TableRow>
+          <TableMeterCell value={20} max={100} tone="danger" />
+          <TableMeterCell value={20} max={100} />
+          <TableMeterCell value={95} max={100} tone="brand" />
+        </TableRow>
+      </TableBody>,
+    )
+
+    const bars = [...document.querySelectorAll('[role="meter"] > span')]
+    expect(bars.map(bar => bar.className.split(" ").find(name => name.startsWith("bg-")))).toEqual([
+      "bg-danger",
+      "bg-ink",
+      "bg-brand",
+    ])
+    await view.unmount()
+  })
+
+  test("draws a meter as a ring before the figure", async () => {
+    const { TableBody, TableMeterCell, TableRow } = await import("./table")
+    const view = await renderTable(
+      <TableBody>
+        <TableRow>
+          <TableMeterCell value={25} max={100} label="25 of 100 rows" layout="ring" tone="danger" />
+          <TableMeterCell value={0} max={100} label="0 of 100 rows" layout="ring" />
+        </TableRow>
+      </TableBody>,
+    )
+
+    const [quarter, empty] = document.querySelectorAll("td")
+    const meter = quarter?.querySelector('[role="meter"]')
+    expect(meter?.getAttribute("aria-valuenow")).toBe("25")
+    expect(quarter?.lastElementChild?.textContent).toBe("25 of 100 rows")
+    const arcs = quarter?.querySelectorAll("circle") ?? []
+    expect(arcs[1]?.getAttribute("class")).toContain("stroke-danger")
+    // A quarter of the circle's length is drawn, the rest is the gap.
+    const [drawn, length] = (arcs[1]?.getAttribute("stroke-dasharray") ?? "").split(" ").map(Number)
+    expect(drawn).toBeCloseTo((length ?? 0) / 4)
+    // An empty meter draws the track alone.
+    expect(empty?.querySelectorAll("circle").length).toBe(1)
     await view.unmount()
   })
 

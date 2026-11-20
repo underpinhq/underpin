@@ -1,7 +1,7 @@
 "use client"
 
 import { Tabs as TabsPrimitive } from "@base-ui/react/tabs"
-import { type ComponentProps, createContext, memo, use } from "react"
+import { type ComponentProps, createContext, memo, use, useEffect, useRef } from "react"
 import { interactiveVariants } from "../lib/interactive"
 import { type SegmentedStyle, segmentedVariants } from "../lib/segmented"
 import { cn, variants, type VariantProps } from "../lib/variants"
@@ -37,10 +37,13 @@ const TabsVariantContext = createContext<TabsStyle>({
 /**
  * The view tabs above a table: a row of labels on a hairline, the chosen one in ink over a 2px
  * ink underline that slides to it. Each label may carry a `TabsCount`. The size does not apply:
- * every tab is 36px, so the row reads as part of the page rather than a control.
+ * every tab is 36px, so the row reads as part of the page rather than a control. A row wider
+ * than its box scrolls sideways rather than wrapping.
  */
 const UNDERLINE_CLASSES = {
-  root: "relative flex items-center gap-5 border-b",
+  // A row wider than its box (a phone) scrolls sideways, with no bar under the hairline. The
+  // pixel above and below keeps the focus ring, drawn a pixel outside a tab, out of the clip.
+  root: "relative flex items-center gap-5 overflow-x-auto border-b py-px [scrollbar-width:none]",
   indicator: [
     "absolute bottom-0 left-0 h-0.5 bg-ink",
     "w-(--active-tab-width) translate-x-(--active-tab-left)",
@@ -48,7 +51,7 @@ const UNDERLINE_CLASSES = {
   ].join(" "),
   item: cn(
     interactiveVariants({ interactive: false }),
-    "relative inline-flex h-9 items-center gap-1.5 whitespace-nowrap font-medium text-control text-ink-secondary",
+    "relative inline-flex h-9 shrink-0 items-center gap-1.5 whitespace-nowrap font-medium text-control text-ink-secondary",
     "hover:text-ink data-active:text-ink",
   ),
 }
@@ -89,9 +92,33 @@ function TabsList({
   size = "md",
   ...props
 }: TabsListProps) {
+  const listRef = useRef<HTMLDivElement>(null)
+
+  // A row that scrolls keeps its active tab in view, for a link straight to a view far along
+  // it. It checks again whenever a tab changes size (a count arriving widens every label), and
+  // never when the reader scrolls the row themselves.
+  useEffect(() => {
+    const list = listRef.current
+    if (variant !== "underline" || !list) return
+
+    function reveal() {
+      const active = list?.querySelector<HTMLElement>("[data-active]")
+      if (!list || !active) return
+      const end = active.offsetLeft + active.offsetWidth
+      if (end > list.scrollLeft + list.clientWidth) list.scrollLeft = end - list.clientWidth
+    }
+
+    reveal()
+    if (typeof ResizeObserver === "undefined") return
+    const observer = new ResizeObserver(reveal)
+    for (const tab of list.children) observer.observe(tab)
+    return () => observer.disconnect()
+  }, [variant])
+
   return (
     <TabsVariantContext value={{ variant, size }}>
       <TabsPrimitive.List
+        ref={listRef}
         className={cn(
           variant === "underline"
             ? UNDERLINE_CLASSES.root

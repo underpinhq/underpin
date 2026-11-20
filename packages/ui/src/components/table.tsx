@@ -24,9 +24,11 @@ import { Sparkline } from "./sparkline"
 
 /**
  * Which columns give way as the table's box narrows: a `medium` column hides below the `@2xl`
- * container width (672px), a `low` one below `@4xl` (896px). A column with none always shows.
+ * container width (672px), a `low` one below `@4xl` (896px) and a `lowest` one below `@6xl`
+ * (1152px), for a table with more columns than a laptop's content column holds. A column with
+ * none always shows.
  */
-export type TableColumnPriority = "medium" | "low"
+export type TableColumnPriority = "medium" | "low" | "lowest"
 
 export interface TableColumn {
   /** The column's grid track: `minmax(0,1fr)` for the name, a fixed `6rem` for a figure. */
@@ -61,6 +63,7 @@ const TableColumnScopeContext = createContext<TableColumnScopeValue>({})
 export const tableColumnPriorityClasses: Record<TableColumnPriority, string> = {
   medium: "@max-2xl:hidden",
   low: "@max-4xl:hidden",
+  lowest: "@max-6xl:hidden",
 }
 
 function formatColumnTemplate(columns: TableColumn[], hidden: TableColumnPriority[]) {
@@ -77,7 +80,7 @@ const tableVariants = variants({
     container: "@container relative",
     table: [
       "grid w-full text-control text-ink",
-      "grid-cols-(--table-columns) @2xl:grid-cols-(--table-columns-md) @4xl:grid-cols-(--table-columns-lg)",
+      "grid-cols-(--table-columns) @2xl:grid-cols-(--table-columns-md) @4xl:grid-cols-(--table-columns-lg) @6xl:grid-cols-(--table-columns-xl)",
       // A sticky header pushes the sticky group headings down by its own height.
       "has-[>[data-sticky]]:[--table-header-height:--spacing(10)]",
     ],
@@ -137,9 +140,11 @@ const tableCellVariants = variants({
   base: [
     "flex min-w-0 items-center gap-2 px-2 first:pl-5 last:pr-5",
     // The trailing inset goes to the last cell still shown: a hidden cell after it stays the
-    // `:last-child`. Below 896px that is a cell followed only by `low` ones, below 672px a cell
-    // followed only by cells with a priority.
-    "@max-4xl:[&:not(:has(~:not([data-priority=low])))]:pr-5",
+    // `:last-child`. Below 1152px that is a cell followed only by `lowest` ones, below 896px one
+    // followed only by `low` and `lowest` ones, below 672px one followed only by cells with a
+    // priority.
+    "@max-6xl:[&:not(:has(~:not([data-priority=lowest])))]:pr-5",
+    "@max-4xl:[&:not(:has(~:not([data-priority=low]):not([data-priority=lowest])))]:pr-5",
     "@max-2xl:[&:not(:has(~:not([data-priority])))]:pr-5",
   ],
 
@@ -202,9 +207,10 @@ export function Table({
 }: TableProps) {
   const styles = tableVariants({ variant })
   const template = {
-    "--table-columns": formatColumnTemplate(columns, ["medium", "low"]),
-    "--table-columns-md": formatColumnTemplate(columns, ["low"]),
-    "--table-columns-lg": formatColumnTemplate(columns, []),
+    "--table-columns": formatColumnTemplate(columns, ["medium", "low", "lowest"]),
+    "--table-columns-md": formatColumnTemplate(columns, ["low", "lowest"]),
+    "--table-columns-lg": formatColumnTemplate(columns, ["lowest"]),
+    "--table-columns-xl": formatColumnTemplate(columns, []),
     ...style,
   } as CSSProperties
   const Root = layout === "list" ? "div" : "table"
@@ -516,19 +522,50 @@ export function TableSparklineCell({ data, ...props }: TableSparklineCellProps) 
   )
 }
 
+const METER_TONES = {
+  neutral: { bar: "bg-ink", ring: "stroke-ink" },
+  brand: { bar: "bg-brand", ring: "stroke-brand" },
+  warning: { bar: "bg-warning", ring: "stroke-warning" },
+  danger: { bar: "bg-danger", ring: "stroke-danger" },
+}
+
+/** The ring's radius in its 16px box, and the length of its circle. */
+const RING_RADIUS = 6
+const RING_LENGTH = 2 * Math.PI * RING_RADIUS
+
 interface TableMeterCellProps extends Omit<TableCellProps, "children"> {
   value: number
   max: number
   /** The usage as text, formatted by the caller: "8,240 of 10,000". */
   label?: ReactNode
+  /**
+   * The meter's colour, for a meter whose state the app knows better than the share does (a
+   * usage lock, a failed job). Left out, it is ink and turns warning past 90%.
+   */
+  tone?: keyof typeof METER_TONES
+  /**
+   * `bar` puts a 48px bar before a muted figure. `ring` puts a 14px ring before the figure in the
+   * cell's own text, for a narrow column whose figure needs the room ("35.5k of 657.2k rows").
+   */
+  layout?: "bar" | "ring"
 }
 
-/** Usage against a limit: a thin bar, then the figure. The bar turns warning past 90%. */
-export function TableMeterCell({ value, max, label, className, ...props }: TableMeterCellProps) {
+/** Usage against a limit: a bar or a ring, then the figure. It turns warning past 90%. */
+export function TableMeterCell({
+  value,
+  max,
+  label,
+  tone,
+  layout = "bar",
+  className,
+  ...props
+}: TableMeterCellProps) {
   const share = max > 0 ? Math.min(value / max, 1) : 0
+  const tones = METER_TONES[tone ?? (share > 0.9 ? "warning" : "neutral")]
+  const ring = layout === "ring"
 
   return (
-    <TableCell className={cn("gap-2", className)} {...props}>
+    <TableCell className={cn(ring ? "gap-1.5" : "gap-2", className)} {...props}>
       <span
         // A native `<meter>` draws its own bar, which the theme's tokens cannot reach.
         // oxlint-disable-next-line jsx-a11y/prefer-tag-over-role
@@ -537,14 +574,44 @@ export function TableMeterCell({ value, max, label, className, ...props }: Table
         aria-valuemin={0}
         aria-valuemax={max}
         aria-label={typeof label === "string" ? label : undefined}
-        className="h-1 w-12 shrink-0 overflow-hidden rounded-full bg-fill"
+        className={cn(
+          "shrink-0",
+          ring ? "flex size-3.5" : "h-1 w-12 overflow-hidden rounded-full bg-fill",
+        )}
       >
-        <span
-          className={cn("block h-full rounded-full bg-ink", share > 0.9 && "bg-warning")}
-          style={{ width: `${share * 100}%` }}
-        />
+        {ring ? (
+          <svg aria-hidden viewBox="0 0 16 16" fill="none" className="size-full -rotate-90">
+            <circle
+              cx="8"
+              cy="8"
+              r={RING_RADIUS}
+              strokeWidth="2.5"
+              className="stroke-fill-strong"
+            />
+            {share > 0 && (
+              <circle
+                cx="8"
+                cy="8"
+                r={RING_RADIUS}
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeDasharray={`${share * RING_LENGTH} ${RING_LENGTH}`}
+                className={tones.ring}
+              />
+            )}
+          </svg>
+        ) : (
+          <span
+            className={cn("block h-full rounded-full", tones.bar)}
+            style={{ width: `${share * 100}%` }}
+          />
+        )}
       </span>
-      {label && <span className="truncate text-ink-muted text-xs tabular-nums">{label}</span>}
+      {label && (
+        <span className={cn("truncate tabular-nums", !ring && "text-ink-muted text-xs")}>
+          {label}
+        </span>
+      )}
     </TableCell>
   )
 }

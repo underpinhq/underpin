@@ -22,7 +22,10 @@ export interface DataTableColumnMeta {
   align?: "start" | "end"
   /** The column's grid track: `minmax(0,1fr)` (the default) for the name, `6rem` for a figure. */
   width?: string
-  /** Where the column gives way as the table narrows: `medium` below 672px, `low` below 896px. */
+  /**
+   * Where the column gives way as the table narrows: `medium` below 672px, `low` below 896px,
+   * `lowest` below 1152px.
+   */
   priority?: TableColumnPriority
   /**
    * Turns the column's name into a button that sorts by it. The first click sorts ascending, or
