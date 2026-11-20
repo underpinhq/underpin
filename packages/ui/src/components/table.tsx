@@ -47,6 +47,13 @@ interface TableContextValue {
 
 const TableContext = createContext<TableContextValue>({ layout: "table", columns: [] })
 
+interface TableColumnScopeValue {
+  align?: "start" | "end"
+  priority?: TableColumnPriority
+}
+
+const TableColumnScopeContext = createContext<TableColumnScopeValue>({})
+
 /**
  * The classes that hide a cell of a column with a priority, on its head and on every cell, so
  * the column drops out whole. `Table` drops its track from the grid at the same widths.
@@ -361,19 +368,37 @@ export interface TableCellProps
  */
 export function TableCell({ align, priority, className, children, ...props }: TableCellProps) {
   const { layout } = use(TableContext)
+  const scope = use(TableColumnScopeContext)
+  const columnPriority = priority ?? scope.priority
   const Cell = layout === "list" ? "div" : "td"
   const text = typeof children === "string" || typeof children === "number"
 
   return (
     <Cell
       role={layout === "list" ? undefined : "cell"}
-      data-priority={priority}
-      className={tableCellVariants({ align, priority, className })}
+      data-priority={columnPriority}
+      className={tableCellVariants({
+        align: align ?? scope.align,
+        priority: columnPriority,
+        className,
+      })}
       {...props}
     >
       {text ? <span className="truncate">{children}</span> : children}
     </Cell>
   )
+}
+
+interface TableColumnScopeProps extends TableColumnScopeValue {
+  children?: ReactNode
+}
+
+/**
+ * Hands the cells inside it their column's `align` and `priority`, for a cell rendered by code
+ * that knows nothing of its column (a `DataTable` column's `cell`). A cell's own props win.
+ */
+export function TableColumnScope({ align, priority, children }: TableColumnScopeProps) {
+  return <TableColumnScopeContext value={{ align, priority }}>{children}</TableColumnScopeContext>
 }
 
 /**
@@ -437,8 +462,16 @@ export function TableIdentityCell({
  * A figure, Number or Money: end-aligned in tabular figures. The caller formats the value, a
  * sum of money with its currency.
  */
-export function TableNumberCell({ align = "end", className, ...props }: TableCellProps) {
-  return <TableCell align={align} className={cn("tabular-nums", className)} {...props} />
+export function TableNumberCell({ align, className, ...props }: TableCellProps) {
+  const scope = use(TableColumnScopeContext)
+
+  return (
+    <TableCell
+      align={align ?? scope.align ?? "end"}
+      className={cn("tabular-nums", className)}
+      {...props}
+    />
+  )
 }
 
 /** A date, muted: pass a `RelativeTime`, which keeps the exact moment for its tooltip. */
@@ -577,9 +610,16 @@ export function TablePersonCell({ avatar, name, ...props }: TablePersonCellProps
  * The row's menu, end-aligned above the row link. It shows on hover, on keyboard focus, while
  * open, and always on a touch screen, which has no hover to give.
  */
-export function TableActionsCell({ align = "end", className, children, ...props }: TableCellProps) {
+export function TableActionsCell({ align, className, children, ...props }: TableCellProps) {
+  const scope = use(TableColumnScopeContext)
+
   return (
-    <TableCell data-slot="actions" align={align} className={className} {...props}>
+    <TableCell
+      data-slot="actions"
+      align={align ?? scope.align ?? "end"}
+      className={className}
+      {...props}
+    >
       <span
         className={cn(
           "relative z-10 flex",
@@ -595,7 +635,10 @@ export function TableActionsCell({ align = "end", className, children, ...props 
 interface TableCheckboxCellProps
   extends
     Omit<TableCellProps, "children" | "onChange">,
-    Pick<ComponentProps<typeof Checkbox>, "checked" | "indeterminate" | "onCheckedChange"> {
+    Pick<
+      ComponentProps<typeof Checkbox>,
+      "checked" | "indeterminate" | "disabled" | "onCheckedChange"
+    > {
   /** Names the checkbox: "Select openalternative.com", "Select all". */
   label: string
   /** Renders a head cell for the header row: the select-all box. Ignored in a list. */
@@ -608,6 +651,7 @@ export function TableCheckboxCell({
   header: headerProp,
   checked,
   indeterminate,
+  disabled,
   onCheckedChange,
   className,
   ...props
@@ -620,6 +664,7 @@ export function TableCheckboxCell({
       aria-label={label}
       checked={checked}
       indeterminate={indeterminate}
+      disabled={disabled}
       className="relative z-10 in-data-inactive:opacity-50"
       onCheckedChange={onCheckedChange}
     />

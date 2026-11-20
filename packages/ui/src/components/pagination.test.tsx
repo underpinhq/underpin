@@ -64,10 +64,46 @@ describe("Pagination", () => {
     for (const button of document.querySelectorAll("button")) {
       expect(button.className).toContain("aspect-square")
     }
-    // The first and last buttons go on a phone, and the word "Showing" with them.
+    // The first and last buttons go on a phone, and the count shortens to "26–50 of 1,204".
     expect(getButton("First page").className).toContain("max-sm:hidden")
     expect(document.querySelector("p > span")?.className).toBe("max-sm:hidden")
+    expect(document.querySelector("p > span:last-child")?.className).toBe("sm:hidden")
+    expect(document.querySelector("p > span:last-child")?.textContent).toBe("26–50 of 1,204")
     expect(await listAxeViolations()).toEqual([])
+
+    await view.unmount()
+  })
+
+  test("takes its words as props, with the figures in the order a language puts them", async () => {
+    const { Pagination } = await import("./pagination")
+
+    const view = await render(
+      <Pagination
+        page={2}
+        pageCount={49}
+        total={1204}
+        perPage={25}
+        format={format}
+        labels={{
+          range: ({ from, to, total }) => (
+            <>
+              {total} 件中 {from}–{to} 件
+            </>
+          ),
+          pageOf: ({ page, pageCount }) => (
+            <>
+              {pageCount} ページ中 {page}
+            </>
+          ),
+          nextPage: "次へ",
+        }}
+        onPageChange={() => {}}
+      />,
+    )
+
+    expect(document.body.textContent).toContain("1,204 件中 26–50 件")
+    expect(document.body.textContent).toContain("49 ページ中 2")
+    expect(listButtonLabels()).toContain("次へ")
 
     await view.unmount()
   })

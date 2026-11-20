@@ -76,6 +76,10 @@
       "types": "./src/lib/load-more.ts",
       "default": "./src/lib/load-more.ts"
     },
+    "./data-table-state": {
+      "types": "./src/lib/data-table-state.ts",
+      "default": "./src/lib/data-table-state.ts"
+    },
     "./time-series": {
       "types": "./src/lib/time-series.ts",
       "default": "./src/lib/time-series.ts"
@@ -121,6 +125,7 @@
     "@base-ui/react": "^1.9.0",
     "@happy-dom/global-registrator": "^21.0.4",
     "@tanstack/react-form": "1.33.5",
+    "@tanstack/react-table": "9.3.1",
     "@types/bun": "^1.4.4",
     "@types/d3-shape": "3",
     "@types/react": "^19.3.0",
@@ -135,6 +140,7 @@
   "peerDependencies": {
     "@base-ui/react": ">=1",
     "@tanstack/react-form": ">=1",
+    "@tanstack/react-table": ">=9",
     "react": ">=19",
     "react-dom": ">=19",
     "tailwindcss": ">=4",
@@ -142,6 +148,9 @@
   },
   "peerDependenciesMeta": {
     "@tanstack/react-form": {
+      "optional": true
+    },
+    "@tanstack/react-table": {
       "optional": true
     }
   },

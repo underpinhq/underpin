@@ -33,6 +33,60 @@ const BAND_CLASSES =
 /** Figures in the band are ink, the words around them muted. */
 const FIGURE_CLASSES = "text-ink"
 
+/** The figures a count label places, each formatted and styled already. */
+export interface PaginationRange {
+  from: ReactNode
+  to: ReactNode
+  total: ReactNode
+}
+
+/** The figures of the page label. */
+export interface PaginationPage {
+  page: ReactNode
+  pageCount: ReactNode
+}
+
+/**
+ * The words of the paged band, each a prop so a product can translate them. A label that holds
+ * figures is a function of them, so a language can put them in its own order.
+ */
+export interface PaginationLabels {
+  /** The count: "Showing 26–50 of 1,204". */
+  range: (range: PaginationRange) => ReactNode
+  /** The count on a phone: "26–50 of 1,204". */
+  rangeShort: (range: PaginationRange) => ReactNode
+  /** "Page 2 of 49". */
+  pageOf: (page: PaginationPage) => ReactNode
+  perPage: string
+  firstPage: string
+  previousPage: string
+  nextPage: string
+  lastPage: string
+}
+
+const PAGINATION_LABELS: PaginationLabels = {
+  range: ({ from, to, total }) => (
+    <>
+      Showing {from}–{to} of {total}
+    </>
+  ),
+  rangeShort: ({ from, to, total }) => (
+    <>
+      {from}–{to} of {total}
+    </>
+  ),
+  pageOf: ({ page, pageCount }) => (
+    <>
+      Page {page} of {pageCount}
+    </>
+  ),
+  perPage: "Per page",
+  firstPage: "First page",
+  previousPage: "Previous page",
+  nextPage: "Next page",
+  lastPage: "Last page",
+}
+
 interface PaginationProps extends Omit<ComponentProps<"div">, "children"> {
   page: number
   pageCount: number
@@ -46,6 +100,8 @@ interface PaginationProps extends Omit<ComponentProps<"div">, "children"> {
   loading?: boolean
   /** Formats each figure in the reader's locale. */
   format?: (value: number) => string
+  /** The band's words, English by default. */
+  labels?: Partial<PaginationLabels>
 }
 
 /**
@@ -65,31 +121,35 @@ export function Pagination({
   onPerPageChange,
   loading = false,
   format = String,
+  labels: labelsProp,
   className,
   ...props
 }: PaginationProps) {
   const perPageLabelId = useId()
+  const labels = { ...PAGINATION_LABELS, ...labelsProp }
   if (total === 0) return null
 
   const { from, to } = getPageRange(page, perPage, total)
+  const range = {
+    from: <span className={FIGURE_CLASSES}>{format(from)}</span>,
+    to: <span className={FIGURE_CLASSES}>{format(to)}</span>,
+    total: <span className={FIGURE_CLASSES}>{format(total)}</span>,
+  }
   const first = page <= 1
   const last = page >= pageCount
 
   return (
     <div aria-busy={loading || undefined} className={cn(BAND_CLASSES, className)} {...props}>
       <p className="truncate">
-        <span className="max-sm:hidden">Showing </span>
-        <span className={FIGURE_CLASSES}>
-          {format(from)}–{format(to)}
-        </span>{" "}
-        of <span className={FIGURE_CLASSES}>{format(total)}</span>
+        <span className="max-sm:hidden">{labels.range(range)}</span>
+        <span className="sm:hidden">{labels.rangeShort(range)}</span>
       </p>
 
       {pageCount > 1 && (
         <div className="flex items-center gap-4">
           {perPageOptions && onPerPageChange && (
             <div className="flex items-center gap-2 max-sm:hidden">
-              <span id={perPageLabelId}>Per page</span>
+              <span id={perPageLabelId}>{labels.perPage}</span>
               <Select
                 value={perPage}
                 disabled={loading}
@@ -112,15 +172,17 @@ export function Pagination({
           )}
 
           <p className="whitespace-nowrap">
-            Page <span className={FIGURE_CLASSES}>{format(page)}</span> of{" "}
-            <span className={FIGURE_CLASSES}>{format(pageCount)}</span>
+            {labels.pageOf({
+              page: <span className={FIGURE_CLASSES}>{format(page)}</span>,
+              pageCount: <span className={FIGURE_CLASSES}>{format(pageCount)}</span>,
+            })}
           </p>
 
           <ButtonGroup>
             <Button
               variant="secondary"
               size="sm"
-              aria-label="First page"
+              aria-label={labels.firstPage}
               prefix={<ChevronsLeftIcon />}
               disabled={loading || first}
               className="max-sm:hidden"
@@ -131,7 +193,7 @@ export function Pagination({
             <Button
               variant="secondary"
               size="sm"
-              aria-label="Previous page"
+              aria-label={labels.previousPage}
               prefix={<ChevronLeftIcon />}
               disabled={loading || first}
               className="max-sm:rounded-l-md max-sm:border-l!"
@@ -140,7 +202,7 @@ export function Pagination({
             <Button
               variant="secondary"
               size="sm"
-              aria-label="Next page"
+              aria-label={labels.nextPage}
               prefix={<ChevronRightIcon />}
               disabled={loading || last}
               className="max-sm:rounded-r-md"
@@ -149,7 +211,7 @@ export function Pagination({
             <Button
               variant="secondary"
               size="sm"
-              aria-label="Last page"
+              aria-label={labels.lastPage}
               prefix={<ChevronsRightIcon />}
               disabled={loading || last}
               className="max-sm:hidden"

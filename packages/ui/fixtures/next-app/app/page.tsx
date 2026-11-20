@@ -27,6 +27,7 @@ import { Steps } from "@underpin/ui/steps"
 import { Switch } from "@underpin/ui/switch"
 import { TextLink } from "@underpin/ui/text-link"
 import { Textarea } from "@underpin/ui/textarea"
+import { DataTables } from "./data-tables"
 
 // A server component that renders every component without "use client", each through its own
 // subpath, and one client component across the boundary. `check-next` reads the markers.
@@ -90,6 +91,7 @@ export default function Home() {
 
       <Skeleton />
       <Steps current={1} total={3} />
+      <DataTables />
     </Page>
   )
 }

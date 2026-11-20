@@ -33,6 +33,10 @@ const MARKERS = [
   "Form section marker",
   "Nav marker",
   'role="switch"',
+  "Paged data table marker",
+  "Infinite data table marker",
+  "Showing",
+  "End of list",
 ]
 
 // Classes the fixture never writes, which only the built components use, and the fonts the

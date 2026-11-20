@@ -255,6 +255,22 @@ description naming its code part.
 - **Views and selection.** Fixed views sit above the toolbar as `Tabs` with
   `variant="underline"`, each with a `TabsCount`. While rows are selected, `BulkActionBar`
   floats at the bottom centre and owns the selection count. A selection covers the current page.
+- **`DataTable`.** `@underpin/ui/data-table` draws these parts from react-table v9 column
+  definitions (an optional peer), so an app writes columns, not markup. Build them with
+  `createDataTableColumnHelper` from `@underpin/ui/data-table-state`: each column's `meta` holds
+  its `align`, `width`, `priority` and `sortable` (`true` sorts ascending first, `"descending"`
+  descending first), and its `cell` returns one of the cell parts,
+  which reads the align and priority from the meta. The state (page, page size, sort, search,
+  filters) is controlled: the package never reads the URL, and each app keeps it in its router's
+  search params. `changeDataTableState` applies the paging rules (a new sort, search, filter or
+  page size goes back to page 1), and the table moves a page past the end to the last page,
+  with `{ replace: true }` so the adapter replaces the history entry. The
+  `pagination` prop picks the footer: `{ type: "pages", total }` or
+  `{ type: "infinite", hasMore, isLoadingMore, onLoadMore }`. `getRowHref` makes rows open
+  their record through `DataTableRowLink` in the name cell, `enableRowSelection` adds the
+  checkbox column (Shift selects a range, a function disables rows), `bulkActions` fills the
+  bar and `isRowInactive` fades archived records. With a `storageKey`, the column picker the toolbar receives remembers its choice in
+  `localStorage`. Every label is a prop with an English default.
 
 ## Icons
 
