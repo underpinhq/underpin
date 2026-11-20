@@ -12,10 +12,11 @@ const buttonInteractiveClasses = interactiveVariants({ interactive: false })
 const buttonVariants = variants({
   base: [
     buttonInteractiveClasses,
-    "group/button inline-flex items-center justify-center font-medium text-start rounded-md hover:z-10",
+    // Lifted while hovered or focused, so its focus outline runs over a neighbour's edge in a
+    // `ButtonGroup` or a toolbar.
+    "group/button inline-flex items-center justify-center font-medium text-start rounded-md hover:z-10 focus-visible:z-10",
     "text-control",
-    "disabled:opacity-50 aria-disabled:opacity-50 data-pending:disabled:opacity-100",
-    "relative transition-[color,background-color,border-color,box-shadow,opacity,translate] duration-150 ease-out-expo",
+    "relative transition-[color,background-color,border-color,box-shadow,translate] duration-150 ease-out-expo",
   ],
 
   variants: {
@@ -38,7 +39,7 @@ const buttonVariants = variants({
       danger: "",
     },
     bordered: {
-      true: "border border-edge-strong shadow-control aria-expanded:border-edge-solid aria-expanded:shadow-none",
+      true: "border border-edge-strong shadow-control aria-expanded:ui-standalone:border-edge-solid aria-expanded:ui-standalone:shadow-none",
     },
     // A fixed height and no vertical padding, so a button lines up with the inputs, pickers
     // and triggers beside it whatever it holds: the control scale in `styles.css`.
@@ -49,61 +50,87 @@ const buttonVariants = variants({
       lg: "h-9 px-3.5 gap-2 text-sm rounded-lg",
     },
     interactive: {
-      // A press sets the button down: it drops 1px and loses its shadow, as a card does. A fixed
+      // A press sets the button down: it loses its shadow and drops 1px, as a card does. A fixed
       // 1px, so a wide button moves as far as a small one, and a move rather than a scale, which
       // would re-rasterise the label on every frame. It goes down at twice the speed it comes
       // back. The `::after` strip stays over the row the button left, or a press on its top pixel
-      // would release outside it and lose the click. Rides `interactive`: a disabled control does
-      // not answer.
-      true: "not-disabled:not-aria-disabled:cursor-pointer aria-disabled:cursor-not-allowed active:not-disabled:not-aria-disabled:translate-y-px active:not-disabled:not-aria-disabled:shadow-none active:not-disabled:not-aria-disabled:duration-75 active:not-disabled:not-aria-disabled:after:absolute active:not-disabled:not-aria-disabled:after:inset-x-0 active:not-disabled:not-aria-disabled:after:-top-0.5 active:not-disabled:not-aria-disabled:after:h-0.5",
+      // would release outside it and lose the click. A member of a `ButtonGroup` stays in line with
+      // its shadow, since either would step it out of the group's outline. Rides `interactive`: a
+      // disabled control does not answer.
+      true: [
+        "not-disabled:not-aria-disabled:cursor-pointer aria-disabled:cursor-not-allowed",
+        "ui-pressed:duration-75 ui-pressed:ui-standalone:shadow-none ui-pressed:ui-standalone:translate-y-px",
+        "ui-pressed:ui-standalone:after:absolute ui-pressed:ui-standalone:after:inset-x-0 ui-pressed:ui-standalone:after:-top-0.5 ui-pressed:ui-standalone:after:h-0.5",
+      ],
     },
   },
 
   compoundVariants: [
-    // A disabled primary button goes flat and grey rather than fading: ink at half strength
-    // reads as a dimmed slab, while the fill reads as a button that is not ready yet. A pending
-    // one keeps its colour, since it is busy rather than unavailable.
+    // A disabled button fades its label and icons to half strength but keeps its fill and edge, so
+    // a disabled member of a `ButtonGroup` still draws its part of the outline. On its own it also
+    // goes flat. A pending button keeps its colour, since it is busy rather than unavailable.
+    {
+      variant: ["secondary", "soft", "ghost"],
+      class: [
+        "not-data-pending:disabled:*:opacity-50 not-data-pending:disabled:ui-standalone:shadow-none",
+        "aria-disabled:*:opacity-50 aria-disabled:ui-standalone:shadow-none",
+      ],
+    },
+    // A disabled primary button goes flat and grey instead: ink at half strength reads as a
+    // dimmed slab, while the fill reads as a button that is not ready yet.
     {
       variant: "primary",
       class: [
-        "not-data-pending:disabled:bg-fill not-data-pending:disabled:text-ink-muted not-data-pending:disabled:shadow-none not-data-pending:disabled:opacity-100",
-        "aria-disabled:bg-fill aria-disabled:text-ink-muted aria-disabled:shadow-none aria-disabled:opacity-100",
+        "not-data-pending:disabled:bg-fill not-data-pending:disabled:text-ink-muted not-data-pending:disabled:shadow-none",
+        "aria-disabled:bg-fill aria-disabled:text-ink-muted aria-disabled:shadow-none",
       ],
     },
     // Only a button that does something answers the pointer. A reading drawn as a button, with
-    // `interactive` off, keeps its resting look under the cursor.
+    // `interactive` off, keeps its resting look under the cursor. Each variant darkens one step
+    // past its hover when pressed, which is the whole press of a `ButtonGroup` member.
     {
       variant: "primary",
       interactive: true,
-      class: "hover:not-aria-disabled:bg-ink/90",
+      class: "hover:not-disabled:not-aria-disabled:bg-ink/90 ui-pressed:bg-ink/80",
     },
     {
       variant: ["secondary", "ghost"],
       interactive: true,
-      class: "hover:not-aria-disabled:bg-fill-subtle hover:not-aria-disabled:text-ink",
+      class:
+        "hover:not-disabled:not-aria-disabled:bg-fill-subtle hover:not-disabled:not-aria-disabled:text-ink ui-pressed:bg-fill",
     },
-    // A bordered button's edge darkens under the pointer, as a field's and a checkbox's do.
+    // A bordered button's edge darkens under the pointer, as a field's and a checkbox's do. Not in
+    // a `ButtonGroup`, where a member shares its left edge with the one before it, so a darker
+    // edge would stop short on that side: a member answers with its fill alone.
     {
       bordered: true,
       interactive: true,
-      class: "hover:not-aria-disabled:border-edge-solid",
+      class: "hover:ui-standalone:not-disabled:not-aria-disabled:border-edge-solid",
     },
     {
       variant: "soft",
       interactive: true,
-      class: "hover:not-aria-disabled:bg-fill-strong hover:not-aria-disabled:text-ink",
+      // The fill has no step past `fill-strong`, so a pressed soft button keeps its hover fill.
+      class:
+        "hover:not-disabled:not-aria-disabled:bg-fill-strong hover:not-disabled:not-aria-disabled:text-ink ui-pressed:bg-fill-strong",
     },
     {
       variant: "primary",
       tone: "danger",
       class:
-        "bg-danger text-danger-on hover:not-aria-disabled:bg-danger/90 aria-expanded:bg-danger/90",
+        "bg-danger text-danger-on hover:not-disabled:not-aria-disabled:bg-danger/90 aria-expanded:bg-danger/90",
+    },
+    {
+      variant: "primary",
+      tone: "danger",
+      interactive: true,
+      class: "ui-pressed:bg-danger/80",
     },
     {
       variant: ["secondary", "soft", "ghost"],
       tone: "danger",
       class:
-        "text-danger-ink hover:not-aria-disabled:text-danger-ink aria-expanded:text-danger-ink",
+        "text-danger-ink hover:not-disabled:not-aria-disabled:text-danger-ink aria-expanded:text-danger-ink",
     },
   ],
 

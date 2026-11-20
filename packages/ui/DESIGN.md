@@ -103,7 +103,8 @@ Dev Mode and the `use_figma` tool both read them. Page `16 · Onboarding` is the
   takes its tone from what it sits on; depth comes only from the shadow tokens (control, card,
   tooltip, popup, modal, drawer, well). The strength follows the role, so related things match:
   everything operated (a field, a button, a raised key, a checkbox) takes the strong edge and
-  darkens to the solid edge under the pointer; a card, a dialog and a divider take the plain
+  darkens to the solid edge under the pointer, except a member of a button group, whose edges its
+  neighbours share, so it answers with its fill; a card, a dialog and a divider take the plain
   edge; a menu, a popover, a tooltip and a toast take the float edge, plain in light and strong
   in dark, where a shadow barely shows. A selected row or radio card is a grey fill. The chosen
   segment is a raised key flush with its track, and a switch's knob a raised key inset 2px in its
@@ -115,10 +116,13 @@ Dev Mode and the `use_figma` tool both read them. Page `16 · Onboarding` is the
   form reads as one column of openings. A control that runs a command is a button, raised; a
   toolbar's period picker is one, since it sits among commands.
 - A control answers a press. A raised surface loses its drop and sits on the page: a button
-  or a card with one link drops 1px, a menu row sinks into a well. Shadows under anything
-  resting on the page stay crisp, a 1px drop and one short layer, never a long soft blur; only
-  what floats over it (a popup, a dialog, a drawer) adds one faint long layer, so it separates
-  from a busy chart or table beneath.
+  or a card with one link drops 1px, a menu row sinks into a well. A button group's member stays
+  in line and darkens instead. Shadows under anything resting on the page stay crisp, a 1px drop
+  and one short layer, never a long soft blur; only what floats over it (a popup, a dialog, a
+  drawer) adds one faint long layer, so it separates from a busy chart or table beneath.
+- A disabled button fades its label and icons to half strength and keeps its fill and edge, so a
+  disabled member of a button group still draws its seams; on its own it also goes flat. A
+  disabled primary turns grey instead: a grey fill and a muted label.
 - Focus is one 2px ring in the focus blue, the same on every control, row, link and cell: drawn
   over the element's own edge, 1px in and 1px out with no gap, so it reads as the edge turning
   blue. On an invalid control the ring is the danger red, so the field an error belongs to stays

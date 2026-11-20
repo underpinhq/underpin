@@ -189,14 +189,15 @@ export function Pagination({
               onClick={() => onPageChange(1)}
             />
             {/* On a phone the first and last buttons are gone, so the inner two take the
-                group's ends: their outer corners and the left edge the group drops. */}
+                group's ends: their outer corners and the left edge the group drops. Marked
+                important, since the group's rules for its members outrank a member's own. */}
             <Button
               variant="secondary"
               size="sm"
               aria-label={labels.previousPage}
               prefix={<ChevronLeftIcon />}
               disabled={loading || first}
-              className="max-sm:rounded-l-md max-sm:border-l!"
+              className="max-sm:rounded-l-md! max-sm:border-l!"
               onClick={() => onPageChange(page - 1)}
             />
             <Button
@@ -205,7 +206,7 @@ export function Pagination({
               aria-label={labels.nextPage}
               prefix={<ChevronRightIcon />}
               disabled={loading || last}
-              className="max-sm:rounded-r-md"
+              className="max-sm:rounded-r-md!"
               onClick={() => onPageChange(page + 1)}
             />
             <Button

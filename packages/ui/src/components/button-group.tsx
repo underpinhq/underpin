@@ -2,13 +2,17 @@ import type { ComponentProps } from "react"
 import { cn } from "../lib/variants"
 
 /**
- * Buttons joined into one control. Each member keeps its own border and the group draws
- * nothing: every member after the first drops its left border, so the edge of the one before it
- * is the divider. Edges are translucent, so two borders laid over each other would draw a darker
- * seam. The inner corners square off. Meant for bordered (`secondary`) buttons. A hovered, open
- * or focused member is lifted above its neighbours, so its focus outline runs round all four
- * sides. A pressed member stays in line, since a 1px drop would step it out of the group, and
- * darkens instead.
+ * Buttons joined into one control, meant for bordered (`secondary`) buttons. The group only
+ * shapes its members: every member after the first drops its left border, so the edge of the one
+ * before it is the divider, and the inner corners square off. Edges are translucent, so two
+ * borders laid over each other would draw a darker seam. Each member paints its fill inside its
+ * border, over the group's surface, so every edge lies on the same colour, and a hovered or
+ * pressed fill cannot darken three of a member's edges and not the fourth, which its neighbour
+ * draws. The group's corners are a medium button's.
+ *
+ * Each member's states stay its own, and `Button` keeps them inside its box when it sits in a
+ * group (the `ui-standalone` variant in `styles.css`): no darker edge on hover, no drop on press,
+ * a disabled member keeps its edge.
  *
  * The ends are found among the members, not the children: an open popup trigger gets
  * focus-guard and `aria-owns` spans rendered beside it, a member under `DisabledReason` a
@@ -19,13 +23,12 @@ import { cn } from "../lib/variants"
 export function ButtonGroup({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
+      data-slot="button-group"
       className={cn(
-        "inline-flex [&>*]:relative [&>*]:rounded-none",
-        "[&>*]:active:translate-y-0! [&>:not([aria-disabled=true])]:active:bg-fill!",
-        "[&>*:hover]:z-10 [&>*:focus-visible]:z-10 [&>*[data-popup-open]]:z-10",
-        "[&>:nth-child(1_of_:not([data-base-ui-focus-guard]):not([aria-owns]):not([hidden]))]:rounded-l-md",
-        "[&>:nth-last-child(1_of_:not([data-base-ui-focus-guard]):not([aria-owns]):not([hidden]))]:rounded-r-md",
+        "inline-flex rounded-md bg-surface [&>*]:bg-clip-padding",
+        "[&>:not(:nth-child(1_of_:not([data-base-ui-focus-guard]):not([aria-owns]):not([hidden])))]:rounded-l-none",
         "[&>:not(:nth-child(1_of_:not([data-base-ui-focus-guard]):not([aria-owns]):not([hidden])))]:border-l-0",
+        "[&>:not(:nth-last-child(1_of_:not([data-base-ui-focus-guard]):not([aria-owns]):not([hidden])))]:rounded-r-none",
         className,
       )}
       {...props}

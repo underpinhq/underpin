@@ -21,6 +21,17 @@
 @source "./";
 
 /*
+ * `ui-pressed`: held down by a pointer or the keyboard, on a control that can run. `ui-standalone`:
+ * not a member of a `ButtonGroup`, whose members share their edges and stay in line, so a darker
+ * edge or a 1px drop would break the group's outline. Both reach every consumer's Tailwind build
+ * through this stylesheet, so they carry the `ui-` prefix to stay clear of a product's own names.
+ * `ui-pressed` takes two `:not()`s, not one with a list, to match the specificity of a hover
+ * written `hover:not-disabled:not-aria-disabled:`; it comes later in the output, so it wins.
+ */
+@custom-variant ui-pressed (&:active:not(:disabled):not([aria-disabled="true"]));
+@custom-variant ui-standalone (&:not([data-slot="button-group"] > *));
+
+/*
  * Every colour is a `light-dark()` pair, resolved by the element's `color-scheme`: unset follows
  * the OS, `[data-theme="dark"|"light"]` forces one (see the base layer below). The set has seven
  * groups, and every token a component uses is one of them:
