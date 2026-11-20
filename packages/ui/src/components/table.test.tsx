@@ -61,6 +61,44 @@ describe("Table", () => {
     await view.unmount()
   })
 
+  test("gives the trailing inset to the last cell still shown as columns drop", async () => {
+    const { Table, TableBody, TableCell, TableRow } = await import("./table")
+    const view = await render(
+      <Table
+        aria-label="Events"
+        columns={[
+          { width: "6rem" },
+          { width: "1fr" },
+          { width: "6rem", priority: "medium" },
+          { width: "5rem", priority: "low" },
+        ]}
+      >
+        <TableBody>
+          <TableRow>
+            <TableCell>Time</TableCell>
+            <TableCell>Page</TableCell>
+            <TableCell priority="medium">Country</TableCell>
+            <TableCell priority="low">Device</TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>,
+    )
+
+    const [time, page, country, device] = document.querySelectorAll("td")
+    const lowGone = "@max-4xl:[&:not(:has(~:not([data-priority=low])))]:pr-5"
+    const bothGone = "@max-2xl:[&:not(:has(~:not([data-priority])))]:pr-5"
+    expect(country?.getAttribute("data-priority")).toBe("medium")
+    expect(device?.getAttribute("data-priority")).toBe("low")
+    expect(time?.hasAttribute("data-priority")).toBe(false)
+    // The rules match the cell whose later siblings are all gone at that width, which happy-dom
+    // cannot evaluate: it has no relative `:has()`. Below 896px Country ends the row, below
+    // 672px Page does.
+    for (const cell of [time, page, country]) expect(cell?.className).toContain(lowGone)
+    expect(page?.className).toContain(bothGone)
+
+    await view.unmount()
+  })
+
   test("draws one line under the header and none above the first row", async () => {
     const { TableBody, TableCell, TableRow } = await import("./table")
     const view = await renderTable(

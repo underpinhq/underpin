@@ -127,7 +127,14 @@ const tableRowVariants = variants({
 })
 
 const tableCellVariants = variants({
-  base: "flex min-w-0 items-center gap-2 px-2 first:pl-5 last:pr-5",
+  base: [
+    "flex min-w-0 items-center gap-2 px-2 first:pl-5 last:pr-5",
+    // The trailing inset goes to the last cell still shown: a hidden cell after it stays the
+    // `:last-child`. Below 896px that is a cell followed only by `low` ones, below 672px a cell
+    // followed only by cells with a priority.
+    "@max-4xl:[&:not(:has(~:not([data-priority=low])))]:pr-5",
+    "@max-2xl:[&:not(:has(~:not([data-priority])))]:pr-5",
+  ],
 
   variants: {
     align: {
@@ -320,6 +327,7 @@ export function TableHead({
     <th
       role="columnheader"
       scope="col"
+      data-priority={priority}
       aria-sort={sort}
       className={tableCellVariants({
         align,
@@ -359,6 +367,7 @@ export function TableCell({ align, priority, className, children, ...props }: Ta
   return (
     <Cell
       role={layout === "list" ? undefined : "cell"}
+      data-priority={priority}
       className={tableCellVariants({ align, priority, className })}
       {...props}
     >
