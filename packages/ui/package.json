@@ -72,6 +72,10 @@
       "types": "./src/lib/media.ts",
       "default": "./src/lib/media.ts"
     },
+    "./load-more": {
+      "types": "./src/lib/load-more.ts",
+      "default": "./src/lib/load-more.ts"
+    },
     "./time-series": {
       "types": "./src/lib/time-series.ts",
       "default": "./src/lib/time-series.ts"

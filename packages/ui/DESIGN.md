@@ -212,6 +212,50 @@ a table where the frame has prose), and only as part of design work on that scre
 - **Chart tooltip notes** are one line each, truncated with an ellipsis; at most two notes, then
   "and N more".
 
+## Tables
+
+The parts live in `@underpin/ui/table`, the toolbar in `@underpin/ui/table-toolbar`, the
+footer band in `@underpin/ui/pagination` and the selection bar in
+`@underpin/ui/bulk-action-bar`. Figma has one component per part on `Components · Tables`, each
+description naming its code part.
+
+- **Table, list or `BarList`.** A table holds records a reader compares across named columns:
+  sites, users, invoices. A list (`layout="list"`) holds records with no column names, where each
+  row reads on its own: members, API keys. A `BarList` holds one figure per label, ranked, with a
+  bar behind it: the dashboard's breakdowns. Never a table for a ranking, never a bar list for
+  records.
+- **Grid, not table layout.** `Table` sets one grid template from its `columns`, and the header
+  and every row take it as a subgrid. A row is a positioned box, so a `TableRowLink` on the name
+  stretches over the whole row, in Safari too. The checkbox, the menu and any other control in a
+  row sit above that link (`relative z-10`).
+- **Row sizes.** Compact is 32px (a feed, a dense list), default 44px (one line), identity 52px
+  (a name with a muted line under it). A skeleton row takes the size of the rows it stands in for.
+- **Lines.** The header is 40px on the surface, with one line under it in the card's edge
+  colour. Rows part with the subtle edge, and the first row draws none, so two lines never
+  stack. An empty, loading or error body keeps the header and its line.
+- **Hover.** Only a row that opens something takes the hover fill (the canvas). A row with no
+  link keeps its background, and only its menu answers. A selected row keeps the subtle fill.
+- **Columns that give way.** A column with `priority: "medium"` drops below a 672px table, one
+  with `"low"` below 896px. Pass the same priority to the column's head and cells. The name
+  column never drops.
+- **States.** Five skeleton rows on a first load. While a later page loads, keep the old rows
+  and dim them. `TableMessage` replaces the rows: `empty` with the create action, `filtered`
+  with a way to clear the filters, `error` with a retry.
+- **Footer modes.** Paged: the `Pagination` band, "Showing 26–50 of 1,204", an optional
+  per-page select, "Page 2 of 49" and the joined first, previous, next and last buttons. A
+  single page keeps the count and drops the controls. Infinite: `PaginationInfinite`, the count,
+  then "Loading more…" while the next batch loads and "End of list" at the end. A table that
+  shows everything at once (the sites list) has no band.
+- **Which footer.** Page a table a reader works through and returns to a place in (admin
+  lists, reports). Load as it scrolls when the newest rows matter most and a reader rarely goes
+  far (an event feed).
+- **Toolbar.** Search first (200px), then a `TableFacetFilter` for each of the two or three
+  common fields, the Filter button and its `TableFilterChip`s, which wrap. The sort and column
+  pickers sit at the end. Page actions stay in the page header.
+- **Views and selection.** Fixed views sit above the toolbar as `Tabs` with
+  `variant="underline"`, each with a `TabsCount`. While rows are selected, `BulkActionBar`
+  floats at the bottom centre and owns the selection count. A selection covers the current page.
+
 ## Icons
 
 Hugeicons at stroke 1.75 in their 24px grid: 16px in rows and menus, 14px inside buttons. The
