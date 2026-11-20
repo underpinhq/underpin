@@ -1,5 +1,11 @@
 # @underpin/ui
 
+## 2.2.0
+
+### Minor Changes
+
+- Add `TableActionsMenu`, the row's "…" menu for a `TableActionsCell`. `TableMessage` with `kind="error"` takes `onRetry` and draws a "Try again" button, its label set by `retryLabel`. `DataTable` no longer needs `state` and `onStateChange` for a table with nothing to page, sort or search. A paged `DataTable` takes `total: undefined` while no page has arrived: it then draws no band and keeps the page the state asks for, so a failed later page shows its error instead of moving the reader to page 1.
+
 ## 2.1.0
 
 ### Minor Changes
