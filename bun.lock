@@ -130,7 +130,7 @@
     },
     "packages/ui": {
       "name": "@underpin/ui",
-      "version": "2.5.0",
+      "version": "2.6.0",
       "dependencies": {
         "@fontsource-variable/geist-mono": "^5.3.0",
         "@hugeicons/core-free-icons": "^4.4.0",

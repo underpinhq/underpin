@@ -1,5 +1,22 @@
 # @underpin/ui
 
+## 2.6.0
+
+### Minor Changes
+
+- Add the parts that settings and detail pages kept as local copies. Every label is a prop with an English default.
+
+  - `SaveChangesButton` (`@underpin/ui/form`) is a settings form's submit. It stays disabled, with "No changes to save." on hover, until a field differs from its default value, and shows the form's pending state like `SubmitButton`. It is in `formComponents`, so a form hook built from them renders it as `<form.SaveChangesButton />`. Change its text with `children` and the reason with `unchangedReason`.
+  - `DangerZoneCard` (`@underpin/ui/danger-zone-card`) is the last card of a settings page, headed "Danger zone". Pass `title`, `description` and `id` to change it.
+  - `DangerRow` (`@underpin/ui/danger-row`) is one row of that card: a label, a description and a danger button that opens a `ConfirmDialog`. It takes the dialog's `confirmText`, `confirmMatch`, `onConfirm`, `isPending`, `onError` and labels. Return a promise from `onConfirm` (a `mutateAsync`) and the confirmation closes once it resolves. For an action that returns nothing, pass `open` and `onOpenChange` and close it yourself. `disabledReason` locks the button with a reason, `isLoading` locks it without one, and `onRetry` puts a retry in its place when what it waits for failed to load.
+  - `FactsCard` and `CopyFact` (`@underpin/ui/facts-card`) list read-only facts about a record in a detail page's side column. A missing value reads as a dash, and `CopyFact` shows a machine value in mono with a copy button. Pass `record` with the ID, `createdAt` and `updatedAt` to close the card with the ID, Created and Updated, the stamps through `RelativeTime`. `time` sets their `locale`, `timeZone` and `hourCycle` as plain data, so a server component can pass it, and `renderTime` draws each stamp yourself.
+
+  `ConfirmDialog`, `ConfirmItemDialog` and `DangerRow` take three new options. `onConfirm` keeps its signature.
+
+  - `confirmMatch="loose"` accepts the typed text whatever its case and the spaces around it.
+  - `onConfirmTextChange` reports the typed text on every change, for a server that checks it again.
+  - `confirmDisabledReason` keeps the confirm button locked with that reason, and Enter does not submit, for example until a required field in `children` is filled.
+
 ## 2.5.0
 
 ### Minor Changes
