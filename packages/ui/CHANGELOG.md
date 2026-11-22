@@ -1,5 +1,21 @@
 # @underpin/ui
 
+## 2.5.0
+
+### Minor Changes
+
+- Add `PerformanceCard` (`@underpin/ui/performance-card`), the stats card of a dashboard: a strip of figures whose selected one is the series drawn under it, in one card. Pass `series` (each with an `id`, `label`, `value`, `format`, `hint`, `trend`, `className` and the `chart` it draws) and the card renders the strip and switches the chart when a figure is picked. It keeps the selection itself, or follows `value` and `onValueChange`. A selection with no chart behind it falls back to the first series that has one, and with a single chart the figures are not pressable. For figures `series` cannot describe, pass a `strip` of your own and the selected `chart` instead. The card draws the chart's loading skeleton, a dimmed and busy chart while an earlier range is still on screen, your error state when there is nothing to draw, and an empty state. A `header` slot holds your title and range control, and `children` follow the chart.
+
+  Add `Trend` (`@underpin/ui/trend`), the arrow and percentage for a change against a compared period. Use it as a `StatStripItem`'s `trend`, in a table cell or beside any figure. Set `invert` for a figure where down is good, and `precision` to read the change to decimals of a percent. A half rounds away from zero both ways, and a change that is not a finite number renders nothing.
+
+  Add `ZonedTime` (`@underpin/ui/zoned-time`): a short stamp whose hover reads how long ago to the second, then the same instant on UTC, on the `timeZone` you pass and on the reader's clock.
+
+  `RelativeTime` now formats both of its readings when you leave them out: how long ago as its text, and the full moment on `timeZone`'s clock as its tooltip. `tooltip` is optional. A server render prints the full moment, and the browser replaces it with how long ago and reads it again every minute, so a page never shows a reading frozen at build time or when it opened. `hourCycle` sets a 12-hour or 24-hour clock on `RelativeTime`, `ZonedTime` and the formatters. The formatters are exported from `@underpin/ui/day`: `formatAgo`, `formatExactAgo`, `formatMoment` and `formatZonedStamps`.
+
+  `TimeSeriesChart` now loads its chart code on demand, showing `TimeSeriesChartSkeleton` until it arrives. A load that fails shows a retry in the chart's place instead of breaking the page. `aria-label` names the chart for a screen reader where `label` says too little. Import it from `@underpin/ui/time-series-chart` directly and drop any lazy wrapper of your own. Call `loadTimeSeriesChart()` to start loading the code early, for example in a route loader.
+
+  `StatStripItem` takes `loading`, which draws a skeleton in place of the figure and hides the trend.
+
 ## 2.4.0
 
 ### Minor Changes
