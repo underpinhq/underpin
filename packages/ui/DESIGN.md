@@ -193,9 +193,9 @@ a table where the frame has prose), and only as part of design work on that scre
 - **Phone toolbar**: one row: the range picker fills it, then Filter, then the page's action as
   an icon-only button (Share, Embed, Refresh keeps its label). The comparison and the
   granularity are groups at the end of the range menu (`PeriodPickers`, through `RangePicker`'s
-  children). With no filter on,
-  Filter opens the picker; with filters on it shows their count and opens a sheet listing the
-  chips, with Add filter, Clear and Done (`FilterBar` with `collapse`). The row never grows.
+  children). With no filter on, Filter opens the picker; with filters on it shows their count
+  and opens a sheet listing the chips, with Add filter, Clear and Done (`FilterBar` with
+  `collapse`). The row never grows.
 - **Compare control**: every toolbar with deltas uses the same compare picker, a secondary button
   with the compare icon, the name of the comparison it is on ("vs. previous period", off
   included) and a chevron. On a phone it is a group at the end of the range menu. The funnel

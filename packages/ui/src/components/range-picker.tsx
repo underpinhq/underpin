@@ -42,8 +42,11 @@ export interface RangePickerStep {
 export interface RangePickerProps<T extends string | number> {
   /** The picked row, or `undefined` while the range is one no row names. */
   value: T | undefined
-  /** The trigger's text: the range's name. */
-  label: ReactNode
+  /**
+   * The trigger's text: the range's name. Defaults to the picked row's label, so only a range no
+   * row names needs one.
+   */
+  label?: ReactNode
   /** The menu's rows, in the groups a separator divides. */
   presets: RangePickerPreset<T>[][]
   /** Runs on every click of a row, the picked one included, so a row can reopen its own panel. */
@@ -158,7 +161,7 @@ export function RangePicker<T extends string | number>({
             />
           }
         >
-          {label}
+          {label ?? presets.flat().find(preset => preset.value === value)?.label}
         </MenuTrigger>
 
         <MenuContent label={menuLabel} align="end">

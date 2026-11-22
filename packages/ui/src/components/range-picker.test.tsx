@@ -117,4 +117,43 @@ describe("RangePicker", () => {
 
     await view.unmount()
   })
+
+  test("reads the picked row's label without one, and clicks of the picked row still count", async () => {
+    const { RangePicker } = await import("./range-picker")
+    const picked: number[] = []
+
+    const view = await render(
+      <RangePicker value={14} presets={PRESETS} onChange={value => picked.push(value)} />,
+    )
+
+    const trigger = document.querySelector<HTMLElement>("button")
+    expect(trigger?.textContent).toBe("Last 14 days")
+    await click(trigger as HTMLElement)
+
+    const row = document.querySelector<HTMLElement>('[role="menuitemradio"][aria-checked="true"]')
+    expect(row?.textContent).toStartWith("Last 14 days")
+    await click(row as HTMLElement)
+    expect(picked).toEqual([14])
+
+    await view.unmount()
+  })
+
+  test("checks no row while the range is one no row names", async () => {
+    const { RangePicker } = await import("./range-picker")
+
+    const view = await render(
+      <RangePicker
+        value={undefined}
+        label="Nov 2 – 9, 2026"
+        presets={PRESETS}
+        onChange={() => {}}
+      />,
+    )
+
+    await click(document.querySelector<HTMLElement>("button") as HTMLElement)
+    expect(document.querySelectorAll('[role="menuitemradio"]')).toHaveLength(3)
+    expect(document.querySelector('[role="menuitemradio"][aria-checked="true"]')).toBeNull()
+
+    await view.unmount()
+  })
 })
