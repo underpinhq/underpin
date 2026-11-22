@@ -10,20 +10,13 @@ import {
   use,
 } from "react"
 import { rowPressClasses } from "../lib/classes"
-import {
-  AlertIcon,
-  ArrowDownIcon,
-  ArrowUpIcon,
-  FilterIcon,
-  MoreIcon,
-  RefreshIcon,
-} from "../lib/icons"
+import { AlertIcon, ArrowDownIcon, ArrowUpIcon, FilterIcon, RefreshIcon } from "../lib/icons"
 import { cn, variants, type VariantProps } from "../lib/variants"
 import { Button } from "./button"
 import { Checkbox } from "./checkbox"
 import { CopyButton } from "./copy-button"
 import { EmptyState } from "./empty-state"
-import { Menu, MenuContent, MenuTrigger } from "./menu"
+import { ActionsMenu } from "./menu"
 import { Skeleton } from "./skeleton"
 import { Sparkline } from "./sparkline"
 
@@ -717,28 +710,11 @@ interface TableActionsMenuProps {
 }
 
 /**
- * The row's "…" menu, for a `TableActionsCell`: a quiet ghost trigger that grows to finger size
- * on a touch screen, and a menu aligned to the row's end.
+ * The row's "…" menu, for a `TableActionsCell`: `ActionsMenu` at its `row` placement, a quiet
+ * ghost trigger that grows to finger size on a touch screen, and a menu aligned to the row's end.
  */
-export function TableActionsMenu({ label, className, children }: TableActionsMenuProps) {
-  return (
-    <Menu>
-      <MenuTrigger
-        render={
-          <Button
-            aria-label={label}
-            variant="ghost"
-            size="sm"
-            prefix={<MoreIcon />}
-            className={cn("text-ink-muted pointer-coarse:size-10", className)}
-          />
-        }
-      />
-      <MenuContent label={label} align="end">
-        {children}
-      </MenuContent>
-    </Menu>
-  )
+export function TableActionsMenu(props: TableActionsMenuProps) {
+  return <ActionsMenu placement="row" {...props} />
 }
 
 interface TableCheckboxCellProps

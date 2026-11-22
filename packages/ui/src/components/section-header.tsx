@@ -1,10 +1,12 @@
 "use client"
 
 import { useRender } from "@base-ui/react/use-render"
-import { type ComponentProps, createContext, type ReactNode, use } from "react"
+import { type ComponentProps, createContext, type ReactElement, type ReactNode, use } from "react"
 import { descriptionClasses } from "../lib/classes"
+import { ChevronLeftIcon } from "../lib/icons"
 import { cn, variants, type VariantProps } from "../lib/variants"
 import { Heading, type HeadingProps } from "./heading"
+import { InlineAction } from "./inline-action"
 import { Stack } from "./stack"
 
 const sectionHeaderVariants = variants({
@@ -181,6 +183,26 @@ function SectionHeaderBack({ className, ...props }: ComponentProps<"div">) {
   )
 }
 
+interface BackLinkProps {
+  /** The link to the list, rendered as the control: a router's `<Link to="/users" />`. */
+  render: ReactElement
+  /** The list's name: "Users". */
+  children: ReactNode
+}
+
+/**
+ * The link back to the list a record belongs to, for the header's `back` slot: a chevron and
+ * the list's name, muted, the same on every detail page.
+ */
+function BackLink({ render, children }: BackLinkProps) {
+  return (
+    <InlineAction touchTarget className="gap-1" render={render}>
+      <ChevronLeftIcon />
+      {children}
+    </InlineAction>
+  )
+}
+
 type SectionHeaderBodyProps = ComponentProps<"div"> & {
   /**
    * Leading visual, e.g. an entity avatar.
@@ -256,6 +278,7 @@ function SectionHeaderActions({ className, ...props }: ComponentProps<typeof Sta
 }
 
 export {
+  BackLink,
   SectionHeader,
   SectionHeaderTitle,
   SectionHeaderBack,

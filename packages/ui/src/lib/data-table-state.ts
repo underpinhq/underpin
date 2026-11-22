@@ -9,6 +9,9 @@ import {
   tableFeatures,
 } from "@tanstack/react-table"
 import type { TableColumnPriority } from "../components/table"
+import type { DataTableSort, DataTableState } from "./data-table-types"
+
+export type { DataTableSort, DataTableState } from "./data-table-types"
 
 /**
  * The model behind `DataTable`: its react-table features, the meta a column carries, and the
@@ -55,25 +58,6 @@ export type DataTableFeatures = typeof DATA_TABLE_FEATURES
  */
 export function createDataTableColumnHelper<TData extends RowData>() {
   return createColumnHelper<DataTableFeatures, TData>()
-}
-
-export interface DataTableSort {
-  /** The column's id. */
-  id: string
-  desc: boolean
-}
-
-/** What a table shows, owned by the app. */
-export interface DataTableState {
-  /** 1-based. Read by a paged table, left out by one that loads as it scrolls. */
-  page?: number
-  /** Rows on a page. Read by a paged table. */
-  perPage?: number
-  /** Left out while the server's own order applies, so no column shows an arrow. */
-  sort?: DataTableSort
-  search?: string
-  /** The chosen values of each filtered field, by field. */
-  filters?: Record<string, string[]>
 }
 
 /** The page size of a paged table whose state names none. */

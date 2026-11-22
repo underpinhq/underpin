@@ -11,7 +11,7 @@ import {
   popupSeparatorClasses,
   popupSurfaceClasses,
 } from "../lib/classes"
-import { CheckIcon } from "../lib/icons"
+import { CheckIcon, MoreIcon } from "../lib/icons"
 import {
   SEGMENTED_INDICATOR_BOX,
   SEGMENTED_UNMEASURED_KEY,
@@ -20,6 +20,7 @@ import {
 } from "../lib/segmented"
 import { findShortcutRow, toHotkey } from "../lib/shortcuts"
 import { cn } from "../lib/variants"
+import { Button } from "./button"
 import { useDisabledReason } from "./disabled-reason"
 import { Kbd } from "./kbd"
 import { Tooltip } from "./tooltip"
@@ -340,7 +341,47 @@ function MenuShortcut({ className, children, ...props }: ComponentProps<typeof K
   )
 }
 
+interface ActionsMenuProps {
+  /** Names the menu and its trigger for a screen reader: "Actions for figma.com". */
+  label: string
+  /**
+   * Where the menu sits: a list row or a card (`row`, a quiet ghost trigger that grows to finger
+   * size on a touch screen), or a page header after the page's primary action (`page`, a
+   * secondary button as tall as the actions beside it).
+   */
+  placement?: "row" | "page"
+  /** Classes for the trigger, e.g. its place on a card. */
+  className?: string
+  children: ReactNode
+}
+
+/** The "…" menu of a list row, a card or a page header, aligned to the trigger's end. */
+function ActionsMenu({ label, placement = "row", className, children }: ActionsMenuProps) {
+  const trigger =
+    placement === "row" ? (
+      <Button
+        aria-label={label}
+        variant="ghost"
+        size="sm"
+        prefix={<MoreIcon />}
+        className={cn("text-ink-muted pointer-coarse:size-10", className)}
+      />
+    ) : (
+      <Button aria-label={label} variant="secondary" prefix={<MoreIcon />} className={className} />
+    )
+
+  return (
+    <Menu>
+      <MenuTrigger render={trigger} />
+      <MenuContent label={label} align="end">
+        {children}
+      </MenuContent>
+    </Menu>
+  )
+}
+
 export {
+  ActionsMenu,
   Menu,
   MenuCheckboxItem,
   MenuContent,

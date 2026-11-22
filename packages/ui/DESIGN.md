@@ -162,15 +162,15 @@ a table where the frame has prose), and only as part of design work on that scre
 ## Recipes
 
 - **Page header**: every route opens with one `SectionHeader` at `size="page"`, the "Page header"
-  component in Underpin UI. Its parts map one to one: the Back link is the `back` slot (the app's
-  `BackLink`: 13px, muted, a 14px chevron, the same on every detail page, admin included), then
-  `title`, `description` and the `actions` slot. On desktop the actions sit beside the title
-  block. On a phone (the component's `Size=Phone`) they stay on the title line, the description
-  runs the full width under both and stops at two lines, and the title drops to 20px. Only the
-  primary action keeps a label. Every other action, and every destructive one, goes into a "…"
-  menu after it, on desktop and phone: `ActionsMenu` with `placement="page"`, a secondary
-  icon-only button with `MoreIcon`. The settings pages' Help button is the one exception: it
-  keeps its own button.
+  component in Underpin UI. Its parts map one to one: the Back link is the `back` slot (`BackLink`
+  from `@underpin/ui/section-header`: 13px, muted, a 14px chevron, the same on every detail page,
+  admin included, with the router's link as its `render`), then `title`, `description` and the
+  `actions` slot. On desktop the actions sit beside the title block. On a phone (the component's
+  `Size=Phone`) they stay on the title line, the description runs the full width under both and
+  stops at two lines, and the title drops to 20px. Only the primary action keeps a label. Every
+  other action, and every destructive one, goes into a "…" menu after it, on desktop and phone:
+  `ActionsMenu` from `@underpin/ui/menu` with `placement="page"`, a secondary icon-only button
+  with `MoreIcon`. The settings pages' Help button is the one exception: it keeps its own button.
   Header actions sit 6px apart, like toolbar controls. View controls (range, refresh) never sit
   in the header: they belong to the toolbar. A page with no visible title (the site dashboard)
   starts with its toolbar.
@@ -243,7 +243,8 @@ description naming its code part.
   row sit above that link (`relative z-10`).
 - **Row menu.** `TableActionsMenu` in a `TableActionsCell`: a ghost, small, muted "…" trigger
   that grows to 40px on a touch screen, opening a menu aligned to the row's end. Its `label`
-  names both the trigger and the menu ("Actions for figma.com").
+  names both the trigger and the menu ("Actions for figma.com"). A card or a list row outside a
+  table takes the same menu as `ActionsMenu` (its default `row` placement).
 - **Row sizes.** Compact is 32px (a feed, a dense list), default 44px (one line), identity 52px
   (a name with a muted line under it). A skeleton row takes the size of the rows it stands in for.
 - **Lines.** The header is 40px on the surface, with one line under it in the card's edge
@@ -277,21 +278,32 @@ description naming its code part.
   definitions (an optional peer), so an app writes columns, not markup. Build them with
   `createDataTableColumnHelper` from `@underpin/ui/data-table-state`: each column's `meta` holds
   its `align`, `width`, `priority` and `sortable` (`true` sorts ascending first, `"descending"`
-  descending first), and its `cell` returns one of the cell parts,
-  which reads the align and priority from the meta. The state (page, page size, sort, search,
-  filters) is controlled: the package never reads the URL, and each app keeps it in its router's
-  search params. `changeDataTableState` applies the paging rules (a new sort, search, filter or
-  page size goes back to page 1), and the table moves a page past the end to the last page,
-  with `{ replace: true }` so the adapter replaces the history entry. While `total` is
-  undefined (no page has arrived, or the page failed) the table draws no band and moves no
-  page, so a failed page keeps its error where the reader is. A short table with nothing to
-  page, sort or search leaves out `state` and `onStateChange`. The
-  `pagination` prop picks the footer: `{ type: "pages", total }` or
-  `{ type: "infinite", hasMore, isLoadingMore, onLoadMore }`. `getRowHref` makes rows open
-  their record through `DataTableRowLink` in the name cell, `enableRowSelection` adds the
-  checkbox column (Shift selects a range, a function disables rows), `bulkActions` fills the
-  bar and `isRowInactive` fades archived records. With a `storageKey`, the column picker the toolbar receives remembers its choice in
-  `localStorage`. Every label is a prop with an English default.
+  descending first), and its `cell` returns one of the cell parts, which reads the align and
+  priority from the meta. The state (page, page size, sort, search, filters) is controlled: the
+  package never reads the URL, and each app keeps it in its router's search params.
+  `changeDataTableState` applies the paging rules (a new sort, search, filter or page size goes
+  back to page 1), and the table moves a page past the end to the last page, with
+  `{ replace: true }` so the adapter replaces the history entry. While `total` is undefined (no page has arrived,
+  or the page failed) the table draws no band and moves no page, so a failed page keeps its error
+  where the reader is. A short table with nothing to page, sort or search leaves out `state` and
+  `onStateChange`. The `pagination` prop picks the footer: `{ type: "pages", total }` or
+  `{ type: "infinite", hasMore, isLoadingMore, onLoadMore }`. `getRowHref` makes rows open their record
+  through `DataTableRowLink` in the name cell, `enableRowSelection` adds the checkbox column
+  (Shift selects a range, a function disables rows), `bulkActions` fills the bar and
+  `isRowInactive` fades archived records. With a `storageKey`, the column picker the toolbar
+  receives remembers its choice in `localStorage`. Every label is a prop with an English default.
+- **State in the URL.** `@underpin/ui/data-table-search` keeps a table's state in search params
+  with no router: `createDataTableSearchSchema` builds the zod schema (zod is an optional peer)
+  for `page`, `perPage` (only from `perPageOptions`), `sort`, `order` and `query`, under new names
+  through `keys`, and drops what it cannot read. A table's own params (a view, a facet) go in with
+  `.extend()`. `readDataTableSearch` and `writeDataTableSearch` turn the params into a
+  `DataTableState` and back with the defaults left out of the URL, and `readFilters` and
+  `writeFilters` map the filters onto the table's own params. `getDataTableSearchProps` returns
+  the table's `state` and `onStateChange`, replacing the history entry while the reader types a
+  search. A Next.js app hands the same objects to nuqs. On TanStack Router, `@underpin/ui/router`
+  (which needs `@tanstack/react-router` and zod) adds `useDataTableRoute`, which wires that to the
+  current route, and `RouterRowLink` for `renderRowLink`, which opens a row in place and preloads
+  it.
 
 ## Icons
 

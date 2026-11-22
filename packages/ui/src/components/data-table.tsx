@@ -41,6 +41,7 @@ import {
   readColumnVisibility,
   writeColumnVisibility,
 } from "../lib/data-table-state"
+import type { DataTableChangeOptions } from "../lib/data-table-types"
 import { ChevronDownIcon } from "../lib/icons"
 import { cn } from "../lib/variants"
 import { BulkActionBar } from "./bulk-action-bar"
@@ -90,6 +91,8 @@ export interface DataTableLabels {
 }
 
 /** The state of a table that pages, sorts and searches nothing, one object so it stays stable. */
+export type { DataTableChangeOptions } from "../lib/data-table-types"
+
 const STATIC_STATE: DataTableState = {}
 
 function ignoreStateChange() {}
@@ -133,14 +136,6 @@ interface DataTableInfinite {
 }
 
 export type DataTablePagination = DataTablePages | DataTableInfinite
-
-export interface DataTableChangeOptions {
-  /**
-   * True when the table corrects the state itself (a page past the end), so a router adapter
-   * replaces the history entry rather than adding one the reader would land back on.
-   */
-  replace: boolean
-}
 
 /** What the toolbar render prop receives. */
 export interface DataTableToolbarContext {
