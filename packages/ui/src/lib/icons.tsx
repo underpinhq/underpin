@@ -30,6 +30,7 @@ import {
   Tick02Icon,
   UnfoldMoreIcon,
 } from "@hugeicons/core-free-icons"
+import type { ComponentProps } from "react"
 import { icon } from "./icon"
 
 // The handful of structural glyphs the package's own components render. This file lives in
@@ -67,3 +68,44 @@ export const PlusCircleIcon = icon(PlusSignCircleIcon, "PlusCircleIcon")
 export const RefreshIcon = icon(Refresh01Icon, "RefreshIcon")
 export const SearchIcon = icon(Search01Icon, "SearchIcon")
 export const SunIcon = icon(Sun03Icon, "SunIcon")
+
+interface SidebarIconProps extends ComponentProps<"svg"> {
+  /** Fills the panel's left pane, for the toggle of a drawer that is open. */
+  open?: boolean
+}
+
+/**
+ * The phone shell's drawer toggle: an outlined panel whose left pane is filled in both states,
+ * wide while the drawer is open and narrowed to a bar while it is closed. Hand drawn, since
+ * Hugeicons' free set has no panel glyph in this style.
+ */
+export function SidebarIcon({ open, ...props }: SidebarIconProps) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="1em"
+      height="1em"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.75}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      {...props}
+    >
+      <rect x="3" y="4" width="18" height="16" rx="4.5" />
+      {/* The pane keeps its left edge, its height and its fill in both states, so opening the
+          drawer only widens it. `rx` clamps itself to half the width at the narrow end. */}
+      <rect
+        x="6.25"
+        y="7.5"
+        width={open ? 4 : 1.5}
+        height="9"
+        rx="1.25"
+        fill="currentColor"
+        stroke="none"
+        className="transition-[width] duration-150 ease-out-expo motion-reduce:transition-none"
+      />
+    </svg>
+  )
+}

@@ -161,6 +161,18 @@ a table where the frame has prose), and only as part of design work on that scre
 
 ## Recipes
 
+- **Shell**: every signed-in screen sits in `Shell` from `@underpin/ui/shell`. On a large screen
+  the 224px rail runs down the left edge: the switcher on top (`RailTop` holding a `NavButton`),
+  then groups of `NavLink` rows, each group a `Nav` with an optional `NavLabel` and a
+  `NavSeparator` between groups, then the user menu's trigger at the bottom (`RailBottom`). A
+  notice sits between the rows and the user row, and only the rows scroll. Under `lg` the rail
+  becomes a 48px bar: the drawer toggle, the switcher, then one optional reading at the end (a
+  live count). The toggle opens the rows and the bottom row in a drawer under the bar, and any
+  navigation closes it (pass the router's URL as `navigationKey`). The
+  content is the `page-container` (`max-w-7xl`, `px-4 md:px-6`), 20px from the top and bottom. A
+  row's end holds a count ("Review queue 5") or a status dot, never a button. An area with its
+  own nav (settings, admin) swaps the rows for its groups behind a back row, and the switcher
+  leaves the rail.
 - **Page header**: every route opens with one `SectionHeader` at `size="page"`, the "Page header"
   component in Underpin UI. Its parts map one to one: the Back link is the `back` slot (`BackLink`
   from `@underpin/ui/section-header`: 13px, muted, a 14px chevron, the same on every detail page,

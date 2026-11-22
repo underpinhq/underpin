@@ -17,10 +17,11 @@ import { IconSwap } from "@underpin/ui/icon-swap"
 import { InlineAction } from "@underpin/ui/inline-action"
 import { Input } from "@underpin/ui/input"
 import { Kbd } from "@underpin/ui/kbd"
-import { Nav, NavLabel, NavSeparator } from "@underpin/ui/nav"
+import { Nav, NavLabel, NavLink, NavSeparator } from "@underpin/ui/nav"
 import { NavButtonSkeleton, NavIdentity } from "@underpin/ui/nav-button"
 import { Page } from "@underpin/ui/page"
 import { Ping } from "@underpin/ui/ping"
+import { RailBottom, RailTop, Shell } from "@underpin/ui/shell"
 import { Skeleton } from "@underpin/ui/skeleton"
 import { Stack } from "@underpin/ui/stack"
 import { Steps } from "@underpin/ui/steps"
@@ -87,7 +88,26 @@ export default function Home() {
         <NavSeparator />
         <NavIdentity name="Identity" detail="Detail" />
         <NavButtonSkeleton />
+        <NavLink href="/queue" count={5} dot="warning">
+          Review queue
+        </NavLink>
       </Nav>
+
+      <Shell
+        top={
+          <RailTop aria-label="Current workspace">
+            <NavButtonSkeleton />
+          </RailTop>
+        }
+        nav={
+          <Nav aria-label="Workspace">
+            <NavLink href="/reports">Reports</NavLink>
+          </Nav>
+        }
+        footer={<RailBottom aria-label="Account" />}
+      >
+        Shell marker
+      </Shell>
 
       <Skeleton />
       <Steps current={1} total={3} />

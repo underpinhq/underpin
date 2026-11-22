@@ -382,9 +382,19 @@
 }
 
 /*
+ * The page inset, shared by the shell's main content and its phone bar so their edges never
+ * drift apart: the full width up to one cap, also as a flex item, whose auto margins would
+ * otherwise shrink it to its content. Its own name rather than `container`, because a utility
+ * defined twice merges, and this one would override a product's own `container`.
+ */
+@utility page-container {
+  @apply mx-auto w-full max-w-7xl px-4 md:px-6;
+}
+
+/*
  * Base helpers the components depend on to render correctly, and the rules every consuming
  * app shares: the pointer on controls and reduced motion. Kept minimal on purpose; the
- * consuming app still supplies its body reset, its page `container` and `@import "tailwindcss"`.
+ * consuming app still supplies its body reset and `@import "tailwindcss"`.
  */
 @layer base {
   /* Theme switch: unset follows the OS, `data-theme` forces one. Drives every `light-dark()`. */

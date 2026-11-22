@@ -1,6 +1,10 @@
-import type { ComponentProps } from "react"
+import { mergeProps } from "@base-ui/react/merge-props"
+import { cloneElement, type ComponentProps, type ReactElement, type ReactNode } from "react"
 import { eyebrowClasses } from "../lib/classes"
+import type { Tone } from "../lib/tone"
 import { cn, variants } from "../lib/variants"
+import { Button } from "./button"
+import { Ping } from "./ping"
 
 export function Nav({ className, ...props }: ComponentProps<"nav">) {
   return <nav className={cn("flex flex-col gap-0.5 px-3 py-2", className)} {...props} />
@@ -80,3 +84,81 @@ export const navItem = variants({
     variant: "link",
   },
 })
+
+export interface NavLinkProps extends Omit<ComponentProps<"a">, "prefix"> {
+  /**
+   * The link element, such as a router's: `<Link to="/sites" />`. The row's props and classes
+   * merge onto it. A plain `<a>` by default.
+   */
+  render?: ReactElement<ComponentProps<"a">>
+
+  /**
+   * Marks the row as the current page (`aria-current="page"`), for a router whose link does not
+   * set it, such as Next.js's.
+   */
+  active?: boolean
+
+  /** The 16px glyph that leads the row. */
+  icon?: ReactNode
+
+  /**
+   * A figure at the row's end, such as the items waiting in a queue. Its text joins the row's
+   * accessible name, so a bare number may need a visually hidden word after it.
+   */
+  count?: ReactNode
+
+  /** A status dot at the row's end, before the count when both are set. */
+  dot?: Tone
+
+  /** Pulses the dot, for a status that is live right now. */
+  pulse?: boolean
+}
+
+/**
+ * A rail row that is a link. It renders an `<a>`, or the element `render` passes, such as a
+ * router's link: `render={<Link to="/sites" />}`. The current page is the row whose link sets
+ * `aria-current="page"`, which TanStack Router's link does on a match and `active` sets
+ * for any other.
+ */
+export function NavLink({
+  active,
+  icon,
+  count,
+  dot,
+  pulse,
+  render,
+  className,
+  children,
+  ...anchorProps
+}: NavLinkProps) {
+  const props = active ? { ...anchorProps, "aria-current": "page" as const } : anchorProps
+  const hasEnd = count !== undefined || dot !== undefined
+
+  return (
+    <Button
+      variant="ghost"
+      size="sm"
+      prefix={icon}
+      // At the row's end rather than after the label: the rows are one column, and a reading
+      // that hangs off the label would sit in a different place on every row.
+      suffix={
+        hasEnd && (
+          <span className="ml-auto flex items-center gap-1.5">
+            {dot && <Ping tone={dot} animate={pulse} size="sm" />}
+            {count !== undefined && (
+              <span className="font-medium text-2xs text-ink-muted tabular-nums">{count}</span>
+            )}
+          </span>
+        )
+      }
+      className={navItem({ className })}
+      // The element's own handlers and classes stay: `mergeProps` chains the handlers and joins
+      // the classes rather than letting the row's replace them.
+      render={
+        render ? cloneElement(render, mergeProps<"a">(props, render.props)) : <a {...props} />
+      }
+    >
+      {children}
+    </Button>
+  )
+}
