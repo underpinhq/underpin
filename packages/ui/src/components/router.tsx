@@ -2,7 +2,11 @@
 
 import { Link, useNavigate, useRouter } from "@tanstack/react-router"
 import type { ComponentProps } from "react"
-import { type DataTableSearchOptions, getDataTableSearchProps } from "../lib/data-table-search"
+import type {
+  DataTableSearch,
+  DataTableSearchKeys,
+  DataTableSearchProps,
+} from "../lib/data-table-search"
 import { parseHref } from "../lib/href"
 
 /**
@@ -23,22 +27,19 @@ export function RouterRowLink({ href = "", ...props }: ComponentProps<"a">) {
   return <Link {...props} to={pathname} search={router.options.parseSearch(search)} hash={hash} />
 }
 
-interface UseDataTableRouteOptions extends DataTableSearchOptions {
-  /** The route's search params, from `Route.useSearch()`. */
-  search: Record<string, unknown>
-}
-
 /**
  * The `state` and `onStateChange` that keep a `DataTable` in the current route's search
- * params. Each change merges into the params the route already holds, so a view or filter of
- * the page's own stays put. A new page or sort adds a history entry; a corrected page and a
- * search typed a key at a time replace it.
+ * params, for a table described by `createDataTableSearch`. Each change merges into the params
+ * the route already holds, so a view or filter of the page's own stays put. A new page or sort
+ * adds a history entry; a corrected page and a search typed a key at a time replace it.
  */
-export function useDataTableRoute({ search, ...options }: UseDataTableRouteOptions) {
+export function useDataTableRoute<Keys extends DataTableSearchKeys>(
+  table: DataTableSearch<Keys>,
+  search: Record<string, unknown>,
+): DataTableSearchProps {
   const navigate = useNavigate()
 
-  return getDataTableSearchProps({
-    ...options,
+  return table.getProps({
     search,
     onSearchChange: (next, { replace }) =>
       void navigate({

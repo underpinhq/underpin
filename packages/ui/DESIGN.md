@@ -305,17 +305,22 @@ description naming its code part.
   `isRowInactive` fades archived records. With a `storageKey`, the column picker the toolbar
   receives remembers its choice in `localStorage`. Every label is a prop with an English default.
 - **State in the URL.** `@underpin/ui/data-table-search` keeps a table's state in search params
-  with no router: `createDataTableSearchSchema` builds the zod schema (zod is an optional peer)
-  for `page`, `perPage` (only from `perPageOptions`), `sort`, `order` and `query`, under new names
-  through `keys`, and drops what it cannot read. A table's own params (a view, a facet) go in with
-  `.extend()`. `readDataTableSearch` and `writeDataTableSearch` turn the params into a
-  `DataTableState` and back with the defaults left out of the URL, and `readFilters` and
-  `writeFilters` map the filters onto the table's own params. `getDataTableSearchProps` returns
-  the table's `state` and `onStateChange`, replacing the history entry while the reader types a
-  search. A Next.js app hands the same objects to nuqs. On TanStack Router, `@underpin/ui/router`
-  (which needs `@tanstack/react-router` and zod) adds `useDataTableRoute`, which wires that to the
-  current route, and `RouterRowLink` for `renderRowLink`, which opens a row in place and preloads
-  it.
+  with no router. One `createDataTableSearch` call per table takes the param names (`keys`, which
+  may not repeat), the page sizes (`perPageOptions`), the default `perPage` and `sort`,
+  `clearValue`, and `readFilters` and `writeFilters`, which map the filters onto the table's own
+  params. It returns `schema` (zod, an optional peer; `.extend()` it with a view or a facet),
+  `read` and `write`, which leave the defaults and any page size not offered out of the URL,
+  `hasUnreadablePage` for the route's redirect, and `getProps`, the table's `state` and
+  `onStateChange`, which replaces the history entry while the reader types a search. It sorts by
+  one column, a `sort` param and an `order` beside it, so a table that sorts by several columns
+  keeps its own params. `read` takes raw text and reads `null` as an absent param. `write` clears
+  a param with `undefined`, which TanStack Router drops. nuqs skips `undefined` and clears only on
+  `null`, so a Next.js app on nuqs passes `clearValue: null`, hands `useQueryStates`'s values to
+  `read`, and `write`'s result to its setter. On TanStack Router, `@underpin/ui/router` (which
+  needs `@tanstack/react-router` and zod) adds `useDataTableRoute(table, search)` and
+  `RouterRowLink` for `renderRowLink`, which opens a row in place and preloads it. The router
+  parses search params as JSON, so hand-typed text such as `1e3` can come back changed; the links
+  the table writes come back exact.
 
 ## Icons
 
