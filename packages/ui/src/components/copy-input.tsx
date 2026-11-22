@@ -1,6 +1,6 @@
 "use client"
 
-import { type ComponentProps, useImperativeHandle, useRef } from "react"
+import { type ComponentProps, type ReactNode, useImperativeHandle, useRef } from "react"
 import { cn } from "../lib/variants"
 import { CopyButton } from "./copy-button"
 import { Input } from "./input"
@@ -9,6 +9,14 @@ interface CopyInputProps extends Omit<ComponentProps<typeof Input>, "value" | "r
   value: string
   /** A shorter form to show in the field, such as a URL without its protocol. */
   display?: string
+  /** The copy button's accessible name and tooltip. */
+  copyLabel?: string
+  /** What the copy button's tooltip reads once the value is copied. */
+  copiedLabel?: ReactNode
+  /** What the copy button's tooltip reads when the browser refused the copy. */
+  failedLabel?: ReactNode
+  /** Runs once the copy button put the value on the clipboard. */
+  onCopied?: () => void
 }
 
 /**
@@ -21,6 +29,10 @@ export function CopyInput({
   ref,
   value,
   display,
+  copyLabel = "Copy to clipboard",
+  copiedLabel,
+  failedLabel,
+  onCopied,
   className,
   onFocus,
   onCopy,
@@ -58,7 +70,12 @@ export function CopyInput({
       <CopyButton
         value={value}
         variant="ghost"
+        aria-label={copyLabel}
+        tooltip={copyLabel}
+        copiedLabel={copiedLabel}
+        failedLabel={failedLabel}
         className="absolute top-1/2 right-0.5 -translate-y-1/2 rounded"
+        onCopy={onCopied}
         onCopyError={() => {
           inputRef.current?.focus()
           inputRef.current?.select()

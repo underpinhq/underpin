@@ -1,3 +1,4 @@
+import { AuthCard } from "@underpin/ui/auth-card"
 import { Badge } from "@underpin/ui/badge"
 import { BarList } from "@underpin/ui/bar-list"
 import { BreakdownCard } from "@underpin/ui/breakdown-card"
@@ -10,6 +11,7 @@ import { Collapse } from "@underpin/ui/collapse"
 import { DetailRow } from "@underpin/ui/detail-row"
 import { EmptyState } from "@underpin/ui/empty-state"
 import { EntityAvatar } from "@underpin/ui/entity-avatar"
+import { ErrorState } from "@underpin/ui/error-state"
 import { FormSection } from "@underpin/ui/form-section"
 import { FormattedNumber } from "@underpin/ui/formatted-number"
 import { Heading } from "@underpin/ui/heading"
@@ -19,6 +21,7 @@ import { Input } from "@underpin/ui/input"
 import { Kbd } from "@underpin/ui/kbd"
 import { Nav, NavLabel, NavLink, NavSeparator } from "@underpin/ui/nav"
 import { NavButtonSkeleton, NavIdentity } from "@underpin/ui/nav-button"
+import { NotFound } from "@underpin/ui/not-found"
 import { Page } from "@underpin/ui/page"
 import { Ping } from "@underpin/ui/ping"
 import { RailBottom, RailTop, Shell } from "@underpin/ui/shell"
@@ -73,6 +76,9 @@ export default function Home() {
       <CodeBlock>code marker</CodeBlock>
       <Collapse open>Collapse marker</Collapse>
       <EmptyState title="Empty marker" />
+      <ErrorState title="Error marker" />
+      <NotFound title="Not found marker" />
+      <AuthCard title="Auth card marker" />
       <EntityAvatar name="Server Render" />
 
       <FormSection title="Form section marker">
