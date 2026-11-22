@@ -12,6 +12,7 @@ import { DetailRow } from "@underpin/ui/detail-row"
 import { EmptyState } from "@underpin/ui/empty-state"
 import { EntityAvatar } from "@underpin/ui/entity-avatar"
 import { ErrorState } from "@underpin/ui/error-state"
+import { Favicon } from "@underpin/ui/favicon"
 import { FormSection } from "@underpin/ui/form-section"
 import { FormattedNumber } from "@underpin/ui/formatted-number"
 import { Heading } from "@underpin/ui/heading"
@@ -32,6 +33,10 @@ import { Switch } from "@underpin/ui/switch"
 import { TextLink } from "@underpin/ui/text-link"
 import { Textarea } from "@underpin/ui/textarea"
 import { DataTables } from "./data-tables"
+
+// A 1×1 PNG inline, so one favicon loads with no request and the fixture covers the loaded state.
+const LOADED_ICON =
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="
 
 // A server component that renders every component without "use client", each through its own
 // subpath, and one client component across the boundary. `check-next` reads the markers.
@@ -80,6 +85,8 @@ export default function Home() {
       <NotFound title="Not found marker" />
       <AuthCard title="Auth card marker" />
       <EntityAvatar name="Server Render" />
+      <Favicon src="/favicon.ico" name="example.com" size="lg" label="Favicon marker" />
+      <Favicon src={LOADED_ICON} name="example.com" />
 
       <FormSection title="Form section marker">
         <Input aria-label="Input" />

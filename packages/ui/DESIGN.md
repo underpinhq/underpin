@@ -220,6 +220,12 @@ a table where the frame has prose), and only as part of design work on that scre
   numeric columns are tabular-nums at fixed widths. The bar rests on `fill-subtle`. On a row that
   filters on click, hover deepens it to `fill` and a press to `fill-strong`. No taller rows in Details dialogs, reports or
   lists.
+- **Favicons** come from `Favicon` (`@underpin/ui/favicon`): bare at 16px in a row or menu
+  item, bare at 20px beside a heading, and on a 28px `fill` tile in a table's identity cell or
+  a settings row, on a light plate in dark mode. The product passes the image's URL. The first
+  letter of the site's name stands in while the icon loads. When it fails, the product's own
+  glyph takes its place, or the letter stays.
+  A site's own avatar beside its name in a switcher or a card is `EntityAvatar`.
 - **Card footers** are a fixed band: hairline above, one `text-xs/5` line, the Details link at
   the start and any note at the end. In loading, error and empty states the band keeps its
   height (the Details link is laid out but invisible).

@@ -38,6 +38,7 @@ const MARKERS = [
   "Review queue",
   "Shell marker",
   'role="switch"',
+  'aria-label="Favicon marker"',
   "Paged data table marker",
   "Infinite data table marker",
   "Showing",
