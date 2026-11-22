@@ -1,5 +1,20 @@
 # @underpin/ui
 
+## 2.4.0
+
+### Minor Changes
+
+- Add `Favicon` (`@underpin/ui/favicon`), a site's icon at the sizes tables and headers use: `sm` (16px) for a list row, `md` (20px) beside a heading, and `lg`, a 28px tile for a table's identity cell or a settings row. Pass the icon's URL as `src`, from your own favicon route or a stored upload, and the site's name or hostname as `name`. The first letter of the name, past a leading `www.`, shows while the icon loads. Without a `name`, the box stays empty while it loads. Pass `fallback` (a globe, say) to show it when the icon fails or there is no `src`. Without one, the letter stays. In dark mode the icon sits on a light plate, so a black icon stays visible. An icon that loads before a server-rendered page hydrates is read as it mounts, so Next.js pages never get stuck on the letter.
+- Add five parts that dashboards kept as local copies. None imports a router or a product's logo, and every label is a prop with an English default.
+
+  - `ConfirmDialog` and `ConfirmItemDialog` (`@underpin/ui/confirm-dialog`) ask before a change: a question, its consequence and a button repeating the question. Return a promise from `onConfirm` and the button shows it pending, the dialog ignores Escape, Cancel and a press outside until it settles, and then closes. A rejection keeps the dialog open and reaches `onError`. Pass `confirmText` to make the reader type it before the action unlocks. The field takes focus and starts empty on every opening. Drive the dialog with `open`, or hand it a `trigger`. The dialog is a form, so `children` add fields but never a form of their own. `ConfirmItemDialog` is open while its `item` is set and words its text from that item.
+  - `ErrorState` and `TableErrorState` (`@underpin/ui/error-state`) stand in for data that failed to load, with a "Try again" button when you pass `onRetry`. `variant="page"` is the heading and sentence for your router's error boundary, announced as an alert.
+  - `NotFound` (`@underpin/ui/not-found`) is the card for a URL no route matches. Pass your router's link to the home page as `action`.
+  - `CopySecret` (`@underpin/ui/copy-secret`) is a dialog's body and footer for a secret shown once, such as a new API key, with a copy button and Done.
+  - `AuthCard`, `AuthCardSkeleton` and `AuthPage` (`@underpin/ui/auth-card`) lay out a signed-out step: the card with its title, error, providers, form and footer link, on a page with your logo in the band at the top. `AuthPage` renders its column as `<main id="main">`. Pass `render={<div />}` inside a layout that has its own `<main>`.
+
+  `CopyInput` takes `copyLabel`, `copiedLabel`, `failedLabel` and `onCopied` for its copy button, and `CopySecret` passes them through.
+
 ## 2.3.0
 
 ### Minor Changes
