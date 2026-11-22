@@ -80,7 +80,11 @@ describe("@underpin/ui exports", () => {
     const { BarList } = await import("./components/bar-list")
     const { BreakdownCard } = await import("./components/breakdown-card")
     const { ViewPicker } = await import("./components/view-picker")
-    const { TimeSeriesChart } = await import("./components/time-series-chart")
+    const { TimeSeriesChart, TimeSeriesChartSkeleton, loadTimeSeriesChart } =
+      await import("./components/time-series-chart")
+    const { PerformanceCard } = await import("./components/performance-card")
+    const { Trend } = await import("./components/trend")
+    const { ZonedTime } = await import("./components/zoned-time")
     const { niceTicks } = await import("./lib/time-series")
 
     const components = [
@@ -92,6 +96,11 @@ describe("@underpin/ui exports", () => {
       BreakdownCard,
       ViewPicker,
       TimeSeriesChart,
+      TimeSeriesChartSkeleton,
+      loadTimeSeriesChart,
+      PerformanceCard,
+      Trend,
+      ZonedTime,
       niceTicks,
     ]
 

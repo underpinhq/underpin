@@ -16,6 +16,7 @@ import { cn, variants, type VariantProps } from "../lib/variants"
 import { cardSurfaceClasses } from "./card"
 import { Collapse } from "./collapse"
 import { FormattedNumber, type NumberFormat } from "./formatted-number"
+import { Skeleton } from "./skeleton"
 
 const stripVariants = variants({
   // Stacked in a tighter cut (see the item) until there is room for one row: two-up on a
@@ -167,6 +168,11 @@ type StatStripItemProps = Omit<useRender.ComponentProps<"div">, "children" | "on
    * Rendered at the end of the label row, e.g. a change against a previous period.
    */
   trend?: ReactNode
+  /**
+   * Draws a skeleton in place of the figure and leaves the trend out, while the figures load.
+   * The label and the hint stay, so the strip keeps its shape.
+   */
+  loading?: boolean
   /** Marks the item as the one driving the panel beside it. */
   selected?: boolean
   /**
@@ -183,7 +189,8 @@ function StatStripItem({
   format,
   hint,
   hintHidden,
-  trend,
+  trend: loadedTrend,
+  loading,
   selected,
   onSelect,
   render,
@@ -191,6 +198,7 @@ function StatStripItem({
   ...props
 }: StatStripItemProps) {
   const id = useId()
+  const trend = loading ? undefined : loadedTrend
   // Named by the label and the figure alone ("Visitors 1,234"), so the change and the hint
   // read after them as its description rather than running into the number.
   const button = onSelect && (
@@ -275,7 +283,17 @@ function StatStripItem({
 
           <p id={`${id}-value`} data-value className={valueClasses}>
             <span data-figure>
-              {isValidElement(value) || (typeof value !== "number" && typeof value !== "string") ? (
+              {loading ? (
+                // A span, since the figure sits inside a <p>. Middle-aligned with no vertical
+                // margin, so it sits inside the value line's fixed height instead of stretching
+                // it. The strong fill rather than the skeleton's own, which the selected item
+                // would show as the one figure that looks missing.
+                <Skeleton
+                  render={<span />}
+                  className="inline-block h-[1em] w-[3.5em] bg-fill-strong align-middle"
+                />
+              ) : isValidElement(value) ||
+                (typeof value !== "number" && typeof value !== "string") ? (
                 value
               ) : (
                 <FormattedNumber value={value} format={format} />

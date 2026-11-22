@@ -138,7 +138,9 @@ Dev Mode and the `use_figma` tool both read them. Page `16 · Onboarding` is the
   gridlines, revenue bars under the visitors line on two axes, breakdown rows with a bar behind
   the label and fixed numeric columns. The bucket still running (today, this month) draws its
   stretch of the line dashed and its bar as a dashed outline, so a period that has only begun
-  never reads as a drop.
+  never reads as a drop. The strip and its chart are one `PerformanceCard`: the selected
+  figure is the series drawn under it, and the card's range control is the page's, in its
+  header.
 
 ## Copy in mocks
 
@@ -239,7 +241,12 @@ a table where the frame has prose), and only as part of design work on that scre
 - **Timestamps** that must stay short on the page use `RelativeTime` from
   `@underpin/ui/relative-time`: the short reading in a `<time>`, the exact moment on hover. The
   hover is one line with the full date, or how long ago above one row per clock (a mono badge
-  naming the zone, the date, the time). The caller formats every string.
+  naming the zone, the date, the time). It formats both readings itself through
+  `@underpin/ui/day` unless the caller passes its own. `ZonedTime` is the version with every
+  clock: how long ago to the second, then UTC, the page's own zone and the reader's.
+- **A change against a compared period** is a `Trend`: an arrow and the unsigned figure,
+  green when the move is good and red when it is bad, an "about equal" glyph in the full ink
+  for none. It sits at the end of a stat's label row, in a table cell, or beside any figure.
 - **Chart tooltip notes** are one line each, truncated with an ellipsis; at most two notes, then
   "and N more".
 

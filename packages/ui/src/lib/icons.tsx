@@ -1,6 +1,7 @@
 import {
   Alert02Icon,
   AlertCircleIcon as AlertCircleDef,
+  ApproximatelyEqualIcon as ApproximatelyEqualDef,
   ArrowDown01Icon,
   ArrowDown02Icon,
   ArrowLeft01Icon,
@@ -39,6 +40,7 @@ import { icon } from "./icon"
 
 export const AlertIcon = icon(Alert02Icon, "AlertIcon")
 export const AlertCircleIcon = icon(AlertCircleDef, "AlertCircleIcon")
+export const ApproximatelyEqualIcon = icon(ApproximatelyEqualDef, "ApproximatelyEqualIcon")
 export const ArrowDownIcon = icon(ArrowDown02Icon, "ArrowDownIcon")
 export const ArrowUpIcon = icon(ArrowUp02Icon, "ArrowUpIcon")
 export const ArrowUpRightIcon = icon(ArrowUpRight01Icon, "ArrowUpRightIcon")

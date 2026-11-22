@@ -48,4 +48,22 @@ describe("StatStripItem", () => {
 
     await view.unmount()
   })
+
+  test("a loading item draws a skeleton for its figure and leaves its trend out", async () => {
+    const { StatStrip, StatStripItem } = await import("./stat-strip")
+
+    const view = await render(
+      <StatStrip>
+        <StatStripItem label="Visitors" value={1234} trend="+4%" hint="Last 7 days" loading />
+      </StatStrip>,
+    )
+
+    const figure = document.querySelector("[data-figure]")
+    expect(figure?.textContent).toBe("")
+    expect(figure?.querySelector(".animate-pulse")).not.toBeNull()
+    expect(document.body.textContent).not.toContain("+4%")
+    expect(document.body.textContent).toContain("Last 7 days")
+
+    await view.unmount()
+  })
 })

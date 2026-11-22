@@ -24,14 +24,18 @@ import { Nav, NavLabel, NavLink, NavSeparator } from "@underpin/ui/nav"
 import { NavButtonSkeleton, NavIdentity } from "@underpin/ui/nav-button"
 import { NotFound } from "@underpin/ui/not-found"
 import { Page } from "@underpin/ui/page"
+import { PerformanceCard } from "@underpin/ui/performance-card"
 import { Ping } from "@underpin/ui/ping"
 import { RailBottom, RailTop, Shell } from "@underpin/ui/shell"
 import { Skeleton } from "@underpin/ui/skeleton"
 import { Stack } from "@underpin/ui/stack"
+import { StatStrip, StatStripItem } from "@underpin/ui/stat-strip"
 import { Steps } from "@underpin/ui/steps"
 import { Switch } from "@underpin/ui/switch"
 import { TextLink } from "@underpin/ui/text-link"
 import { Textarea } from "@underpin/ui/textarea"
+import { Trend } from "@underpin/ui/trend"
+import { ZonedTime } from "@underpin/ui/zoned-time"
 import { DataTables } from "./data-tables"
 
 // A 1×1 PNG inline, so one favicon loads with no request and the fixture covers the loaded state.
@@ -121,6 +125,28 @@ export default function Home() {
       >
         Shell marker
       </Shell>
+
+      <PerformanceCard
+        strip={
+          <StatStrip variant="track">
+            <StatStripItem
+              label="Performance marker"
+              value={12}
+              trend={<Trend id="trend-marker" change={0.06} />}
+            />
+          </StatStrip>
+        }
+        isLoading
+      />
+      <PerformanceCard
+        series={[
+          { id: "visitors", label: "Series marker", value: 34, trend: <Trend change={-0.02} /> },
+        ]}
+        isLoading
+      />
+      <ZonedTime date="2026-09-20T14:58:20.000Z" timeZone="Asia/Kolkata">
+        Zoned marker
+      </ZonedTime>
 
       <Skeleton />
       <Steps current={1} total={3} />

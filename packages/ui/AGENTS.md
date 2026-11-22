@@ -37,7 +37,7 @@ What a screen looks like and how design work happens in Figma: [`DESIGN.md`](DES
 
 ## TanStack Charts
 
-`TimeSeriesChart` is drawn with `@tanstack/charts` (pinned exactly; its minors may break) through the React adapter's `/react/tooltip` entry and the `motion()` renderer. `Sparkline` is plain SVG on purpose, so a page that only lists sites never loads the runtime.
+`TimeSeriesChart` is drawn with `@tanstack/charts` (pinned exactly; its minors may break) through the React adapter's `/react/tooltip` entry and the `motion()` renderer. The chart lives in `lib/time-series-plot.tsx`, and the `time-series-chart` entry loads it with `lazy()` behind `TimeSeriesChartSkeleton`, so an app imports the entry directly and still keeps the chart library out of its first paint. Nothing else may import `lib/time-series-plot` statically, or the library comes back into the importer's bundle. `Sparkline` is plain SVG on purpose, so a page that only lists sites never loads the runtime.
 
 - A chart definition's identity is its update boundary: each new one rebuilds the scene. Memoize it only where its inputs are stable; `TimeSeriesChart` builds one per render because its callers hand it fresh rows and formatters every time
 - The `motion()` renderer grows an entering bar from its `y1` and shrinks an exiting one back to it. A segment stacked on another bar (`y1` at that bar's top) therefore floats in mid-air while the bar under it animates; draw it from zero, behind the bar

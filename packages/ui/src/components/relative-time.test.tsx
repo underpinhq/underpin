@@ -130,4 +130,85 @@ describe("RelativeTime", () => {
 
     await view.unmount()
   })
+
+  test("formats both readings itself when the caller passes neither", async () => {
+    const { RelativeTime } = await import("./relative-time")
+
+    const view = await render(
+      <RelativeTime date={new Date(Date.now() - 2 * 86_400_000)} timeZone="UTC" locale="en-US" />,
+    )
+
+    expect(getTime().textContent).toBe("2 days ago")
+    await hover(getTime())
+    expect(findPanel()?.textContent).toMatch(/^\w+ \d+, \d{4} at \d+:\d{2} [AP]M$/)
+
+    await view.unmount()
+  })
+
+  test("reads the default tooltip on the clock it is given", async () => {
+    const { RelativeTime } = await import("./relative-time")
+
+    const view = await render(
+      <RelativeTime date={INSTANT} timeZone="Asia/Tokyo" locale="en-US">
+        2 months ago
+      </RelativeTime>,
+    )
+
+    await hover(getTime())
+    expect(findPanel()?.textContent).toBe("September 20, 2026 at 11:58 PM")
+
+    await view.unmount()
+  })
+
+  test("a server render prints the full moment, and the browser how long ago", async () => {
+    const { renderToString } = await import("react-dom/server")
+    const { RelativeTime } = await import("./relative-time")
+
+    // A reading of how long ago made on the server would be frozen at the render's moment.
+    const html = renderToString(<RelativeTime date={INSTANT} hourCycle="h23" />)
+    expect(html).toContain("September 20, 2026 at 14:58")
+    expect(html).not.toContain("ago")
+
+    const view = await render(<RelativeTime date={INSTANT} locale="en-US" />)
+    expect(getTime().textContent).toMatch(/ago$/)
+    await view.unmount()
+  })
+
+  test("reads the clock in the cycle it is given", async () => {
+    const { RelativeTime } = await import("./relative-time")
+
+    const view = await render(
+      <RelativeTime date={INSTANT} timeZone="UTC" locale="en-US" hourCycle="h23">
+        2 months ago
+      </RelativeTime>,
+    )
+
+    await hover(getTime())
+    expect(findPanel()?.textContent).toBe("September 20, 2026 at 14:58")
+
+    await view.unmount()
+  })
+
+  test("reads how long ago again as the minutes pass", async () => {
+    const { jest } = await import("bun:test")
+    const { act } = await import("react")
+    const { RelativeTime } = await import("./relative-time")
+
+    jest.useFakeTimers()
+    try {
+      const view = await render(
+        <RelativeTime date={new Date(Date.now() - 2 * 60_000)} locale="en-US" />,
+      )
+      expect(getTime().textContent).toBe("2 minutes ago")
+
+      await act(async () => {
+        jest.advanceTimersByTime(5 * 60_000)
+      })
+      expect(getTime().textContent).toBe("7 minutes ago")
+
+      await view.unmount()
+    } finally {
+      jest.useRealTimers()
+    }
+  })
 })
