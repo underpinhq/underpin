@@ -179,12 +179,21 @@ a table where the frame has prose), and only as part of design work on that scre
   end: range, then compare, then Share. A live list ends with Refresh instead. A page mode
   switch (Revenue's Overview and Customers, User flow's anchor) comes before Filter. Saved
   segments live in the Filter menu, and an applied segment is one chip, holding its filters.
+- **Date range**: every stats page picks its range with one `RangePicker`
+  (`@underpin/ui/range-picker`), the first of the toolbar's pickers, never in the header. It is a
+  secondary button with the calendar icon, the range's name and a chevron, opening a menu of the
+  product's preset ranges in groups, each row with its single-key shortcut. A page that steps
+  through calendar units adds the previous and next arrows after the label, greyed at a bound.
+  The range lives in the URL (`?period=`, `?days=`), so a reload or a shared link opens the same
+  view. A custom range and the comparison stay in the product, around the control: a custom
+  range is a preset row that opens the product's own panel, anchored to the control.
 - **Share menu**: the dashboard's one share control is a secondary "Share" button with
   `ShareIcon`, opening a menu (Share image…, Embed…, Share links…). It replaces the separate
   Embed button. Read-only boards (a share link, the live demo) have none.
 - **Phone toolbar**: one row: the range picker fills it, then Filter, then the page's action as
   an icon-only button (Share, Embed, Refresh keeps its label). The comparison and the
-  granularity are groups at the end of the range menu (`PeriodPickers`). With no filter on,
+  granularity are groups at the end of the range menu (`PeriodPickers`, through `RangePicker`'s
+  children). With no filter on,
   Filter opens the picker; with filters on it shows their count and opens a sheet listing the
   chips, with Add filter, Clear and Done (`FilterBar` with `collapse`). The row never grows.
 - **Compare control**: every toolbar with deltas uses the same compare picker, a secondary button
