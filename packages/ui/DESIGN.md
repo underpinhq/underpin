@@ -238,6 +238,19 @@ a table where the frame has prose), and only as part of design work on that scre
   end, secondary then primary. A destructive dialog puts the danger button in the primary slot.
   On a phone sheet the buttons go full width and stack in reading order, primary nearest the
   thumb.
+- **Settings pages** are a column of `Card`s, each a `FormSection` of `DetailRow`s at
+  `density="form"`. A card that edits what is saved renders its section as the form and ends
+  in `<form.SaveChangesButton />` on the footer band: it reads "Save changes" and stays
+  disabled, with "No changes to save." on hover, until a field differs from what is saved.
+  The page's last card is the `DangerZoneCard` (`@underpin/ui/danger-zone-card`), one
+  `DangerRow` (`@underpin/ui/danger-row`) per action nothing brings back. A row's secondary
+  danger button opens a `ConfirmDialog`, which asks for the object's name when `confirmText`
+  is set. The card itself stays neutral: only the buttons are red.
+- **Detail pages** put the record's main lists on the left and a 360px side column on the
+  right, from `lg` up. The side column is a stack of `FactsCard`s (`@underpin/ui/facts-card`):
+  compact label and value rows, a missing value as a dash, and a machine value in `CopyFact`
+  (mono, with copy). Pass `record` to close the card with the ID, Created and Updated, the
+  two stamps through `RelativeTime`.
 - **Timestamps** that must stay short on the page use `RelativeTime` from
   `@underpin/ui/relative-time`: the short reading in a `<time>`, the exact moment on hover. The
   hover is one line with the full date, or how long ago above one row per clock (a mono badge

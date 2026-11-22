@@ -692,6 +692,36 @@ export function SubmitButton({ isPending = false, ...props }: ComponentProps<typ
   )
 }
 
+interface SaveChangesButtonProps extends Omit<ComponentProps<typeof Button>, "disabled"> {
+  /** Why the button is locked while every field still holds its saved value. */
+  unchangedReason?: string
+}
+
+/**
+ * A settings form's submit, locked with a reason until a field differs from its default value,
+ * which a settings form sets to what is saved. Shows the form's pending state like
+ * `SubmitButton`.
+ */
+export function SaveChangesButton({
+  unchangedReason = "No changes to save.",
+  children = "Save changes",
+  ...props
+}: SaveChangesButtonProps) {
+  const form = useFormContext()
+
+  return (
+    <form.Subscribe selector={state => state.isDefaultValue}>
+      {unchanged => (
+        <DisabledReason reason={unchanged ? unchangedReason : undefined}>
+          <SubmitButton disabled={unchanged} {...props}>
+            {children}
+          </SubmitButton>
+        </DisabledReason>
+      )}
+    </form.Subscribe>
+  )
+}
+
 interface FormErrorProps {
   className?: string
 }
@@ -725,4 +755,4 @@ export const fieldComponents = {
   CheckboxField,
   RadioCardField,
 }
-export const formComponents = { SubmitButton, FormError }
+export const formComponents = { SubmitButton, SaveChangesButton, FormError }

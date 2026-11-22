@@ -146,6 +146,77 @@ describe("ConfirmDialog", () => {
     await view.unmount()
   })
 
+  test("a loose match ignores case and spaces, and the typed text is reported apart", async () => {
+    const { ConfirmDialog } = await import("./confirm-dialog")
+    const onConfirm = mock((..._args: unknown[]) => {})
+    const onConfirmTextChange = mock((_typed: string) => {})
+
+    const view = await render(
+      <ConfirmDialog
+        open
+        title="Delete go.example.com?"
+        description="Its links stop working."
+        action="Delete domain"
+        confirmText="go.example.com"
+        confirmMatch="loose"
+        onConfirmTextChange={onConfirmTextChange}
+        onConfirm={onConfirm}
+      />,
+    )
+
+    const input = document.querySelector<HTMLInputElement>('[role="dialog"] input')
+    if (!input) throw new Error("No confirmation field")
+
+    await typeInto(input, " Go.Example.org ")
+    await click(getButton("Delete domain"))
+    expect(onConfirm).not.toHaveBeenCalled()
+
+    await typeInto(input, " Go.Example.com ")
+    await click(getButton("Delete domain"))
+    expect(onConfirm).toHaveBeenCalledTimes(1)
+    expect(onConfirm.mock.calls[0]).toEqual([])
+    expect(onConfirmTextChange).toHaveBeenLastCalledWith(" Go.Example.com ")
+
+    await view.unmount()
+  })
+
+  test("stays locked with the caller's reason, against a click and Enter", async () => {
+    const { act } = await import("react")
+    const { readDescription } = await import("../test-dom")
+    const { ConfirmDialog } = await import("./confirm-dialog")
+    const onConfirm = mock(() => {})
+
+    function renderDialog(reason: string | undefined) {
+      return (
+        <ConfirmDialog
+          open
+          title="Reject this ad?"
+          description="The advertiser gets your note."
+          action="Reject ad"
+          confirmDisabledReason={reason}
+          onConfirm={onConfirm}
+        >
+          <input aria-label="Note" />
+        </ConfirmDialog>
+      )
+    }
+
+    const view = await render(renderDialog("Write a note first."))
+
+    expect(readDescription(getButton("Reject ad"))).toContain("Write a note first.")
+    await click(getButton("Reject ad"))
+    await act(async () => {
+      getDialog().querySelector("form")?.requestSubmit()
+    })
+    expect(onConfirm).not.toHaveBeenCalled()
+
+    await view.rerender(renderDialog(undefined))
+    await click(getButton("Reject ad"))
+    expect(onConfirm).toHaveBeenCalledTimes(1)
+
+    await view.unmount()
+  })
+
   test("takes its labels as props", async () => {
     const { ConfirmDialog } = await import("./confirm-dialog")
 
@@ -369,7 +440,7 @@ describe("ConfirmItemDialog", () => {
   })
   test("words the dialog from the item and runs the action on it", async () => {
     const { ConfirmItemDialog } = await import("./confirm-dialog")
-    const onConfirm = mock((_item: { name: string }) => Promise.resolve())
+    const onConfirm = mock((..._args: unknown[]) => Promise.resolve())
     const onClose = mock(() => {})
 
     const view = await render(

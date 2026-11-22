@@ -8,10 +8,12 @@ import { Callout, CalloutText } from "@underpin/ui/callout"
 import { Card, CardFooter, CardHeader, CardPanel } from "@underpin/ui/card"
 import { CodeBlock } from "@underpin/ui/code-block"
 import { Collapse } from "@underpin/ui/collapse"
+import { DangerZoneCard } from "@underpin/ui/danger-zone-card"
 import { DetailRow } from "@underpin/ui/detail-row"
 import { EmptyState } from "@underpin/ui/empty-state"
 import { EntityAvatar } from "@underpin/ui/entity-avatar"
 import { ErrorState } from "@underpin/ui/error-state"
+import { FactsCard } from "@underpin/ui/facts-card"
 import { Favicon } from "@underpin/ui/favicon"
 import { FormSection } from "@underpin/ui/form-section"
 import { FormattedNumber } from "@underpin/ui/formatted-number"
@@ -88,6 +90,10 @@ export default function Home() {
       <ErrorState title="Error marker" />
       <NotFound title="Not found marker" />
       <AuthCard title="Auth card marker" />
+      <DangerZoneCard title="Danger zone marker">
+        <p>Danger row</p>
+      </DangerZoneCard>
+      <FactsCard title="Facts marker" facts={[["Plan", "Pro"]]} />
       <EntityAvatar name="Server Render" />
       <Favicon src="/favicon.ico" name="example.com" size="lg" label="Favicon marker" />
       <Favicon src={LOADED_ICON} name="example.com" />

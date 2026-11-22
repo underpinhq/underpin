@@ -270,3 +270,50 @@ describe("Form fields", () => {
     await view.unmount()
   })
 })
+
+function getSubmit() {
+  const button = document.querySelector<HTMLButtonElement>('button[type="submit"]')
+  if (!button) throw new Error("No submit button")
+  return button
+}
+
+/** Disabled natively or only to assistive tech, whichever the button does. */
+function isLocked(button: HTMLButtonElement) {
+  return button.disabled || button.getAttribute("aria-disabled") === "true"
+}
+
+describe("SaveChangesButton", () => {
+  test("stays locked with its reason until a field differs from the saved value", async () => {
+    const { act } = await import("react")
+    const { readDescription } = await import("../test-dom")
+    const { Form, useAppForm } = await loadForm()
+    const rendered: { form?: { setFieldValue: (field: "name", value: string) => void } } = {}
+
+    function Profile() {
+      const form = useAppForm({ defaultValues: { name: "Ada" } })
+      rendered.form = form
+
+      return (
+        <Form form={form}>
+          <form.AppField name="name">{field => <field.TextField label="Name" />}</form.AppField>
+          <form.SaveChangesButton unchangedReason="Nothing changed yet." />
+        </Form>
+      )
+    }
+
+    const view = await render(<Profile />)
+    const button = getSubmit()
+
+    expect(button.textContent).toBe("Save changes")
+    expect(isLocked(button)).toBe(true)
+    expect(readDescription(button)).toContain("Nothing changed yet.")
+
+    await act(async () => rendered.form?.setFieldValue("name", "Grace"))
+    expect(isLocked(getSubmit())).toBe(false)
+
+    await act(async () => rendered.form?.setFieldValue("name", "Ada"))
+    expect(isLocked(getSubmit())).toBe(true)
+
+    await view.unmount()
+  })
+})

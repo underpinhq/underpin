@@ -45,6 +45,21 @@ export interface ConfirmDialogProps extends ConfirmLabels {
    * dialog says so and adds the field; leave it out for an ordinary confirmation.
    */
   confirmText?: string
+  /**
+   * How the typed text must match `confirmText`: `exact`, or `loose`, which ignores case and
+   * the spaces around it.
+   */
+  confirmMatch?: ConfirmMatch
+  /**
+   * Reports the typed text on every change, for a server that checks it again: keep the last
+   * value and send it from `onConfirm`. Each opening starts the field empty.
+   */
+  onConfirmTextChange?: (typed: string) => void
+  /**
+   * Why the action cannot run yet, e.g. a required field in `children` is empty: the button
+   * stays locked with this reason, and Enter does not submit.
+   */
+  confirmDisabledReason?: string
   /** The confirming button's meaning: danger for a loss, neutral for an undoable change. */
   tone?: ButtonProps["tone"]
   isPending?: boolean
@@ -56,12 +71,16 @@ export interface ConfirmDialogProps extends ConfirmLabels {
   /**
    * Runs the action. A returned promise (a `mutateAsync`) shows the button pending and closes
    * the dialog once it resolves, and the dialog cannot be dismissed until it settles. A rejection
-   * leaves the dialog open and reaches `onError`.
+   * leaves the dialog open and reaches `onError`. Anything else leaves closing to the parent,
+   * through `open`.
    */
   onConfirm: () => void | Promise<unknown>
   /** Reports a rejected `onConfirm`, e.g. in a toast. Close the dialog here to give up. */
   onError?: (error: unknown) => void
 }
+
+/** How typed confirmation text is compared with the text asked for. */
+export type ConfirmMatch = "exact" | "loose"
 
 /** A line of the dialog, fixed or worded from the item. */
 type ItemText<T> = string | ((item: T) => string)
@@ -75,6 +94,9 @@ export interface ConfirmItemDialogProps<T> extends ConfirmLabels {
   action: ItemText<T>
   /** The text to type before the action unlocks, fixed or worded from the item. */
   confirmText?: ItemText<T>
+  confirmMatch?: ConfirmMatch
+  onConfirmTextChange?: (typed: string) => void
+  confirmDisabledReason?: string
   tone?: ButtonProps["tone"]
   /** Runs the action on the item, typically a `mutateAsync`, as `ConfirmDialog` runs it. */
   onConfirm: (item: T) => Promise<unknown>
@@ -83,6 +105,11 @@ export interface ConfirmItemDialogProps<T> extends ConfirmLabels {
 
 function formatItemText<T>(text: ItemText<T>, item: T) {
   return typeof text === "function" ? text(item) : text
+}
+
+function isTypedMatch(typed: string, confirmText: string, match: ConfirmMatch) {
+  if (match === "exact") return typed === confirmText
+  return typed.trim().toLowerCase() === confirmText.trim().toLowerCase()
 }
 
 function formatDefaultConfirmTextLabel(confirmText: string) {
@@ -110,6 +137,9 @@ export function ConfirmDialog({
   description,
   action,
   confirmText,
+  confirmMatch = "exact",
+  onConfirmTextChange,
+  confirmDisabledReason,
   tone,
   isPending = false,
   children,
@@ -127,7 +157,11 @@ export function ConfirmDialog({
   const [typed, setTyped] = useState("")
   const [shownOpen, setShownOpen] = useState(false)
   const isOpen = open ?? ownOpen
-  const locked = !!confirmText && typed !== confirmText
+  // The typed text comes first: it sits above the fields `children` add.
+  const lockedReason =
+    confirmText && !isTypedMatch(typed, confirmText, confirmMatch)
+      ? formatConfirmTextReason(confirmText)
+      : confirmDisabledReason
   const pending = isPending || isRunning
   // Counts each opening, closing and unmount. An action outlives the opening it started in when
   // the parent closes or unmounts the dialog itself, and must not then close or settle anything.
@@ -192,7 +226,7 @@ export function ConfirmDialog({
             // submit that form too.
             event.preventDefault()
             event.stopPropagation()
-            if (!locked && !pending) void run()
+            if (!lockedReason && !pending) void run()
           }}
         >
           <DialogBody>
@@ -217,7 +251,10 @@ export function ConfirmDialog({
                     autoComplete="off"
                     autoCapitalize="none"
                     spellCheck={false}
-                    onChange={event => setTyped(event.target.value)}
+                    onChange={event => {
+                      setTyped(event.target.value)
+                      onConfirmTextChange?.(event.target.value)
+                    }}
                   />
                 </div>
               </>
@@ -228,8 +265,8 @@ export function ConfirmDialog({
 
           <DialogFooter>
             <DialogClose>{cancelLabel}</DialogClose>
-            {/* The exact text unlocks the button; no validation message, refusing is the guard. */}
-            <DisabledReason reason={locked ? formatConfirmTextReason(confirmText) : undefined}>
+            {/* The matching text unlocks the button; no validation message, refusing is the guard. */}
+            <DisabledReason reason={lockedReason}>
               <Button type="submit" tone={tone ?? "danger"} isPending={pending}>
                 {action}
               </Button>

@@ -33,6 +33,8 @@ const MARKERS = [
   "Error marker",
   "Not found marker",
   "Auth card marker",
+  "Danger zone marker",
+  "Facts marker",
   "Form section marker",
   "Nav marker",
   "Review queue",
