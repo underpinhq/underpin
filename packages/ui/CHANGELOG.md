@@ -1,5 +1,14 @@
 # @underpin/ui
 
+## 2.11.0
+
+### Minor Changes
+
+- `@underpin/ui/breakdown-card-tabs` ships `BreakdownCardTabs`, the small plain tab row a `BreakdownCard` takes as its `actions` to switch views. It wraps from the card's right edge, and `scroll` makes it scroll sideways on a phone instead. `aria-label` names the row, usually with the card's title. Inside `BreakdownPanelContext`, with `useBreakdownPanel()`'s props on the card body, each tab names the body as the panel it switches. `BreakdownCardTab` and `useBreakdownTabProps` tie a tab of your own, such as one that opens a menu, to the same panel.
+- `Favicon` takes `fill`, which draws the image over the whole `lg` tile, clipped to its corners, for a logo made to fill its square. A pressed table row takes `bg-fill` in place of `bg-fill-strong`, and a row opened from the keyboard keeps its hover fill under the focus ring. A `StatStrip` in the `track` variant draws a top hairline when it is not the first child of its card, so it sits apart from a card header above it.
+- `formatAgo` takes `style: "short"` and `RelativeTime` takes `agoStyle="short"` for the language's abbreviated units ("3 hr. ago"). `formatDayAgo` reads a calendar day against today ("yesterday", "in 2 days"), and `formatDaysAway` gives the bare count ("3 days") for a "… left" figure. `formatAgo` and `RelativeTime` take an instant and throw in development on a bare "YYYY-MM-DD", which would read as UTC midnight.
+- `@underpin/ui/sortable` ships `SortableList`, `useSortableItem` and `DragHandle`, which let a reader drag a list or a grid into their own order on dnd-kit. A pointer picks up the whole item or only its grip (`activator`), and a finger picks it up after a long press. From the keyboard, the grip picks the item up with Space or Enter, or moves it one place per arrow key, and a screen reader hears each move. `@dnd-kit/core`, `@dnd-kit/sortable` and `@dnd-kit/utilities` are optional peers, needed only by an app that imports it.
+
 ## 2.10.0
 
 ### Minor Changes
