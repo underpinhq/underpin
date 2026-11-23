@@ -1,5 +1,15 @@
 # @underpin/ui
 
+## 2.7.0
+
+### Minor Changes
+
+- `Combobox` picks several values. Put `multiple` on the root and `ComboboxChips` in the input's place: each value shows as a `ComboboxChip` with its own remove button, ahead of a `ComboboxChipsInput`. Enter toggles the highlighted option, as in any listbox. A comma adds it and never takes a picked one off, and a pasted list split by commas or line breaks adds each term the label of an option in the root's `items` reads, keeping what was typed and any term longer than the input's `maxLength` in the text. Pass `commaAdds={false}` where a value may hold a comma. Backspace in the empty input removes the last chip, and Escape closes the list without clearing the chips. A screen reader hears each value added or removed, in sentences `announcements` on `ComboboxChips` can replace. A chip whose children are not plain text takes a `label` for its remove button, and a read-only field shows no remove buttons. `ComboboxValue` renders the chips of an uncontrolled field.
+
+  `ComboboxCreateItem` offers to create a term nothing matches. The new `@underpin/ui/combobox-create` entry builds that option (`findComboboxCreateOption`), reads its label for the filter (`withComboboxCreateLabel`) and splits the terms to create out of the next value (`splitComboboxCreateValue`). With `creatable` on `ComboboxChipsInput`, pasted terms nothing matches arrive as create options too. `ComboboxFooter` and `ComboboxKeyHint` draw a band of key hints under the list. A `ComboboxItem` with a `suffix` now keeps the suffix at the row's end when the row is selected.
+
+  The `@base-ui/react` peer range rises from `>=1` to `^1.9.0`: the chips field renders Base UI's `Combobox.InputGroup`, which earlier 1.x releases lack, and the package is tested against 1.9.
+
 ## 2.6.1
 
 ### Patch Changes
