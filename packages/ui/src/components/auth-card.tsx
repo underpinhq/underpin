@@ -79,11 +79,16 @@ export function AuthCard({
   )
 }
 
+export interface AuthCardSkeletonProps {
+  /** Draws the 40px circle over the title. Pass `false` when the loaded card has no mark or icon. */
+  mark?: boolean
+}
+
 /** An `AuthCard` still loading, each bar inside the line it stands in for. */
-export function AuthCardSkeleton() {
+export function AuthCardSkeleton({ mark = true }: AuthCardSkeletonProps) {
   return (
     <AuthCard
-      mark={<Skeleton className="size-10 rounded-full" />}
+      mark={mark && <Skeleton className="size-10 rounded-full" />}
       title={<Skeleton render={<span />} className="inline-block h-5 w-44 align-middle" />}
       description={
         <>

@@ -33,6 +33,21 @@ describe("AuthCard", () => {
   })
 })
 
+describe("AuthCardSkeleton", () => {
+  test("draws the mark's circle over the title unless told to leave it out", async () => {
+    const { AuthCardSkeleton } = await import("./auth-card")
+
+    const withMark = await render(<AuthCardSkeleton />)
+    expect(document.querySelector("header > .size-10")).not.toBeNull()
+    await withMark.unmount()
+
+    const withoutMark = await render(<AuthCardSkeleton mark={false} />)
+    expect(document.querySelector("header > .size-10")).toBeNull()
+    expect(document.querySelector("header h1")).not.toBeNull()
+    await withoutMark.unmount()
+  })
+})
+
 describe("AuthPage", () => {
   test("puts the app's logo in a band above the card, in the page's main landmark", async () => {
     const { AuthCard, AuthPage } = await import("./auth-card")
