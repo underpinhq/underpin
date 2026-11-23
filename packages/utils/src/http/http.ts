@@ -2,7 +2,13 @@
  * Utility functions for URLs, hostnames and IP addresses.
  */
 
-import { HTTP_PROTOCOL, isLocalhostUrl, normalizeUrl, trimSlashes } from "../internal/url.js"
+import {
+  HTTP_PROTOCOL,
+  isLocalhostUrl,
+  normalizeUrl,
+  removeTrailingSlash,
+  trimSlashes,
+} from "../internal/url.js"
 
 /** An http(s) protocol in any letter case, or the "//" of a protocol-relative URL. */
 const ABSOLUTE_URL = /^(https?:)?\/\//i
@@ -136,6 +142,59 @@ export function removeQueryParams(url?: string): string {
     const questionIndex = url.indexOf("?")
     return questionIndex !== -1 ? url.substring(0, questionIndex) : url
   }
+}
+
+/** Click ids that ad platforms and email tools add to a link. Every `utm_*` param counts too. */
+const TRACKING_PARAMS: ReadonlySet<string> = new Set([
+  "fbclid",
+  "gclid",
+  "gbraid",
+  "wbraid",
+  "msclkid",
+  "dclid",
+  "twclid",
+  "ttclid",
+  "li_fat_id",
+  "igshid",
+  "yclid",
+  "mc_cid",
+  "mc_eid",
+  "_hsenc",
+  "_hsmi",
+])
+
+/** Checks if a raw `key=value` query pair is a tracking param. */
+function isTrackingParam(pair: string) {
+  const [key = ""] = pair.split("=", 1)
+  const name = key.toLowerCase()
+  return name.startsWith("utm_") || TRACKING_PARAMS.has(name)
+}
+
+/**
+ * Formats a URL for display: drops the protocol, a leading "www.", tracking query params (`utm_*`
+ * and ad click ids such as `fbclid` or `gclid`) and a trailing slash. Other query params and the
+ * hash stay as written. Works on the string, so input that is not a full URL, such as
+ * "example.com/a", is cleaned the same way and never throws.
+ * @param url - The URL to format.
+ * @returns The URL as a reader would type it.
+ * @example
+ * formatDisplayUrl("https://www.example.com/ai/?utm_source=x&ref=y") // "example.com/ai?ref=y"
+ */
+export function formatDisplayUrl(url?: string): string {
+  if (!url) return ""
+
+  const [beforeHash = "", ...hashParts] = url.trim().split("#")
+  const [path = "", ...queryParts] = beforeHash.split("?")
+  const hash = hashParts.join("#")
+
+  const base = removeTrailingSlash(removeProtocol(path).replace(/^www\./i, ""))
+  const query = queryParts
+    .join("?")
+    .split("&")
+    .filter(pair => pair && !isTrackingParam(pair))
+    .join("&")
+
+  return `${base === "/" ? "" : base}${query ? `?${query}` : ""}${hash ? `#${hash}` : ""}`
 }
 
 /**

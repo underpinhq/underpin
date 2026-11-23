@@ -8,8 +8,10 @@ export const HTTP_PROTOCOL: RegExp = /^https?:\/\//i
 /**
  * Removes every trailing slash, keeping a lone root slash.
  * A loop rather than `/\/+$/`, which backtracks in quadratic time on long runs of slashes.
+ * @param value - The string to trim.
+ * @returns The string without trailing slashes.
  */
-function removeTrailingSlash(value: string) {
+export function removeTrailingSlash(value: string): string {
   let end = value.length
   while (end > 1 && value[end - 1] === "/") end--
   return value.slice(0, end)
