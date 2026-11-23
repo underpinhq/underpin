@@ -95,6 +95,56 @@ describe("TableFacetFilter", () => {
 
     await view.unmount()
   })
+
+  test("picks one value at a time when it is not multiple", async () => {
+    const { TableFacetFilter } = await import("./table-toolbar")
+    const onValueChange = mock((_value: string[]) => {})
+
+    const view = await render(
+      <TableFacetFilter
+        label="Tier"
+        options={OPTIONS}
+        value={["free"]}
+        multiple={false}
+        onValueChange={onValueChange}
+      />,
+    )
+
+    await click(getTrigger())
+    const items = [...document.querySelectorAll<HTMLElement>('[role="menuitemradio"]')]
+    expect(items.map(item => item.getAttribute("aria-checked"))).toEqual(["true", "false"])
+    const premium = items[1]
+    if (!premium) throw new Error("No Premium option")
+    await click(premium)
+    expect(onValueChange).toHaveBeenCalledWith(["premium"])
+    expect(document.querySelector('[role="menu"]')).toBeNull()
+    expect(await listAxeViolations()).toEqual([])
+
+    await view.unmount()
+  })
+
+  test("writes nothing when the chosen value is picked again", async () => {
+    const { TableFacetFilter } = await import("./table-toolbar")
+    const onValueChange = mock((_value: string[]) => {})
+
+    const view = await render(
+      <TableFacetFilter
+        label="Tier"
+        options={OPTIONS}
+        value={["free"]}
+        multiple={false}
+        onValueChange={onValueChange}
+      />,
+    )
+
+    await click(getTrigger())
+    const free = document.querySelector<HTMLElement>('[role="menuitemradio"]')
+    if (!free) throw new Error("No Free option")
+    await click(free)
+    expect(onValueChange).not.toHaveBeenCalled()
+
+    await view.unmount()
+  })
 })
 
 describe("TableFilterChip", () => {

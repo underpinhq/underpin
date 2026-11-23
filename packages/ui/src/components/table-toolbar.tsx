@@ -4,7 +4,16 @@ import type { ComponentProps, ReactNode } from "react"
 import { CancelIcon, PlusCircleIcon } from "../lib/icons"
 import { interactiveVariants } from "../lib/interactive"
 import { cn } from "../lib/variants"
-import { Menu, MenuCheckboxItem, MenuContent, MenuItem, MenuSeparator, MenuTrigger } from "./menu"
+import {
+  Menu,
+  MenuCheckboxItem,
+  MenuContent,
+  MenuItem,
+  MenuRadioGroup,
+  MenuRadioItem,
+  MenuSeparator,
+  MenuTrigger,
+} from "./menu"
 
 export interface TableFacetOption {
   value: string
@@ -79,6 +88,11 @@ interface TableFacetFilterProps {
   /** The chosen values, empty while the filter is off. */
   value: string[]
   onValueChange: (value: string[]) => void
+  /**
+   * Whether the reader may pick several values. False for a field the API filters by one value:
+   * the rows are radios, and a pick replaces the chosen value and closes the menu.
+   */
+  multiple?: boolean
   /** What the trigger shows for several values. */
   formatSelected?: (count: number) => string
   clearLabel?: string
@@ -87,14 +101,15 @@ interface TableFacetFilterProps {
 /**
  * A column filter in the toolbar, 32px like a button. Off, it is a dashed button with a plus;
  * on, it shows the chosen value, or how many are chosen, after a divider. Its menu ticks values
- * on and off and clears the filter. A filter with a relation (is not, contains) is a
- * `TableFilterChip`.
+ * on and off, or with `multiple={false}` picks one, and clears the filter. A filter with a
+ * relation (is not, contains) is a `TableFilterChip`.
  */
 export function TableFacetFilter({
   label,
   options,
   value,
   onValueChange,
+  multiple = true,
   formatSelected = count => `${count} selected`,
   clearLabel = "Clear filter",
 }: TableFacetFilterProps) {
@@ -119,21 +134,39 @@ export function TableFacetFilter({
         )}
       </MenuTrigger>
       <MenuContent label={label} align="start">
-        {options.map(option => (
-          <MenuCheckboxItem
-            key={option.value}
-            checked={value.includes(option.value)}
-            onCheckedChange={checked =>
-              onValueChange(
-                checked
-                  ? [...value, option.value]
-                  : value.filter(chosenValue => chosenValue !== option.value),
-              )
-            }
+        {multiple ? (
+          options.map(option => (
+            <MenuCheckboxItem
+              key={option.value}
+              checked={value.includes(option.value)}
+              onCheckedChange={checked =>
+                onValueChange(
+                  checked
+                    ? [...value, option.value]
+                    : value.filter(chosenValue => chosenValue !== option.value),
+                )
+              }
+            >
+              {option.label}
+            </MenuCheckboxItem>
+          ))
+        ) : (
+          <MenuRadioGroup
+            value={chosen[0]?.value ?? null}
+            onValueChange={(picked: string) => {
+              // Picking the one chosen value again changes nothing, so it writes nothing. A pick
+              // from several values (a hand-edited URL) still narrows them to one.
+              if (value.length === 1 && value[0] === picked) return
+              onValueChange([picked])
+            }}
           >
-            {option.label}
-          </MenuCheckboxItem>
-        ))}
+            {options.map(option => (
+              <MenuRadioItem key={option.value} value={option.value} closeOnClick>
+                {option.label}
+              </MenuRadioItem>
+            ))}
+          </MenuRadioGroup>
+        )}
         {chosen.length > 0 && (
           <>
             <MenuSeparator />

@@ -31,10 +31,11 @@ export function RouterRowLink({ href = "", ...props }: ComponentProps<"a">) {
  * The `state` and `onStateChange` that keep a `DataTable` in the current route's search
  * params, for a table described by `createDataTableSearch`. Each change merges into the params
  * the route already holds, so a view or filter of the page's own stays put. A new page or sort
- * adds a history entry; a corrected page and a search typed a key at a time replace it.
+ * adds a history entry; a corrected page and a search typed a key at a time replace it. The
+ * hook reads only the table's `getProps`, so a table with renamed params needs no type argument.
  */
-export function useDataTableRoute<Keys extends DataTableSearchKeys>(
-  table: DataTableSearch<Keys>,
+export function useDataTableRoute<Keys extends DataTableSearchKeys = {}>(
+  table: Pick<DataTableSearch<Keys>, "getProps">,
   search: Record<string, unknown>,
 ): DataTableSearchProps {
   const navigate = useNavigate()

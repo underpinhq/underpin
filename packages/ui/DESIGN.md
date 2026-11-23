@@ -315,7 +315,10 @@ description naming its code part.
   far (an event feed).
 - **Toolbar.** Search first (200px), then a `TableFacetFilter` for each of the two or three
   common fields, the Filter button and its `TableFilterChip`s, which wrap. The sort and column
-  pickers sit at the end. Page actions stay in the page header.
+  pickers sit at the end. Page actions stay in the page header. A search that loads the list
+  from a server takes `SearchInput`'s `debounce`. A field the API filters by one value takes
+  `multiple={false}` on its facet, so a pick replaces the value rather than adding one the
+  API drops.
 - **Views and selection.** Fixed views sit above the toolbar as `Tabs` with
   `variant="underline"`, each with a `TabsCount`. While rows are selected, `BulkActionBar`
   floats at the bottom centre and owns the selection count. A selection covers the current page.
