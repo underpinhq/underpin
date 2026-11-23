@@ -1,5 +1,58 @@
 # @underpin/ui
 
+## 2.9.0
+
+### Minor Changes
+
+- Breaking: `ConfirmDialog`, `ConfirmItemDialog` and `DangerRow` take one `confirm` object in place of `confirmText`, `confirmMatch`, `onConfirmTextChange` and `confirmDisabledReason`. The four props are removed. `onConfirm` keeps its signature.
+
+  | Before | After |
+  | --- | --- |
+  | `confirmText="acme.com"` | `confirm={{ text: "acme.com" }}` |
+  | `confirmMatch="loose"` | `confirm={{ text, match: "loose" }}` |
+  | `onConfirmTextChange={setTyped}` | `confirm={{ text, onTextChange: setTyped }}` |
+  | `confirmDisabledReason={reason}` | `confirm={{ disabledReason: reason }}` |
+
+  On `ConfirmItemDialog`, `confirm.text` is still a string or a function of the item. A conditional typed confirmation becomes `confirm={isUsed ? { text: name } : undefined}`. The new `ConfirmOptions` type describes the object.
+- Add `PagedDataTable` (`@underpin/ui/paged-data-table`), a `DataTable` for a list the API pages, kept in the URL. Give it the `createDataTableSearch` result as `table`, the route's `search` and `onSearchChange`, and the page's query (a TanStack Query result whose data is `{ items, total }`, or another shape mapped with the query's `select`). It shows the loading rows, the paged footer from `total`, and a message in place of rows: the error with "Try again" that refetches, "Nothing matches" with "Clear filters" after a search, filter or view, or the `empty` message.
+
+  `views` adds view tabs with a count each, their value in one search param. The first view is the default and stays out of the URL, and a new view goes back to page 1. A view with `narrows` is a filter over the first: its empty list reads as filtered, and "Clear filters" returns to the first view. A view with `narrows: false` is a list of its own: it shows its empty message, and "Clear filters" keeps it. Left out, `narrows` is true for a view with no `empty` of its own. `DataTableViews` is the tabs alone.
+
+  On TanStack Router, `RouterPagedDataTable` from `@underpin/ui/router` fills in `onSearchChange` and opens rows through the router. `@underpin/ui/router` now needs `@tanstack/react-table` installed too.
+
+  ```tsx
+  <RouterPagedDataTable
+    aria-label="Users"
+    columns={COLUMNS}
+    table={USER_TABLE_SEARCH}
+    search={Route.useSearch()}
+    query={users}
+    getRowId={user => user.id}
+    views={{ param: "status", label: "Account views", options: VIEWS, counts: users.data?.counts }}
+    empty={{ icon: <UsersIcon />, title: "No accounts yet" }}
+    filtered={{ title: "No account matches", hint: "Try a name, an email or an id." }}
+  />
+  ```
+
+  On Next.js with nuqs, create the table search with `clearValue: null` and pass `useQueryStates`'s values and setter to `PagedDataTable`. `createDataTableSearch` also returns that `clearValue`, and `TableErrorState` takes a `description`.
+- `PerformanceCard` draws its strip from `series` alone. This is a breaking change: the `strip` and `chart` props are removed.
+
+  - A series takes `tooltip`, shown under its item on hover and read to a screen reader as the item's description, and `hintHidden`, which folds its hint line away.
+  - The card takes `stripError`, an error with a title, a description and a retry, shown in place of the strip while the figures failed to load. It also takes `isStripLoading`, for figures that load apart from the chart.
+  - The charted item is marked as selected whenever the strip has more than one item, also when it is the only chart and so cannot be pressed.
+  - `StatStripItem` takes `description`, text for a screen reader alone.
+
+  To move a card off `strip` and `chart`, describe each item of the strip as an entry of `series`, give the entries that can be charted their `chart`, and pass the selected one's `id` as `value`.
+- Add an area rail to `Shell`, for an area with its own nav such as settings or an admin panel.
+
+  - `AreaRail` replaces the product's rows: a back row with the area's name, then the area's groups. Pass it as the Shell's `nav` and leave `top` out. `back` is the link element the row renders, so it works with any router. With TanStack Router, write `<Link to="/" activeOptions={{ exact: true }} />`: a link to `/` matches every path by prefix, and without `exact` the back row reads as the current page across the whole area. The phone drawer shows the same rail.
+  - The back row's accessible name is "Leave" and the area's name, such as "Leave admin". `backLabel` replaces it, and must contain the area's visible name, so a reader who speaks the word on screen can reach the row (WCAG 2.5.3).
+  - `AreaRailGroup` is one group of `NavLink` rows after a hairline, with an optional `label` heading. It needs an `aria-label`.
+  - `AreaRailSkeleton` stands in while the groups load. `groups` lists each group's heading and row count.
+  - Entering or leaving an area steps the rail on a wide screen. The rail's body drifts 8px and fades out, and the new one drifts in from the other side, while the page beside it swaps at once. Your router starts it as a view transition with the types from `getAreaRailTypes(from, to, findArea)` in `@underpin/ui/view-transition`. It takes the two locations and a function that names a location's area, and answers `false` on the first page, inside one area, under `lg` and without `matchMedia`. With TanStack Router, return it from `defaultViewTransition.types` as `getAreaRailTypes(fromLocation, toLocation, location => findArea(location.pathname))`, and set `defaultViewTransition` only when `hasViewTransitionTypes()` is true. Under reduced motion the rail swaps at once.
+  - The Shell's rail body now carries `view-transition-name: shell-rail`, so render one Shell per document. A second one on the page, such as a preview, renames it with `railBodyClassName="[view-transition-name:preview-rail]"`. Rename any element of your own that uses `shell-rail`.
+  - `matchesMedia` from `@underpin/ui/media` returns `false` where there is no `matchMedia`, as on the server, instead of throwing.
+
 ## 2.8.0
 
 ### Minor Changes
