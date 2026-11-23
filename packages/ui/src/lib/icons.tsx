@@ -16,6 +16,7 @@ import {
   Cancel01Icon,
   CancelCircleIcon as CancelCircleDef,
   CheckmarkCircle02Icon,
+  DragDropVerticalIcon,
   ListFilterIcon,
   ComputerIcon as ComputerDef,
   Copy01Icon,
@@ -61,6 +62,7 @@ export const ComputerIcon = icon(ComputerDef, "ComputerIcon")
 export const CopyIcon = icon(Copy01Icon, "CopyIcon")
 export const DashIcon = icon(Remove01Icon, "DashIcon")
 export const FilterIcon = icon(ListFilterIcon, "FilterIcon")
+export const GripIcon = icon(DragDropVerticalIcon, "GripIcon")
 export const HelpIcon = icon(HelpCircleIcon, "HelpIcon")
 export const InfoIcon = icon(InformationCircleIcon, "InfoIcon")
 export const LoadingIcon = icon(Loading03Icon, "LoadingIcon")

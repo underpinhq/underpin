@@ -10,7 +10,7 @@ This package was published as `@dirstack/ui` up to 1.15.0. Upgrading from `@dirs
 npm install @underpin/ui @base-ui/react tailwindcss tailwindcss-animate
 ```
 
-Peers: `react` and `react-dom` 19 or newer, `@base-ui/react` 1, `tailwindcss` 4 and `tailwindcss-animate` 1. `@tanstack/react-form` 1 is optional and only `@underpin/ui/form` needs it.
+Peers: `react` and `react-dom` 19 or newer, `@base-ui/react` 1, `tailwindcss` 4 and `tailwindcss-animate` 1. `@tanstack/react-form` 1 is optional and only `@underpin/ui/form` needs it. `@dnd-kit/core` 6, `@dnd-kit/sortable` 10 and `@dnd-kit/utilities` 3 are optional and only `@underpin/ui/sortable` needs them.
 
 ## Styles
 
