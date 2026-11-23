@@ -115,6 +115,13 @@ Dev Mode and the `use_figma` tool both read them. Page `16 · Onboarding` is the
   the strong edge and no shadow, with its value in ink at 400 and its placeholder muted, so a
   form reads as one column of openings. A control that runs a command is a button, raised; a
   toolbar's period picker is one, since it sits among commands.
+- A field that holds several picked values is a combobox in `multiple` mode: each value is an
+  outline chip inside the field with its own remove, ahead of the text. Enter toggles the
+  highlighted option, a comma only adds it, and a pasted list splits into chips. Backspace in the
+  empty text removes the last chip. A term nothing matches
+  gets a "Create …" row led by a plus, at the end of the list. A suggested group sits above the
+  matches under its own label, a count ends its row in muted tabular figures, and a footer under
+  the list names the keys.
 - A control answers a press. A raised surface loses its drop and sits on the page: a button
   or a card with one link drops 1px, a menu row sinks into a well. A button group's member stays
   in line and darkens instead. Shadows under anything resting on the page stay crisp, a 1px drop
