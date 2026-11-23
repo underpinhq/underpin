@@ -83,4 +83,13 @@ describe("tree shaking", () => {
     expect(code).not.toContain("slugify")
     expect(modules).toEqual(["http/http.js"])
   })
+
+  it("bundles formatDisplayUrl without the IP helpers", async () => {
+    const { code, modules } = await bundleExport("formatDisplayUrl")
+
+    expect(code).toContain("fbclid")
+    expect(code).not.toContain("CLOUDFLARE_IP_RANGES")
+    expect(code).not.toContain("slugify")
+    expect(modules).toEqual(["http/http.js", "internal/url.js"])
+  })
 })

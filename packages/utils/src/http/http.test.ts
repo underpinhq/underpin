@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest"
 import {
   addProtocol,
   CLOUDFLARE_IP_RANGES,
+  formatDisplayUrl,
   getClientIp,
   getDomain,
   getParentDomains,
@@ -140,6 +141,105 @@ describe("removeQueryParams", () => {
 
   it("handles empty input", () => {
     expect(removeQueryParams()).toBe("")
+  })
+})
+
+describe("formatDisplayUrl", () => {
+  it("removes the protocol", () => {
+    expect(formatDisplayUrl("https://example.com/a")).toBe("example.com/a")
+    expect(formatDisplayUrl("http://example.com/a")).toBe("example.com/a")
+    expect(formatDisplayUrl("HTTPS://example.com/a")).toBe("example.com/a")
+    expect(formatDisplayUrl("//example.com/a")).toBe("example.com/a")
+  })
+
+  it("removes a leading www", () => {
+    expect(formatDisplayUrl("https://www.example.com/a")).toBe("example.com/a")
+    expect(formatDisplayUrl("https://WWW.example.com")).toBe("example.com")
+    expect(formatDisplayUrl("https://app.www.example.com")).toBe("app.www.example.com")
+    expect(formatDisplayUrl("https://wwwexample.com")).toBe("wwwexample.com")
+  })
+
+  it("removes every utm param", () => {
+    expect(
+      formatDisplayUrl("https://brightdata.com/ai?utm_source=x&utm_medium=y&utm_campaign=z"),
+    ).toBe("brightdata.com/ai")
+    expect(formatDisplayUrl("https://example.com?UTM_Source=x&utm_whatever=y")).toBe("example.com")
+  })
+
+  it("removes ad click ids", () => {
+    const ids = [
+      "fbclid",
+      "gclid",
+      "gbraid",
+      "wbraid",
+      "msclkid",
+      "dclid",
+      "twclid",
+      "ttclid",
+      "li_fat_id",
+      "igshid",
+      "yclid",
+      "mc_cid",
+      "mc_eid",
+      "_hsenc",
+      "_hsmi",
+    ]
+
+    for (const id of ids) {
+      expect(formatDisplayUrl(`https://example.com/a?${id}=123`)).toBe("example.com/a")
+    }
+  })
+
+  it("removes a tracking key without a value", () => {
+    expect(formatDisplayUrl("https://example.com/a?gclid&ref=1")).toBe("example.com/a?ref=1")
+  })
+
+  it("matches a percent-encoded tracking key", () => {
+    expect(formatDisplayUrl("https://example.com/a?utm%5Fsource=x&ref=1")).toBe(
+      "example.com/a?ref=1",
+    )
+    expect(formatDisplayUrl("https://example.com/a?%E0%A4%A=x")).toBe("example.com/a?%E0%A4%A=x")
+  })
+
+  it("keeps other query params in their order", () => {
+    expect(formatDisplayUrl("https://example.com/a?ref=x&utm_source=y&page=2")).toBe(
+      "example.com/a?ref=x&page=2",
+    )
+    expect(formatDisplayUrl("https://example.com/a?q=a%20b&flag")).toBe(
+      "example.com/a?q=a%20b&flag",
+    )
+  })
+
+  it("removes the question mark when no params are left", () => {
+    expect(formatDisplayUrl("https://example.com/a?")).toBe("example.com/a")
+    expect(formatDisplayUrl("https://example.com/a?gclid=1#top")).toBe("example.com/a#top")
+  })
+
+  it("removes a trailing slash", () => {
+    expect(formatDisplayUrl("https://example.com/")).toBe("example.com")
+    expect(formatDisplayUrl("https://example.com/a/")).toBe("example.com/a")
+    expect(formatDisplayUrl("https://example.com/a/#top")).toBe("example.com/a#top")
+    expect(formatDisplayUrl("https://example.com/a/?utm_source=x")).toBe("example.com/a")
+    expect(formatDisplayUrl("https://example.com/?ref=x")).toBe("example.com?ref=x")
+  })
+
+  it("keeps the hash", () => {
+    expect(formatDisplayUrl("https://www.example.com/a/?utm_source=x&ref=y#top")).toBe(
+      "example.com/a?ref=y#top",
+    )
+    expect(formatDisplayUrl("https://example.com/#/route?x=1")).toBe("example.com#/route?x=1")
+  })
+
+  it("cleans input that is not a full URL", () => {
+    expect(formatDisplayUrl("example.com/a/")).toBe("example.com/a")
+    expect(formatDisplayUrl("www.example.com/a?utm_source=x&ref=y")).toBe("example.com/a?ref=y")
+    expect(formatDisplayUrl("  https://example.com/a  ")).toBe("example.com/a")
+    expect(formatDisplayUrl("not a url")).toBe("not a url")
+  })
+
+  it("handles empty input", () => {
+    expect(formatDisplayUrl()).toBe("")
+    expect(formatDisplayUrl("")).toBe("")
   })
 })
 
