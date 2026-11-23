@@ -51,10 +51,26 @@ const favicon = variants({
         letter: "text-xs",
       },
     },
+    /**
+     * Draw the image over the whole box, clipped to its corners, for a logo made to fill its
+     * square (an uploaded ad or product logo) rather than a 16px favicon. Changes only `lg`,
+     * where the image otherwise sits small in the middle of its tile.
+     */
+    fill: {
+      true: {},
+    },
     loaded: {
       false: { image: "opacity-0" },
     },
   },
+
+  compoundVariants: [
+    {
+      size: "lg",
+      fill: true,
+      class: { image: "size-full rounded-[inherit] object-cover" },
+    },
+  ],
 
   defaultVariants: {
     size: "sm",
@@ -62,6 +78,9 @@ const favicon = variants({
 })
 
 const IMAGE_SIZES = { sm: 16, md: 20, lg: 16 } as const
+
+/** The pixels of an `lg` image that fills its tile. */
+const FILLED_IMAGE_SIZE = 28
 
 type FaviconProps = Omit<ComponentProps<"span">, "children"> &
   VariantProps<typeof favicon> & {
@@ -99,6 +118,7 @@ export function Favicon({
   fallback,
   label,
   size,
+  fill,
   className,
   ...props
 }: FaviconProps) {
@@ -109,9 +129,9 @@ export function Favicon({
   const isLoaded = current === "loaded"
   const isFailed = !src || current === "failed"
 
-  const styles = favicon({ size, loaded: isLoaded })
+  const styles = favicon({ size, fill, loaded: isLoaded })
   const named = label ? ({ role: "img", "aria-label": label } as const) : { "aria-hidden": true }
-  const pixels = IMAGE_SIZES[size ?? "sm"]
+  const pixels = fill && size === "lg" ? FILLED_IMAGE_SIZE : IMAGE_SIZES[size ?? "sm"]
   const initial = formatFaviconLetter(name)
   const letter = initial ? <span className={styles.letter()}>{initial}</span> : null
 

@@ -237,7 +237,11 @@ describe("Table", () => {
     expect(linked?.className).toContain("relative")
     // The hover fill applies only to a row that holds a row link, and never over the press fill.
     expect(linked?.className).toContain("has-[[data-row-link]:not(:active)]:hover:bg-canvas")
-    expect(linked?.className).toContain("has-[[data-press-target]:active]:bg-fill-strong")
+    expect(linked?.className).toContain(
+      "has-[[data-press-target]:active:not(:focus-visible)]:bg-fill",
+    )
+    // A focused link keeps the hover fill while pressed, under its focus ring.
+    expect(linked?.className).toContain("has-[[data-row-link]:focus-visible]:bg-canvas")
     expect(linked?.className).not.toContain("has-[[data-row-link]]:hover:bg-canvas")
     expect(linked?.querySelector("[data-row-link]")).not.toBeNull()
     expect(plain?.querySelector("[data-row-link]")).toBeNull()

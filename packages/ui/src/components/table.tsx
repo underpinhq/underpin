@@ -106,10 +106,11 @@ const tableRowVariants = variants({
   base: [
     ROW_GRID_CLASSES,
     "group/row relative items-center border-t border-edge-subtle",
-    // Only a row that opens something answers the pointer. The hover and focus fills leave out a
-    // pressed link: they match with the same weight as the press fill and come later in the
-    // stylesheet, so they would hide it.
-    "has-[[data-row-link]:not(:active)]:hover:bg-canvas has-[[data-row-link]:focus-visible:not(:active)]:bg-canvas",
+    // Only a row that opens something answers the pointer. The hover fill leaves out a pressed
+    // link: it matches with the same weight as the press fill and comes later in the stylesheet,
+    // so it would hide it. A focused link keeps the hover fill even while pressed, since the press
+    // fill skips it.
+    "has-[[data-row-link]:not(:active)]:hover:bg-canvas has-[[data-row-link]:focus-visible]:bg-canvas",
     rowPressClasses,
     "data-selected:bg-fill-subtle data-selected:hover:bg-fill-subtle",
     // The cell holding the row link sits on a layer above its neighbours. A faded cell is a

@@ -36,8 +36,9 @@ const stripVariants = variants({
       plain: cardSurfaceClasses,
       // The same row as a band of the card it shares with something else, most often the
       // chart the selected figure draws: no surface of its own, and the panel below it
-      // carries the hairline that closes the band.
-      track: "",
+      // carries the hairline that closes the band. Under a card header it draws the hairline
+      // that opens the band, as a card panel does.
+      track: "not-first:border-t",
     },
 
     // Where the stacked grid gives way to one row. A cell of that row is the full width over

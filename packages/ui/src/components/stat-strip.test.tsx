@@ -141,3 +141,22 @@ describe("StatStripItem", () => {
     }
   })
 })
+
+describe("StatStrip", () => {
+  test("a track strip under a card header opens its band with a hairline", async () => {
+    const { StatStrip, StatStripItem } = await import("./stat-strip")
+
+    const view = await render(
+      <div>
+        <h2>Performance</h2>
+        <StatStrip variant="track">
+          <StatStripItem label="Visitors" value={12} />
+        </StatStrip>
+      </div>,
+    )
+
+    expect(document.querySelector("[data-row]")?.className).toContain("not-first:border-t")
+
+    await view.unmount()
+  })
+})

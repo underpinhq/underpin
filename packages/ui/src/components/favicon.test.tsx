@@ -202,6 +202,27 @@ describe("Favicon", () => {
     }
   })
 
+  test("fills an lg tile with the image when asked", async () => {
+    holdImagesLoading()
+    const { Favicon } = await import("./favicon")
+
+    const view = await render(
+      <Favicon size="lg" fill src="https://icons.test/logo.png" name="Acme" />,
+    )
+
+    const image = findImage()
+    expect(image?.className).toContain("size-full")
+    expect(image?.className).toContain("object-cover")
+    expect(image?.getAttribute("width")).toBe("28")
+
+    await view.rerender(<Favicon size="lg" src="https://icons.test/logo.png" name="Acme" />)
+
+    expect(findImage()?.className).toContain("size-4")
+    expect(findImage()?.getAttribute("width")).toBe("16")
+
+    await view.unmount()
+  })
+
   test("is hidden from assistive tech unless it has a label", async () => {
     const { Favicon } = await import("./favicon")
 

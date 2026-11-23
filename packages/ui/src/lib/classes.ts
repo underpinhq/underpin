@@ -112,13 +112,18 @@ export const iconTileClasses =
 export const descriptionClasses = "max-w-prose text-copy text-ink-muted"
 
 /**
- * A row of a table or a list, pressed: past its hover fill, and fading into it. Only the press
- * fades. A pointer sweeping down the list lights and clears each row at once, since a fading row
- * trails the cursor and reads as lag. The row's link or button carries `data-press-target`, so a
- * press on a smaller control in the row leaves the row alone.
+ * A row of a table or a list, pressed: `bg-fill`, past its hover fill and short of the strong
+ * fill a pressed menu item takes, since a row is a far larger box. Only the press fades. A
+ * pointer sweeping down the list lights and clears each row at once, since a fading row trails
+ * the cursor and reads as lag. The row's link or button carries `data-press-target`, so a press
+ * on a smaller control in the row leaves the row alone. A row opened from the keyboard keeps its
+ * focus ring and hover fill instead: the ring already marks it, and a dark fill inside the ring
+ * reads as a selection.
  */
-export const rowPressClasses =
-  "transition-colors duration-0 ease-out has-[[data-press-target]:active]:bg-fill-strong has-[[data-press-target]:active]:duration-150"
+export const rowPressClasses = [
+  "transition-colors duration-0 ease-out",
+  "has-[[data-press-target]:active:not(:focus-visible)]:bg-fill has-[[data-press-target]:active:not(:focus-visible)]:duration-150",
+].join(" ")
 
 /**
  * One row in any floating list. Vertical padding, control text, secondary foreground,
