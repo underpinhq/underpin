@@ -1,5 +1,11 @@
 # @underpin/ui
 
+## 2.6.1
+
+### Patch Changes
+
+- Fix `StatStrip` shrinking every figure to nothing when one of its items is hidden at the current width, such as a `StatStripItem` (or a `PerformanceCard` series) with `className="max-sm:hidden"` on a phone. A hidden item no longer counts toward the fit, and the figures never shrink below half their size.
+
 ## 2.6.0
 
 ### Minor Changes
