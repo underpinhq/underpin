@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test"
+import { describe, expect, spyOn, test } from "bun:test"
 import { listAxeViolations, registerDom, render } from "../test-dom"
 
 registerDom()
@@ -65,5 +65,79 @@ describe("StatStripItem", () => {
     expect(document.body.textContent).toContain("Last 7 days")
 
     await view.unmount()
+  })
+
+  test("a figure hidden at this width leaves the others at the size they fit", async () => {
+    const { StatStrip, StatStripItem } = await import("./stat-strip")
+    const proto = HTMLElement.prototype
+    const saved = {
+      offsetParent: Object.getOwnPropertyDescriptor(proto, "offsetParent"),
+      clientWidth: Object.getOwnPropertyDescriptor(proto, "clientWidth"),
+    }
+
+    // A layout, which the test DOM has none of: every value line 100px wide, every figure
+    // 150px wide, and the item marked hidden without a box at all, as `display: none` leaves it.
+    Object.defineProperty(proto, "offsetParent", {
+      configurable: true,
+      get(this: HTMLElement) {
+        return this.closest(".hidden-item") ? null : document.body
+      },
+    })
+    Object.defineProperty(proto, "clientWidth", {
+      configurable: true,
+      get(this: HTMLElement) {
+        return this.matches("[data-value]") && !this.closest(".hidden-item") ? 100 : 0
+      },
+    })
+    const rect = spyOn(proto, "getBoundingClientRect").mockImplementation(function (
+      this: HTMLElement,
+    ) {
+      const width = this.matches("[data-figure]") && !this.closest(".hidden-item") ? 150 : 0
+      return { width } as DOMRect
+    })
+
+    try {
+      for (const order of [
+        ["shown", "hidden"],
+        ["hidden", "shown"],
+      ]) {
+        const view = await render(
+          <StatStrip>
+            {order.map(kind => (
+              <StatStripItem
+                key={kind}
+                label={kind}
+                value="$30.6K"
+                className={kind === "hidden" ? "hidden-item" : undefined}
+              />
+            ))}
+          </StatStrip>,
+        )
+
+        const fit = document
+          .querySelector<HTMLElement>("[data-row]")
+          ?.style.getPropertyValue("--stat-fit")
+        // 98px of room over 150px of figure, rounded down.
+        expect(fit).toBe("0.65")
+        await view.unmount()
+      }
+
+      // With every figure hidden there is nothing to fit, and the factor stays unset.
+      const view = await render(
+        <StatStrip>
+          <StatStripItem label="hidden" value={12} className="hidden-item" />
+        </StatStrip>,
+      )
+      expect(
+        document.querySelector<HTMLElement>("[data-row]")?.style.getPropertyValue("--stat-fit"),
+      ).toBe("")
+      await view.unmount()
+    } finally {
+      // The test DOM has no `offsetParent` of its own, so the stub goes again.
+      if (saved.offsetParent) Object.defineProperty(proto, "offsetParent", saved.offsetParent)
+      else delete (proto as { offsetParent?: unknown }).offsetParent
+      if (saved.clientWidth) Object.defineProperty(proto, "clientWidth", saved.clientWidth)
+      rect.mockRestore()
+    }
   })
 })

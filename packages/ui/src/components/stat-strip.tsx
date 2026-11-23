@@ -57,6 +57,9 @@ const stripVariants = variants({
   },
 })
 
+/** The smallest share of its size a figure is shrunk to. */
+const MIN_FIT = 0.5
+
 /**
  * Shrinks every figure of the strip by the same factor until the widest one fits its cell, so
  * figures stay one size across the strip and none is cut off. A figure's length depends on the
@@ -75,21 +78,30 @@ function useFigureFit() {
     const strip = ref.current
     if (!strip) return
 
-    // `||`, not `??`: an unset property reads as "" and so as 0, which means full size.
-    const current = Number(strip.style.getPropertyValue("--stat-fit")) || 1
+    // An unset property reads as "" and so as 0, which means full size, as does anything that
+    // is not a positive factor.
+    const stored = Number(strip.style.getPropertyValue("--stat-fit"))
+    const current = Number.isFinite(stored) && stored > 0 ? stored : 1
     let scale = 1
 
     // The text's own width against its line's: a truncated line reports no overflow through
     // `scrollWidth`, since the ellipsis is what fills it. The browser truncates a figure that
     // fits to within a pixel, so the line is taken as two pixels narrower than it is.
     for (const text of strip.querySelectorAll<HTMLElement>("[data-value] > [data-figure]")) {
-      const available = (text.parentElement?.clientWidth ?? 0) - 2
+      const line = text.parentElement
+      // An item hidden at this width (`max-sm:hidden`) has no box, and its zero width would
+      // read as no room at all and shrink every other figure to nothing.
+      if (!line || line.offsetParent === null) continue
+
+      const available = line.clientWidth - 2
       const needed = text.getBoundingClientRect().width / current
+      if (available <= 0 || needed <= 0) continue
       if (needed > available) scale = Math.min(scale, available / needed)
     }
 
-    // Rounded down, so a figure that fits by a subpixel is not cut off by rounding up.
-    const next = Math.floor(scale * 100) / 100
+    // Rounded down, so a figure that fits by a subpixel is not cut off by rounding up, and
+    // never below the floor, where a figure would stop being readable at all.
+    const next = Math.max(MIN_FIT, Math.floor(scale * 100) / 100)
     if (next !== current) strip.style.setProperty("--stat-fit", String(next))
   }, [])
 
