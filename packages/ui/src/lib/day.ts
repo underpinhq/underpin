@@ -1,4 +1,6 @@
-import { dateFormat, relativeFormat } from "./intl"
+import { isDevelopment } from "./env"
+import { assertInstant, DAY_KEY } from "./instant"
+import { dateFormat, numberFormat, relativeFormat } from "./intl"
 
 /**
  * A calendar day as "YYYY-MM-DD" — the shape `<input type="date">` uses, and the one a date
@@ -18,10 +20,10 @@ export function dateToDay(date: Date): string {
   return `${date.getFullYear()}-${month}-${day}`
 }
 
-// The readings below turn an instant into text for a person: how long ago it was, the full
-// moment, and the same moment on several clocks. Every one takes the clock it reads on as
-// `timeZone` (the reader's own by default) and the language as `locale` (the reader's by
-// default).
+// The readings below turn an instant, or a calendar day, into text for a person: how long ago
+// it was, the full moment, and the same moment on several clocks. Every one takes the language
+// as `locale`, and a reading made on a clock takes that clock as `timeZone` (both the reader's
+// own by default).
 
 export interface MomentFormatOptions {
   /** A BCP 47 language tag; the reader's own when left out. */
@@ -35,11 +37,28 @@ export interface MomentFormatOptions {
   hourCycle?: Intl.DateTimeFormatOptions["hourCycle"]
 }
 
+/**
+ * How a unit is written: `"long"` spells it out ("3 hours ago"), `"short"` abbreviates it in
+ * the language's own way ("3 hr. ago") for a line that shares its width with other text.
+ */
+export type AgoStyle = "long" | "short"
+
 export interface AgoFormatOptions {
   /** A BCP 47 language tag; the reader's own when left out. */
   locale?: string
   /** The moment the reading is made against; the current one when left out. */
   now?: Date
+  /** How the unit is written; spelled out when left out. */
+  style?: AgoStyle
+}
+
+export interface DayAgoFormatOptions {
+  /** A BCP 47 language tag; the reader's own when left out. */
+  locale?: string
+  /** The day the reading is made on, as "YYYY-MM-DD"; the reader's own today when left out. */
+  today?: string
+  /** How the unit is written; spelled out when left out. */
+  style?: AgoStyle
 }
 
 /** One instant as a single clock reads it. */
@@ -60,6 +79,14 @@ const DAY_MS = 24 * HOUR_MS
 /** Closer to now than this reads as now, since "0 seconds ago" reads as a glitch. */
 const NOW_MS = 10 * SECOND_MS
 
+/** Whole calendar days from one day key to another; negative when `to` comes first. */
+function countDays(from: string, to: string) {
+  if (isDevelopment() && !(DAY_KEY.test(from) && DAY_KEY.test(to))) {
+    throw new Error(`Expected two "YYYY-MM-DD" days, got "${from}" and "${to}".`)
+  }
+  return Math.round((Date.parse(`${to}T00:00:00Z`) - Date.parse(`${from}T00:00:00Z`)) / DAY_MS)
+}
+
 /**
  * The largest unit a span reaches, each counted in whole rounded units: seconds under a minute,
  * minutes under an hour, hours under a day, days under 30, months under 12, then years.
@@ -79,21 +106,49 @@ function pickAgoUnit(elapsed: number): [number, Intl.RelativeTimeFormatUnit] {
 }
 
 /**
- * How far an instant is from now, in its largest unit: "3 hours ago", "in 2 days". Within ten
- * seconds of now it is the language's own word for now.
+ * How far an instant is from now, in its largest unit: "3 hours ago", "in 2 days", or "3 hr.
+ * ago" in the short style. Within ten seconds of now it is the language's own word for now.
+ * It takes an instant (ISO 8601 with a time, or a `Date`); a calendar day goes through
+ * `formatDayAgo`.
  */
 export function formatAgo(
   date: Date | string,
-  { locale, now = new Date() }: AgoFormatOptions = {},
+  { locale, now = new Date(), style = "long" }: AgoFormatOptions = {},
 ) {
+  assertInstant(date)
   const elapsed = new Date(date).getTime() - now.getTime()
 
   if (Math.abs(elapsed) < NOW_MS) {
-    return relativeFormat(locale, { numeric: "auto" }).format(0, "second")
+    return relativeFormat(locale, { numeric: "auto", style }).format(0, "second")
   }
 
   const [value, unit] = pickAgoUnit(elapsed)
-  return relativeFormat(locale, { numeric: "always" }).format(value, unit)
+  return relativeFormat(locale, { numeric: "always", style }).format(value, unit)
+}
+
+/**
+ * How far a calendar day ("YYYY-MM-DD") is from today, counted on the calendar: "today",
+ * "yesterday", "in 2 days", "3 days ago". For a reading kept by the day, or one printed beside
+ * a date, where counting an instant's hours would land a day off around midnight.
+ */
+export function formatDayAgo(
+  day: string,
+  { locale, today = dateToDay(new Date()), style = "long" }: DayAgoFormatOptions = {},
+) {
+  return relativeFormat(locale, { numeric: "auto", style }).format(countDays(today, day), "day")
+}
+
+/**
+ * How many calendar days a day ("YYYY-MM-DD") is from today, with no direction: "3 days",
+ * "1 day". For a "… left" figure, counted like `formatDayAgo` so the two never disagree.
+ */
+export function formatDaysAway(
+  day: string,
+  { locale, today = dateToDay(new Date()), style = "long" }: DayAgoFormatOptions = {},
+) {
+  return numberFormat(locale, { style: "unit", unit: "day", unitDisplay: style }).format(
+    Math.abs(countDays(today, day)),
+  )
 }
 
 /** The full moment on one clock: "September 20, 2026 at 2:58 PM". */

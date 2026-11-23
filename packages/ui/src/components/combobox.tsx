@@ -28,6 +28,7 @@ import {
   isComboboxCreateOption,
   splitComboboxTerms,
 } from "../lib/combobox-create"
+import { isDevelopment } from "../lib/env"
 import { CancelIcon, CheckIcon, ChevronsUpDownIcon, PlusIcon } from "../lib/icons"
 import { cn, variants, type VariantProps } from "../lib/variants"
 import { badgeVariants } from "./badge"
@@ -403,12 +404,6 @@ interface ComboboxChipProps extends ComboboxPrimitive.Chip.Props {
    * chip whose children are not a plain string (an icon beside the name) needs it.
    */
   label?: string
-}
-
-function isDevelopment() {
-  // A bundler replaces this read with a constant; a page with no `process` is a production one.
-  // oxlint-disable-next-line node/no-process-env
-  return typeof process !== "undefined" && process.env.NODE_ENV !== "production"
 }
 
 /**

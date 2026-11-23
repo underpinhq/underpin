@@ -1,5 +1,12 @@
 import { describe, expect, test } from "bun:test"
-import { formatAgo, formatExactAgo, formatMoment, formatZonedStamps } from "./day"
+import {
+  formatAgo,
+  formatDayAgo,
+  formatDaysAway,
+  formatExactAgo,
+  formatMoment,
+  formatZonedStamps,
+} from "./day"
 
 const SECOND = 1000
 const MINUTE = 60 * SECOND
@@ -27,6 +34,47 @@ describe("formatAgo", () => {
 
   test("speaks the language it is given", () => {
     expect(formatAgo(at(-3 * HOUR), { locale: "de", now: NOW })).toBe("vor 3 Stunden")
+  })
+
+  test("abbreviates the unit in the short style", () => {
+    const options = { locale: "en-US", now: NOW, style: "short" } as const
+
+    expect(formatAgo(at(-4 * SECOND), options)).toBe("now")
+    expect(formatAgo(at(-3 * HOUR), options)).toBe("3 hr. ago")
+    expect(formatAgo(at(5 * MINUTE), options)).toBe("in 5 min.")
+  })
+
+  test("refuses a calendar day, which would read as UTC midnight", () => {
+    expect(() => formatAgo("2026-09-20", { now: NOW })).toThrow(/calendar day/)
+    expect(formatAgo("2026-09-20T16:58:00.000Z", { locale: "en-US", now: NOW })).toBe(
+      "20 seconds ago",
+    )
+  })
+})
+
+describe("formatDayAgo", () => {
+  test("counts calendar days, whatever the hour", () => {
+    const options = { locale: "en-US", today: "2026-09-20" }
+
+    expect(formatDayAgo("2026-09-20", options)).toBe("today")
+    expect(formatDayAgo("2026-09-19", options)).toBe("yesterday")
+    expect(formatDayAgo("2026-09-17", options)).toBe("3 days ago")
+    expect(formatDayAgo("2026-09-21", options)).toBe("tomorrow")
+    expect(formatDayAgo("2026-09-23", options)).toBe("in 3 days")
+  })
+
+  test("counts across a month and a daylight saving change", () => {
+    expect(formatDayAgo("2026-10-26", { locale: "en-US", today: "2026-11-02" })).toBe("7 days ago")
+  })
+})
+
+describe("formatDaysAway", () => {
+  test("gives the calendar days with no direction", () => {
+    const options = { locale: "en-US", today: "2026-09-20" }
+
+    expect(formatDaysAway("2026-09-23", options)).toBe("3 days")
+    expect(formatDaysAway("2026-09-21", options)).toBe("1 day")
+    expect(formatDaysAway("2026-09-17", options)).toBe("3 days")
   })
 })
 

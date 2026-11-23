@@ -145,6 +145,25 @@ describe("RelativeTime", () => {
     await view.unmount()
   })
 
+  test("abbreviates the built-in reading in the short style", async () => {
+    const { RelativeTime } = await import("./relative-time")
+
+    const view = await render(
+      <RelativeTime date={new Date(Date.now() - 3 * 3_600_000)} locale="en-US" agoStyle="short" />,
+    )
+
+    expect(getTime().textContent).toBe("3 hr. ago")
+
+    await view.unmount()
+  })
+
+  test("refuses a calendar day, which would read as UTC midnight", async () => {
+    const { renderToString } = await import("react-dom/server")
+    const { RelativeTime } = await import("./relative-time")
+
+    expect(() => renderToString(<RelativeTime date="2026-09-20" />)).toThrow(/calendar day/)
+  })
+
   test("reads the default tooltip on the clock it is given", async () => {
     const { RelativeTime } = await import("./relative-time")
 

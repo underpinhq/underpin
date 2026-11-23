@@ -1,7 +1,14 @@
 "use client"
 
 import { type ComponentProps, type ReactNode, useSyncExternalStore } from "react"
-import { formatAgo, formatMoment, type MomentFormatOptions, type ZonedStamp } from "../lib/day"
+import {
+  type AgoStyle,
+  formatAgo,
+  formatMoment,
+  type MomentFormatOptions,
+  type ZonedStamp,
+} from "../lib/day"
+import { assertInstant } from "../lib/instant"
 import { Badge } from "./badge"
 import { Tooltip } from "./tooltip"
 
@@ -9,7 +16,10 @@ import { Tooltip } from "./tooltip"
 export type RelativeTimeStamp = ZonedStamp
 
 export interface RelativeTimeProps extends Omit<ComponentProps<"time">, "dateTime"> {
-  /** The instant being reported on; ISO 8601, or a `Date`. */
+  /**
+   * The instant being reported on: ISO 8601 with a time of day, or a `Date`. A bare
+   * "YYYY-MM-DD" throws in development, since it would read as UTC midnight.
+   */
   date: Date | string
   /**
    * What the hover says: the full date, or how long ago above a list of `stamps`. The full
@@ -24,12 +34,19 @@ export interface RelativeTimeProps extends Omit<ComponentProps<"time">, "dateTim
   locale?: string
   /** The clock's cycle in the built-in readings (`"h23"`, `"h12"`); the language's own by default. */
   hourCycle?: MomentFormatOptions["hourCycle"]
+  /**
+   * How the built-in reading writes its unit: spelled out ("3 hours ago") by default, or
+   * `"short"` ("3 hr. ago") for a line that shares its width with other text.
+   */
+  agoStyle?: AgoStyle
 }
 
 interface MomentProps extends Pick<
   RelativeTimeProps,
   "date" | "timeZone" | "locale" | "hourCycle"
 > {}
+
+interface AgoProps extends MomentProps, Pick<RelativeTimeProps, "agoStyle"> {}
 
 /** The full moment, formatted as the tooltip opens rather than on every render of the page. */
 function Moment({ date, timeZone, locale, hourCycle }: MomentProps) {
@@ -76,7 +93,7 @@ function readServerClock(): number | undefined {
  * reading of how long ago made on the server would be frozen at the moment of the render, a
  * static page's build among them, and in the server's language.
  */
-function Ago({ date, timeZone, locale, hourCycle }: MomentProps) {
+function Ago({ date, timeZone, locale, hourCycle, agoStyle }: AgoProps) {
   const minute = useSyncExternalStore(subscribeClock, readClock, readServerClock)
 
   if (minute === undefined) {
@@ -87,7 +104,7 @@ function Ago({ date, timeZone, locale, hourCycle }: MomentProps) {
     })
   }
 
-  return formatAgo(date, { locale })
+  return formatAgo(date, { locale, style: agoStyle })
 }
 
 /**
@@ -103,12 +120,22 @@ export function RelativeTime({
   timeZone,
   locale,
   hourCycle,
+  agoStyle,
   children,
   ...props
 }: RelativeTimeProps) {
+  assertInstant(date)
   const time = (
     <time dateTime={new Date(date).toISOString()} {...props}>
-      {children ?? <Ago date={date} timeZone={timeZone} locale={locale} hourCycle={hourCycle} />}
+      {children ?? (
+        <Ago
+          date={date}
+          timeZone={timeZone}
+          locale={locale}
+          hourCycle={hourCycle}
+          agoStyle={agoStyle}
+        />
+      )}
     </time>
   )
   const reading = tooltip ?? (
