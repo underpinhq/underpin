@@ -1,5 +1,18 @@
 # @underpin/ui
 
+## 2.8.0
+
+### Minor Changes
+
+- Add two options for a table toolbar whose list loads from a server.
+
+  - `SearchInput` takes `debounce`, in milliseconds. The field shows each key at once and calls `onValueChange` after the typing pauses. Enter, the clear button and an emptied field apply at once. Text an input method is still composing waits until the composition ends. A value changed from outside, such as by Back, replaces the text, while the field's own value coming back, trimmed or not, leaves the text alone. With `useDataTableRoute` or `getProps`, each pause replaces the history entry, so Back skips the partial searches.
+  - `TableFacetFilter` takes `multiple={false}` for a field the API filters by one value. Its rows are radios, and a pick replaces the value and closes the menu. Picking the chosen value again calls nothing. `value` and `onValueChange` keep their `string[]` shape.
+
+### Patch Changes
+
+- `useDataTableRoute` accepts a table from `createDataTableSearch({ keys })` with renamed params, such as `{ query: "search" }`, without a type argument. Such a call failed to type check before, so `useDataTableRoute<typeof KEYS>(…)` was needed. That form still compiles.
+
 ## 2.7.0
 
 ### Minor Changes
