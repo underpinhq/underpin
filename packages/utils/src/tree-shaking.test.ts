@@ -83,6 +83,7 @@ describe("tree shaking", () => {
     expect(code).not.toContain("slugify")
     expect(modules).toEqual(["http/http.js"])
   })
+
   it("bundles formatDisplayUrl without the IP helpers", async () => {
     const { code, modules } = await bundleExport("formatDisplayUrl")
 

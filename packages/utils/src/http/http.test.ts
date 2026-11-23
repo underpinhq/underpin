@@ -156,6 +156,7 @@ describe("formatDisplayUrl", () => {
     expect(formatDisplayUrl("https://www.example.com/a")).toBe("example.com/a")
     expect(formatDisplayUrl("https://WWW.example.com")).toBe("example.com")
     expect(formatDisplayUrl("https://app.www.example.com")).toBe("app.www.example.com")
+    expect(formatDisplayUrl("https://wwwexample.com")).toBe("wwwexample.com")
   })
 
   it("removes every utm param", () => {
@@ -189,6 +190,17 @@ describe("formatDisplayUrl", () => {
     }
   })
 
+  it("removes a tracking key without a value", () => {
+    expect(formatDisplayUrl("https://example.com/a?gclid&ref=1")).toBe("example.com/a?ref=1")
+  })
+
+  it("matches a percent-encoded tracking key", () => {
+    expect(formatDisplayUrl("https://example.com/a?utm%5Fsource=x&ref=1")).toBe(
+      "example.com/a?ref=1",
+    )
+    expect(formatDisplayUrl("https://example.com/a?%E0%A4%A=x")).toBe("example.com/a?%E0%A4%A=x")
+  })
+
   it("keeps other query params in their order", () => {
     expect(formatDisplayUrl("https://example.com/a?ref=x&utm_source=y&page=2")).toBe(
       "example.com/a?ref=x&page=2",
@@ -206,6 +218,7 @@ describe("formatDisplayUrl", () => {
   it("removes a trailing slash", () => {
     expect(formatDisplayUrl("https://example.com/")).toBe("example.com")
     expect(formatDisplayUrl("https://example.com/a/")).toBe("example.com/a")
+    expect(formatDisplayUrl("https://example.com/a/#top")).toBe("example.com/a#top")
     expect(formatDisplayUrl("https://example.com/a/?utm_source=x")).toBe("example.com/a")
     expect(formatDisplayUrl("https://example.com/?ref=x")).toBe("example.com?ref=x")
   })

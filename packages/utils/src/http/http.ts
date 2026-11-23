@@ -163,10 +163,19 @@ const TRACKING_PARAMS: ReadonlySet<string> = new Set([
   "_hsmi",
 ])
 
-/** Checks if a raw `key=value` query pair is a tracking param. */
+/** Decodes a query key, or returns it as written when its percent-encoding is malformed. */
+function decodeQueryKey(key: string) {
+  try {
+    return decodeURIComponent(key)
+  } catch {
+    return key
+  }
+}
+
+/** Checks if a raw `key=value` query pair is a tracking param, matching its decoded key. */
 function isTrackingParam(pair: string) {
   const [key = ""] = pair.split("=", 1)
-  const name = key.toLowerCase()
+  const name = decodeQueryKey(key).toLowerCase()
   return name.startsWith("utm_") || TRACKING_PARAMS.has(name)
 }
 
