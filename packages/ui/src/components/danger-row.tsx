@@ -11,10 +11,7 @@ export interface DangerRowProps extends Pick<
   ConfirmDialogProps,
   | "open"
   | "onOpenChange"
-  | "confirmText"
-  | "confirmMatch"
-  | "onConfirmTextChange"
-  | "confirmDisabledReason"
+  | "confirm"
   | "isPending"
   | "onConfirm"
   | "onError"
@@ -47,8 +44,9 @@ export interface DangerRowProps extends Pick<
 
 /**
  * A settings row for an action nothing brings back: the danger button on the right, opening a
- * `ConfirmDialog`. Pass `confirmText`, the object's own name, to have it typed before the action
- * unlocks; without it the confirmation asks once, for what can be brought back another way.
+ * `ConfirmDialog`. Pass `confirm={{ text }}`, with the object's own name, to have it typed
+ * before the action unlocks; without it the confirmation asks once, for what can be brought
+ * back another way.
  *
  * Return a promise from `onConfirm` (a `mutateAsync`) and the confirmation closes once it
  * resolves. An action that returns nothing (a `mutate` with `isPending`) never closes it: drive
@@ -68,7 +66,7 @@ export function DangerRow({
   action,
   open,
   onOpenChange,
-  ...confirm
+  ...dialogProps
 }: DangerRowProps) {
   const [ownOpen, setOwnOpen] = useState(false)
   const isOpen = open ?? ownOpen
@@ -106,7 +104,7 @@ export function DangerRow({
         description={confirmDescription}
         action={action}
         onOpenChange={setOpen}
-        {...confirm}
+        {...dialogProps}
       />
     </DetailRow>
   )

@@ -251,7 +251,7 @@ a table where the frame has prose), and only as part of design work on that scre
   disabled, with "No changes to save." on hover, until a field differs from what is saved.
   The page's last card is the `DangerZoneCard` (`@underpin/ui/danger-zone-card`), one
   `DangerRow` (`@underpin/ui/danger-row`) per action nothing brings back. A row's secondary
-  danger button opens a `ConfirmDialog`, which asks for the object's name when `confirmText`
+  danger button opens a `ConfirmDialog`, which asks for the object's name when `confirm.text`
   is set. The card itself stays neutral: only the buttons are red.
 - **Detail pages** put the record's main lists on the left and a 360px side column on the
   right, from `lg` up. The side column is a stack of `FactsCard`s (`@underpin/ui/facts-card`):

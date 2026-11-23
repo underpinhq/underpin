@@ -48,7 +48,7 @@ describe("DangerRow", () => {
     const view = await render(
       <DangerRow
         {...ROW}
-        confirmText="acme.com"
+        confirm={{ text: "acme.com" }}
         cancelLabel="Keep it"
         formatConfirmTextReason={text => `Enter ${text} first.`}
         onConfirm={() => Promise.resolve()}

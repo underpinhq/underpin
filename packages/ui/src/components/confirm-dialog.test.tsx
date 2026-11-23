@@ -125,7 +125,7 @@ describe("ConfirmDialog", () => {
         title="Delete example.com?"
         description="Its stats are deleted with it."
         action="Delete site"
-        confirmText="example.com"
+        confirm={{ text: "example.com" }}
         onConfirm={onConfirm}
       />,
     )
@@ -149,7 +149,7 @@ describe("ConfirmDialog", () => {
   test("a loose match ignores case and spaces, and the typed text is reported apart", async () => {
     const { ConfirmDialog } = await import("./confirm-dialog")
     const onConfirm = mock((..._args: unknown[]) => {})
-    const onConfirmTextChange = mock((_typed: string) => {})
+    const onTextChange = mock((_typed: string) => {})
 
     const view = await render(
       <ConfirmDialog
@@ -157,9 +157,7 @@ describe("ConfirmDialog", () => {
         title="Delete go.example.com?"
         description="Its links stop working."
         action="Delete domain"
-        confirmText="go.example.com"
-        confirmMatch="loose"
-        onConfirmTextChange={onConfirmTextChange}
+        confirm={{ text: "go.example.com", match: "loose", onTextChange }}
         onConfirm={onConfirm}
       />,
     )
@@ -175,7 +173,7 @@ describe("ConfirmDialog", () => {
     await click(getButton("Delete domain"))
     expect(onConfirm).toHaveBeenCalledTimes(1)
     expect(onConfirm.mock.calls[0]).toEqual([])
-    expect(onConfirmTextChange).toHaveBeenLastCalledWith(" Go.Example.com ")
+    expect(onTextChange).toHaveBeenLastCalledWith(" Go.Example.com ")
 
     await view.unmount()
   })
@@ -193,7 +191,7 @@ describe("ConfirmDialog", () => {
           title="Reject this ad?"
           description="The advertiser gets your note."
           action="Reject ad"
-          confirmDisabledReason={reason}
+          confirm={{ disabledReason: reason }}
           onConfirm={onConfirm}
         >
           <input aria-label="Note" />
@@ -226,7 +224,7 @@ describe("ConfirmDialog", () => {
         title="Supprimer ce site ?"
         description="Ses statistiques sont supprimées."
         action="Supprimer"
-        confirmText="example.com"
+        confirm={{ text: "example.com" }}
         cancelLabel="Annuler"
         irreversibleLabel="Action irréversible."
         formatConfirmTextLabel={text => `Saisissez ${text}`}
@@ -273,7 +271,7 @@ describe("ConfirmDialog", () => {
           title="Delete example.com?"
           description="Its stats are deleted with it."
           action="Delete site"
-          confirmText="example.com"
+          confirm={{ text: "example.com" }}
           onConfirm={onConfirm}
         />
       )
@@ -459,6 +457,33 @@ describe("ConfirmItemDialog", () => {
 
     expect(onConfirm).toHaveBeenCalledWith({ name: "Signups" })
     expect(onClose).toHaveBeenCalledTimes(1)
+
+    await view.unmount()
+  })
+
+  test("words the typed text from the item and keeps the rest of `confirm`", async () => {
+    const { ConfirmItemDialog } = await import("./confirm-dialog")
+    const onConfirm = mock((..._args: unknown[]) => Promise.resolve())
+    const onTextChange = mock((_typed: string) => {})
+
+    const view = await render(
+      <ConfirmItemDialog
+        item={{ name: "Signups" }}
+        title={goal => `Delete ${goal.name}?`}
+        description={() => "Its conversions are deleted with it."}
+        action="Delete goal"
+        confirm={{ text: goal => goal.name, match: "loose", onTextChange }}
+        onClose={() => {}}
+        onConfirm={onConfirm}
+      />,
+    )
+
+    expect(getTypedField().labels?.[0]?.textContent).toBe("Type Signups to confirm")
+    await typeInto(getTypedField(), "signups")
+    await click(getButton("Delete goal"))
+
+    expect(onTextChange).toHaveBeenLastCalledWith("signups")
+    expect(onConfirm).toHaveBeenCalledWith({ name: "Signups" })
 
     await view.unmount()
   })

@@ -41,25 +41,10 @@ export interface ConfirmDialogProps extends ConfirmLabels {
   /** The confirming button's label, repeating the question, e.g. "Delete share link". */
   action: ReactNode
   /**
-   * What has to be typed before the action unlocks, for something that cannot be undone. The
-   * dialog says so and adds the field; leave it out for an ordinary confirmation.
+   * What has to happen before the action unlocks: a text to type for something that cannot be
+   * undone, or a reason it cannot run yet. Leave it out for an ordinary confirmation.
    */
-  confirmText?: string
-  /**
-   * How the typed text must match `confirmText`: `exact`, or `loose`, which ignores case and
-   * the spaces around it.
-   */
-  confirmMatch?: ConfirmMatch
-  /**
-   * Reports the typed text on every change, for a server that checks it again: keep the last
-   * value and send it from `onConfirm`. Each opening starts the field empty.
-   */
-  onConfirmTextChange?: (typed: string) => void
-  /**
-   * Why the action cannot run yet, e.g. a required field in `children` is empty: the button
-   * stays locked with this reason, and Enter does not submit.
-   */
-  confirmDisabledReason?: string
+  confirm?: ConfirmOptions
   /** The confirming button's meaning: danger for a loss, neutral for an undoable change. */
   tone?: ButtonProps["tone"]
   isPending?: boolean
@@ -82,6 +67,30 @@ export interface ConfirmDialogProps extends ConfirmLabels {
 /** How typed confirmation text is compared with the text asked for. */
 export type ConfirmMatch = "exact" | "loose"
 
+/** What a confirmation asks for before its action unlocks. */
+export interface ConfirmOptions<Text = string> {
+  /**
+   * The text to type, for something that cannot be undone. The dialog says so and adds the
+   * field.
+   */
+  text?: Text
+  /**
+   * How the typed text must match `text`: `exact` (the default), or `loose`, which ignores case
+   * and the spaces around it.
+   */
+  match?: ConfirmMatch
+  /**
+   * Reports the typed text on every change, for a server that checks it again: keep the last
+   * value and send it from `onConfirm`. Each opening starts the field empty.
+   */
+  onTextChange?: (typed: string) => void
+  /**
+   * Why the action cannot run yet, e.g. a required field in `children` is empty: the button
+   * stays locked with this reason, and Enter does not submit. A text still to type comes first.
+   */
+  disabledReason?: string
+}
+
 /** A line of the dialog, fixed or worded from the item. */
 type ItemText<T> = string | ((item: T) => string)
 
@@ -92,11 +101,8 @@ export interface ConfirmItemDialogProps<T> extends ConfirmLabels {
   title: ItemText<T>
   description: (item: T) => ReactNode
   action: ItemText<T>
-  /** The text to type before the action unlocks, fixed or worded from the item. */
-  confirmText?: ItemText<T>
-  confirmMatch?: ConfirmMatch
-  onConfirmTextChange?: (typed: string) => void
-  confirmDisabledReason?: string
+  /** What unlocks the action, as on `ConfirmDialog`, with the text fixed or worded from the item. */
+  confirm?: ConfirmOptions<ItemText<T>>
   tone?: ButtonProps["tone"]
   /** Runs the action on the item, typically a `mutateAsync`, as `ConfirmDialog` runs it. */
   onConfirm: (item: T) => Promise<unknown>
@@ -126,7 +132,7 @@ function formatDefaultConfirmTextReason(confirmText: string) {
 
 /**
  * The one confirmation: a question naming the object, the consequence under it, and a button
- * repeating the question. With `confirmText` it asks for that text to be typed first, behind a
+ * repeating the question. With `confirm.text` it asks for that text to be typed first, behind a
  * warning that the action cannot be undone.
  */
 export function ConfirmDialog({
@@ -136,10 +142,7 @@ export function ConfirmDialog({
   title,
   description,
   action,
-  confirmText,
-  confirmMatch = "exact",
-  onConfirmTextChange,
-  confirmDisabledReason,
+  confirm,
   tone,
   isPending = false,
   children,
@@ -157,11 +160,12 @@ export function ConfirmDialog({
   const [typed, setTyped] = useState("")
   const [shownOpen, setShownOpen] = useState(false)
   const isOpen = open ?? ownOpen
+  const confirmText = confirm?.text
   // The typed text comes first: it sits above the fields `children` add.
   const lockedReason =
-    confirmText && !isTypedMatch(typed, confirmText, confirmMatch)
+    confirmText && !isTypedMatch(typed, confirmText, confirm?.match ?? "exact")
       ? formatConfirmTextReason(confirmText)
-      : confirmDisabledReason
+      : confirm?.disabledReason
   const pending = isPending || isRunning
   // Counts each opening, closing and unmount. An action outlives the opening it started in when
   // the parent closes or unmounts the dialog itself, and must not then close or settle anything.
@@ -253,7 +257,7 @@ export function ConfirmDialog({
                     spellCheck={false}
                     onChange={event => {
                       setTyped(event.target.value)
-                      onConfirmTextChange?.(event.target.value)
+                      confirm?.onTextChange?.(event.target.value)
                     }}
                   />
                 </div>
@@ -288,7 +292,7 @@ export function ConfirmItemDialog<T>({
   title,
   description,
   action,
-  confirmText,
+  confirm,
   onConfirm,
   ...props
 }: ConfirmItemDialogProps<T>) {
@@ -301,7 +305,12 @@ export function ConfirmItemDialog<T>({
       title={shown === null ? "" : formatItemText(title, shown)}
       description={shown !== null && description(shown)}
       action={shown === null ? "" : formatItemText(action, shown)}
-      confirmText={shown === null || !confirmText ? undefined : formatItemText(confirmText, shown)}
+      confirm={
+        confirm && {
+          ...confirm,
+          text: shown === null || !confirm.text ? undefined : formatItemText(confirm.text, shown),
+        }
+      }
       onOpenChange={open => !open && onClose()}
       onConfirm={() => (item === null ? undefined : onConfirm(item))}
     />
