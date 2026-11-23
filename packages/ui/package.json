@@ -72,6 +72,10 @@
       "types": "./src/lib/media.ts",
       "default": "./src/lib/media.ts"
     },
+    "./view-transition": {
+      "types": "./src/lib/view-transition.ts",
+      "default": "./src/lib/view-transition.ts"
+    },
     "./load-more": {
       "types": "./src/lib/load-more.ts",
       "default": "./src/lib/load-more.ts"

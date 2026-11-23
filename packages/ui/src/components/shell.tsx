@@ -1,12 +1,23 @@
 "use client"
 
-import { type ComponentProps, type MouseEvent, type ReactNode, useEffect, useState } from "react"
-import { SidebarIcon } from "../lib/icons"
+import { mergeProps } from "@base-ui/react/merge-props"
+import {
+  type ComponentProps,
+  cloneElement,
+  Fragment,
+  type MouseEvent,
+  type ReactElement,
+  type ReactNode,
+  useEffect,
+  useState,
+} from "react"
+import { ChevronLeftIcon, SidebarIcon } from "../lib/icons"
 import { FROM_LG, useMediaQuery } from "../lib/media"
 import { cn } from "../lib/variants"
 import { Button, buttonVariants } from "./button"
 import { SideDrawer } from "./dialog"
-import { Nav } from "./nav"
+import { Nav, NavLabel, NavSeparator } from "./nav"
+import { Skeleton } from "./skeleton"
 
 /**
  * The phone bar's own height, which the drawer under it starts from. The bar's
@@ -59,6 +70,128 @@ export function RailBottom({ className, ...props }: ComponentProps<typeof Nav>) 
   )
 }
 
+export interface AreaRailProps {
+  /** The area's name, such as "Settings", on the back row. */
+  label: string
+
+  /**
+   * The link the back row renders, such as a router's:
+   * `<Link to="/" activeOptions={{ exact: true }} />`. The row's classes, label and accessible
+   * name merge onto it. Where it leads is the caller's: the page the reader came from, or the
+   * product's home. A TanStack Router link to `/` needs `exact`: it matches every path by
+   * prefix and would mark the back row as the current page across the whole area.
+   */
+  back: ReactElement<ComponentProps<"a">>
+
+  /**
+   * The back row's accessible name, which says where it goes. "Leave" and the label by
+   * default ("Leave settings"). A name of your own must contain the label, so a reader who
+   * speaks the visible word can still reach the row.
+   */
+  backLabel?: string
+
+  /** The area's groups, each an `AreaRailGroup`. */
+  children: ReactNode
+}
+
+/**
+ * The nav of an area with its own sections, such as settings or an admin panel, in place of
+ * the product's rows: a back row, then the area's groups. The back row is the area's name
+ * after a 24px muted chip holding a chevron, and the whole row links back. Pass it as the
+ * Shell's `nav` and leave `top` out, since the back row takes the switcher's place. The phone
+ * drawer shows it too.
+ */
+export function AreaRail({ label, back, backLabel, children }: AreaRailProps) {
+  const props = {
+    // The visible word is the area's name; the accessible name says where the link goes.
+    "aria-label": backLabel ?? `Leave ${label.toLowerCase()}`,
+    className:
+      "group flex h-9 items-center gap-2.5 rounded-md px-1 font-medium text-base text-ink tracking-micro",
+  }
+
+  return (
+    <>
+      <div className="px-3 pt-3 pb-2">
+        {cloneElement(
+          back,
+          mergeProps<"a">(props, back.props),
+          <span className="flex size-6 shrink-0 items-center justify-center rounded-sm bg-fill transition-colors group-hover:bg-fill-strong">
+            <ChevronLeftIcon className="size-3.5" strokeWidth={2} />
+          </span>,
+          label,
+        )}
+      </div>
+
+      {children}
+    </>
+  )
+}
+
+export interface AreaRailGroupProps extends ComponentProps<"nav"> {
+  /** The group's accessible name, such as "Site settings". */
+  "aria-label": string
+
+  /** The heading over the rows. An area with one group needs none. */
+  label?: ReactNode
+}
+
+/**
+ * One group of an area's `NavLink` rows, after a hairline that parts it from the back row or
+ * the group above. Each group draws its own line, so a group left out leaves no double line.
+ */
+export function AreaRailGroup({ label, children, ...props }: AreaRailGroupProps) {
+  return (
+    <>
+      <NavSeparator />
+
+      <Nav {...props}>
+        {label && <NavLabel>{label}</NavLabel>}
+        {children}
+      </Nav>
+    </>
+  )
+}
+
+/** One group of an `AreaRailSkeleton`: its heading, if it has one, and how many rows it holds. */
+export interface AreaRailSkeletonGroup {
+  label?: string
+  rows: number
+}
+
+export interface AreaRailSkeletonProps {
+  /** The groups the area will show, so the loaded rail lands on the same lines. */
+  groups: readonly AreaRailSkeletonGroup[]
+}
+
+/**
+ * An `AreaRail` while what it lists loads: the back row's outline, then each group's heading
+ * over its rows' outlines. The headings are real text, since an area knows its groups before
+ * it knows their rows.
+ */
+export function AreaRailSkeleton({ groups }: AreaRailSkeletonProps) {
+  return (
+    <>
+      <div className="px-3 pt-3 pb-2">
+        <Skeleton className="h-9" />
+      </div>
+
+      {groups.map(({ label, rows }, index) => (
+        // oxlint-disable-next-line react/no-array-index-key -- a skeleton's groups never reorder
+        <Fragment key={index}>
+          <NavSeparator />
+
+          <Nav aria-hidden>
+            {label && <NavLabel>{label}</NavLabel>}
+            {Array.from({ length: rows }, (_, row) => (
+              <Skeleton key={row} className="h-8 pointer-coarse:h-9" />
+            ))}
+          </Nav>
+        </Fragment>
+      ))}
+    </>
+  )
+}
+
 export interface ShellProps {
   /**
    * The rail's top on a wide screen, usually a `RailTop` holding the switcher. The drawer leaves
@@ -97,7 +230,11 @@ export interface ShellProps {
   /** Runs when the drawer opens or closes, from the toggle, a link or `navigationKey`. */
   onOpenChange?: (open: boolean) => void
 
-  /** Classes for the part of the wide rail that scrolls: `top` and `nav`. */
+  /**
+   * Classes for the part of the wide rail that scrolls: `top` and `nav`. It carries
+   * `view-transition-name: shell-rail`, and a view transition name must be unique on the page,
+   * so a second Shell renames it here (`[view-transition-name:preview-rail]`).
+   */
   railBodyClassName?: string
 
   /** The page, inside `<main>` on the shared content container. */
@@ -109,6 +246,7 @@ export interface ShellProps {
  * content. Under `lg` the rail gives way to one sticky bar holding the drawer toggle and the
  * `header`. The drawer and its scrim start below the bar and show the rail's rows and footer.
  * A plain click on any link in the drawer closes it, so a row needs no handler of its own.
+ * Render one Shell per document: its rail's view transition name must be unique on the page.
  */
 export function Shell({
   top,
@@ -208,7 +346,16 @@ export function Shell({
       </header>
 
       <aside className="sticky top-0 hidden h-dvh w-56 shrink-0 flex-col border-r bg-canvas lg:flex">
-        <div className={cn("flex min-h-0 flex-1 flex-col overflow-y-auto", railBodyClassName)}>
+        {/* The part that steps when the reader enters or leaves an area (`getAreaRailTypes`):
+            the switcher and the rows together, so it fills the rail down to the footer in both
+            states and the two snapshots match in size. Left out, the switcher would vanish
+            alone and drag the area's rows up. */}
+        <div
+          className={cn(
+            "flex min-h-0 flex-1 flex-col overflow-y-auto [view-transition-name:shell-rail]",
+            railBodyClassName,
+          )}
+        >
           {top}
           {nav}
         </div>

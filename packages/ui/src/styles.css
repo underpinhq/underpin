@@ -571,6 +571,49 @@
   }
 
   /*
+   * Entering or leaving an area with its own rail (`getAreaRailTypes`): the Shell's rail body
+   * (`shell-rail`) drifts 8px and fades out, and its replacement drifts in from 8px the other
+   * way, on the throw and curve of every enter in the library. The page beside it swaps at
+   * once rather than cross-fading with itself.
+   */
+  html:active-view-transition-type(area-enter, area-leave) {
+    &::view-transition-old(root),
+    &::view-transition-new(root) {
+      animation: none;
+    }
+
+    &::view-transition-old(shell-rail) {
+      animation: area-rail-leave 150ms var(--ease-out-expo) both;
+    }
+
+    &::view-transition-new(shell-rail) {
+      animation: area-rail-enter 300ms var(--ease-out-expo) both;
+    }
+  }
+
+  html:active-view-transition-type(area-enter) {
+    --area-rail-throw: 8px;
+  }
+
+  html:active-view-transition-type(area-leave) {
+    --area-rail-throw: -8px;
+  }
+
+  @keyframes area-rail-leave {
+    to {
+      opacity: 0;
+      transform: translateX(calc(var(--area-rail-throw) * -1));
+    }
+  }
+
+  @keyframes area-rail-enter {
+    from {
+      opacity: 0;
+      transform: translateX(var(--area-rail-throw));
+    }
+  }
+
+  /*
    * Less motion, not none. A reader who asks for reduced motion is asking for nothing to
    * travel across the screen; a fade still explains that a dialog opened or a toast arrived,
    * and stripping it leaves popups snapping in and out with no sense of where they came from.

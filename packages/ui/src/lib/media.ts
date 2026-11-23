@@ -24,10 +24,13 @@ interface MediaQueryStore {
 const stores = new Map<string, MediaQueryStore>()
 
 /**
- * Whether a media query matches right now, for a callback. A render reads `useMediaQuery`
- * instead, which is false on the server and re-renders when the answer changes.
+ * Whether a media query matches right now, for a callback. False where there is no
+ * `matchMedia`, as on the server. A render reads `useMediaQuery` instead, which is false on
+ * the server and re-renders when the answer changes.
  */
 export function matchesMedia(query: string): boolean {
+  if (typeof matchMedia === "undefined") return false
+
   return matchMedia(query).matches
 }
 

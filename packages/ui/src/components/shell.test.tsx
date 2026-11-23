@@ -232,3 +232,144 @@ describe("Shell", () => {
     await view.unmount()
   })
 })
+
+async function renderAreaRailElement(backLabel?: string) {
+  const { AreaRail, AreaRailGroup, Shell } = await import("./shell")
+  const { NavLink } = await import("./nav")
+
+  return (
+    <Shell
+      nav={
+        <AreaRail
+          label="Settings"
+          // oxlint-disable-next-line jsx-a11y/control-has-associated-label -- the rail adds the label and the name
+          back={<a href="#home" className="back-link" />}
+          backLabel={backLabel}
+        >
+          <AreaRailGroup aria-label="Workspace settings" label="Workspace">
+            <NavLink href="#members">Members</NavLink>
+          </AreaRailGroup>
+          <AreaRailGroup aria-label="Account settings">
+            <NavLink href="#profile">Profile</NavLink>
+          </AreaRailGroup>
+        </AreaRail>
+      }
+    >
+      <h1>Members</h1>
+    </Shell>
+  )
+}
+
+describe("AreaRail", () => {
+  test("renders the back row onto the link it is given", async () => {
+    const view = await render(await renderAreaRailElement())
+
+    const back = document.querySelector<HTMLAnchorElement>("aside a.back-link")
+    expect(back?.getAttribute("href")).toBe("#home")
+    expect(back?.getAttribute("aria-label")).toBe("Leave settings")
+    expect(back?.textContent).toBe("Settings")
+    expect(back?.className).toContain("h-9")
+    expect(back?.querySelector("svg")).not.toBeNull()
+
+    await view.unmount()
+  })
+
+  test("takes the back row's accessible name from `backLabel`", async () => {
+    const view = await render(await renderAreaRailElement("Back to the dashboard"))
+
+    const back = document.querySelector("aside a.back-link")
+    expect(back?.getAttribute("aria-label")).toBe("Back to the dashboard")
+
+    await view.unmount()
+  })
+
+  test("parts every group from the row above with a hairline", async () => {
+    const view = await render(await renderAreaRailElement())
+
+    const workspace = document.querySelector('aside nav[aria-label="Workspace settings"]')
+    expect(workspace?.previousElementSibling?.tagName).toBe("HR")
+    expect(workspace?.querySelector("p")?.textContent).toBe("Workspace")
+
+    const account = document.querySelector('aside nav[aria-label="Account settings"]')
+    expect(account?.previousElementSibling?.tagName).toBe("HR")
+    expect(account?.querySelector("p")).toBeNull()
+    expect(document.querySelectorAll("aside hr")).toHaveLength(2)
+
+    await view.unmount()
+  })
+
+  test("names the rail body for the area step", async () => {
+    const view = await render(await renderAreaRailElement())
+
+    const body = document.querySelector("aside a.back-link")?.closest("aside > div")
+    expect(body?.className).toContain("[view-transition-name:shell-rail]")
+
+    await view.unmount()
+  })
+
+  test("names the rail body from `railBodyClassName` for a second Shell", async () => {
+    const { Shell } = await import("./shell")
+    const view = await render(
+      <Shell
+        nav={<nav aria-label="Workspace" />}
+        railBodyClassName="[view-transition-name:preview-rail]"
+      >
+        <h1>Preview</h1>
+      </Shell>,
+    )
+
+    const body = document.querySelector('aside nav[aria-label="Workspace"]')?.parentElement
+    expect(body?.className).toContain("[view-transition-name:preview-rail]")
+    expect(body?.className).not.toContain("[view-transition-name:shell-rail]")
+
+    await view.unmount()
+  })
+
+  test("builds the back row's default name from the label", async () => {
+    const { AreaRail } = await import("./shell")
+    const view = await render(
+      // oxlint-disable-next-line jsx-a11y/control-has-associated-label -- the rail adds the label and the name
+      <AreaRail label="Admin" back={<a href="#home" />}>
+        {null}
+      </AreaRail>,
+    )
+
+    expect(document.querySelector('a[href="#home"]')?.getAttribute("aria-label")).toBe(
+      "Leave admin",
+    )
+
+    await view.unmount()
+  })
+
+  test("shows the same rail in the phone drawer", async () => {
+    const view = await render(await renderAreaRailElement())
+
+    await openDrawer()
+    const backs = document.querySelectorAll('a[aria-label="Leave settings"]')
+    expect(backs).toHaveLength(2)
+    const drawerBack = [...backs].find(back => !back.closest("aside"))
+    expect(drawerBack).toBeDefined()
+
+    await view.unmount()
+  })
+})
+
+describe("AreaRailSkeleton", () => {
+  test("outlines the back row and each group's rows under its heading", async () => {
+    const { AreaRailSkeleton } = await import("./shell")
+    const view = await render(
+      <AreaRailSkeleton groups={[{ label: "Workspace", rows: 3 }, { rows: 2 }]} />,
+    )
+
+    const groups = document.querySelectorAll("nav")
+    expect(groups).toHaveLength(2)
+    expect(groups[0]?.getAttribute("aria-hidden")).toBe("true")
+    expect(groups[0]?.querySelector("p")?.textContent).toBe("Workspace")
+    expect(groups[0]?.querySelectorAll(".animate-pulse")).toHaveLength(3)
+    expect(groups[1]?.querySelector("p")).toBeNull()
+    expect(groups[1]?.querySelectorAll(".animate-pulse")).toHaveLength(2)
+    expect(document.querySelectorAll("hr")).toHaveLength(2)
+
+    await view.unmount()
+  })
+})

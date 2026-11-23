@@ -28,7 +28,14 @@ import { NotFound } from "@underpin/ui/not-found"
 import { Page } from "@underpin/ui/page"
 import { PerformanceCard } from "@underpin/ui/performance-card"
 import { Ping } from "@underpin/ui/ping"
-import { RailBottom, RailTop, Shell } from "@underpin/ui/shell"
+import {
+  AreaRail,
+  AreaRailGroup,
+  AreaRailSkeleton,
+  RailBottom,
+  RailTop,
+  Shell,
+} from "@underpin/ui/shell"
 import { Skeleton } from "@underpin/ui/skeleton"
 import { Stack } from "@underpin/ui/stack"
 import { StatStrip, StatStripItem } from "@underpin/ui/stat-strip"
@@ -130,6 +137,22 @@ export default function Home() {
         footer={<RailBottom aria-label="Account" />}
       >
         Shell marker
+      </Shell>
+
+      <Shell
+        nav={
+          // oxlint-disable-next-line jsx-a11y/control-has-associated-label -- the rail adds the label and the name
+          <AreaRail label="Settings" back={<a href="/" />}>
+            <AreaRailGroup aria-label="Account settings" label="Account">
+              <NavLink href="/settings/profile">Profile</NavLink>
+            </AreaRailGroup>
+          </AreaRail>
+        }
+        // A second Shell on one page renames its rail, since a view transition name is unique.
+        railBodyClassName="[view-transition-name:fixture-area-rail]"
+      >
+        <AreaRailSkeleton groups={[{ label: "Account", rows: 2 }]} />
+        Area rail marker
       </Shell>
 
       <PerformanceCard

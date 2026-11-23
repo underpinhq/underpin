@@ -179,9 +179,23 @@ a table where the frame has prose), and only as part of design work on that scre
   live count). The toggle opens the rows and the bottom row in a drawer under the bar, and any
   navigation closes it (pass the router's URL as `navigationKey`). The
   content is the `page-container` (`max-w-7xl`, `px-4 md:px-6`), 20px from the top and bottom. A
-  row's end holds a count ("Review queue 5") or a status dot, never a button. An area with its
-  own nav (settings, admin) swaps the rows for its groups behind a back row, and the switcher
-  leaves the rail.
+  row's end holds a count ("Review queue 5") or a status dot, never a button.
+- **Area rail**: an area with its own nav (settings, an admin panel) passes an `AreaRail` as the
+  Shell's `nav` and leaves `top` out, so the switcher leaves the rail. The rail opens with a back
+  row: the area's name after a 24px muted chip holding a chevron, the whole row a link (`back`,
+  with the router's link as the element, `activeOptions={{ exact: true }}` on a TanStack link
+  to `/` so the row never reads as the current page) whose accessible name says where it goes:
+  "Leave" and the area's name, or a `backLabel` that contains the name. Each `AreaRailGroup` follows a hairline, with a `NavLabel` heading when the area
+  has more than one. The phone drawer shows the same rail. While the groups load,
+  `AreaRailSkeleton` draws the back row's outline and each group's heading over its rows'
+  outlines. Entering or leaving the area steps the rail on a wide screen: the old body drifts
+  8px and fades out in 150ms, the new one drifts in from 8px the other way and fades in over
+  300ms, both on `--ease-out-expo`, leftward on the way in and rightward on the way out. The
+  page beside it swaps at once, and a move between two pages of one area leaves the rail still.
+  Under reduced motion the swap is instant. The product's router asks `getAreaRailTypes` from
+  `@underpin/ui/view-transition` for the types, from the two locations and a function naming
+  each one's area; the first page never steps, and neither does the phone drawer, which
+  closes as the page changes. One Shell per document: its rail's transition name is unique.
 - **Page header**: every route opens with one `SectionHeader` at `size="page"`, the "Page header"
   component in Underpin UI. Its parts map one to one: the Back link is the `back` slot (`BackLink`
   from `@underpin/ui/section-header`: 13px, muted, a 14px chevron, the same on every detail page,
