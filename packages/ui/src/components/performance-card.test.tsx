@@ -17,6 +17,14 @@ const CHART = {
   className: "chart-marker",
 }
 
+/** The chart's skeleton, apart from the figures' own. */
+const CHART_SKELETON = ".animate-pulse.h-64"
+
+/** One series that draws the chart it is given, or a figure only without one. */
+function only(chart?: typeof CHART) {
+  return [{ id: "visitors", label: "Visitors", value: 120, chart }]
+}
+
 /** Mounts the card with the chart's code already loaded, so the chart draws on first render. */
 async function render(element: ReactElement) {
   const { loadTimeSeriesChart } = await import("./time-series-chart")
@@ -34,8 +42,7 @@ describe("PerformanceCard", () => {
     const view = await render(
       <PerformanceCard
         header={<h2>Performance</h2>}
-        strip={<div>Strip marker</div>}
-        chart={CHART}
+        series={[{ id: "visitors", label: "Strip marker", value: 120, chart: CHART }]}
         footnote="Excludes bots"
       />,
     )
@@ -49,12 +56,12 @@ describe("PerformanceCard", () => {
     await view.unmount()
   })
 
-  test("draws the skeleton while loading or with no chart yet", async () => {
+  test("draws the skeleton while loading", async () => {
     const { PerformanceCard } = await import("./performance-card")
 
-    for (const props of [{ isLoading: true, chart: CHART }, {}]) {
-      const view = await render(<PerformanceCard strip={null} {...props} />)
-      expect(document.querySelector(".animate-pulse")).not.toBeNull()
+    for (const series of [only(CHART), only()]) {
+      const view = await render(<PerformanceCard series={series} isLoading />)
+      expect(document.querySelector(CHART_SKELETON)).not.toBeNull()
       expect(document.querySelector(".chart-marker")).toBeNull()
       await view.unmount()
     }
@@ -63,7 +70,7 @@ describe("PerformanceCard", () => {
   test("dims the chart while it shows an earlier range", async () => {
     const { PerformanceCard } = await import("./performance-card")
 
-    const view = await render(<PerformanceCard strip={null} chart={CHART} isPlaceholder />)
+    const view = await render(<PerformanceCard series={only(CHART)} isPlaceholder />)
     expect(document.querySelector(".chart-marker")?.className).toContain("opacity-50")
 
     await view.unmount()
@@ -74,13 +81,13 @@ describe("PerformanceCard", () => {
     const error = <p>Error marker</p>
 
     // A first load that failed: no chart, and the error wins over the skeleton.
-    const failed = await render(<PerformanceCard strip={null} isLoading error={error} />)
+    const failed = await render(<PerformanceCard series={only()} isLoading error={error} />)
     expect(document.body.textContent).toContain("Error marker")
-    expect(document.querySelector(".animate-pulse")).toBeNull()
+    expect(document.querySelector(CHART_SKELETON)).toBeNull()
     await failed.unmount()
 
     // A refetch that failed keeps the series already on screen.
-    const kept = await render(<PerformanceCard strip={null} chart={CHART} error={error} />)
+    const kept = await render(<PerformanceCard series={only(CHART)} error={error} />)
     expect(document.body.textContent).not.toContain("Error marker")
     expect(document.querySelector(".chart-marker")).not.toBeNull()
     await kept.unmount()
@@ -90,13 +97,11 @@ describe("PerformanceCard", () => {
     const { PerformanceCard } = await import("./performance-card")
     const chart = { ...CHART, data: [] }
 
-    const plain = await render(<PerformanceCard strip={null} chart={chart} />)
+    const plain = await render(<PerformanceCard series={only(chart)} />)
     expect(document.body.textContent).toContain("No data in this range")
     await plain.unmount()
 
-    const own = await render(
-      <PerformanceCard strip={null} chart={chart} empty={<p>Nothing yet</p>} />,
-    )
+    const own = await render(<PerformanceCard series={only(chart)} empty={<p>Nothing yet</p>} />)
     expect(document.body.textContent).toContain("Nothing yet")
     await own.unmount()
   })
@@ -162,11 +167,11 @@ describe("PerformanceCard", () => {
   test("marks the chart busy while it loads or shows an earlier range", async () => {
     const { PerformanceCard } = await import("./performance-card")
 
-    const view = await render(<PerformanceCard strip={null} chart={CHART} isPlaceholder />)
+    const view = await render(<PerformanceCard series={only(CHART)} isPlaceholder />)
     expect(document.querySelector("[aria-busy=true] .chart-marker")).not.toBeNull()
     await view.unmount()
 
-    const settled = await render(<PerformanceCard strip={null} chart={CHART} />)
+    const settled = await render(<PerformanceCard series={only(CHART)} />)
     expect(document.querySelector("[aria-busy]")).toBeNull()
     await settled.unmount()
   })
@@ -187,7 +192,7 @@ describe("PerformanceCard", () => {
     ] as const) {
       const view = await render(<PerformanceCard series={[...shown]} value={value} />)
       expect(document.querySelector(".chart-marker")).not.toBeNull()
-      expect(document.querySelector(".animate-pulse")).toBeNull()
+      expect(document.querySelector(CHART_SKELETON)).toBeNull()
       await view.unmount()
     }
 
@@ -205,14 +210,27 @@ describe("PerformanceCard", () => {
         series={[
           { id: "clicks", label: "Clicks", value: 12, chart: CHART },
           { id: "ctr", label: "CTR", value: "1.2%", className: "max-sm:hidden" },
+          { id: "lifetime", label: "Lifetime", value: 9000 },
         ]}
       />,
     )
 
     expect(document.querySelector("button")).toBeNull()
-    expect(document.querySelector("[data-selected]")).toBeNull()
+    // Beside figure-only items, the charted one is still marked as the one the chart draws.
+    expect(document.querySelector("[data-selected]")?.textContent).toContain("Clicks")
+    expect(document.querySelectorAll("[data-selected]")).toHaveLength(1)
     expect(document.querySelector(".chart-marker")).not.toBeNull()
     expect(document.querySelector(".max-sm\\:hidden")?.textContent).toContain("CTR")
+
+    await view.unmount()
+  })
+
+  test("a strip of one item marks nothing", async () => {
+    const { PerformanceCard } = await import("./performance-card")
+
+    const view = await render(<PerformanceCard series={only(CHART)} />)
+    expect(document.querySelector("[data-selected]")).toBeNull()
+    expect(document.querySelector(".chart-marker")).not.toBeNull()
 
     await view.unmount()
   })
@@ -222,7 +240,98 @@ describe("PerformanceCard", () => {
 
     const view = await render(<PerformanceCard series={[{ id: "a", label: "A", value: 1 }]} />)
     expect(document.body.textContent).toContain("No data in this range")
-    expect(document.querySelector(".animate-pulse")).toBeNull()
+    expect(document.querySelector(CHART_SKELETON)).toBeNull()
+
+    await view.unmount()
+  })
+
+  test("shows the strip's error in place of the figures, with its retry", async () => {
+    const { act } = await import("react")
+    const { PerformanceCard } = await import("./performance-card")
+    let retries = 0
+
+    const view = await render(
+      <PerformanceCard
+        series={only(CHART)}
+        stripError={{ title: "Figures failed", onRetry: () => retries++ }}
+      />,
+    )
+
+    expect(document.body.textContent).toContain("Figures failed")
+    expect(document.body.textContent).not.toContain("Visitors")
+    // The chart has its own error, so the strip's leaves it drawn.
+    expect(document.querySelector(".chart-marker")).not.toBeNull()
+
+    await act(async () => document.querySelector("button")?.click())
+    expect(retries).toBe(1)
+
+    await view.unmount()
+  })
+
+  test("the figures load apart from the chart, and a hint folds away", async () => {
+    const { PerformanceCard } = await import("./performance-card")
+
+    const view = await render(
+      <PerformanceCard
+        series={[
+          { id: "visitors", label: "Visitors", value: 120, chart: CHART },
+          {
+            id: "pageviews",
+            label: "Pageviews",
+            value: 340,
+            hint: "Hint marker",
+            hintHidden: true,
+            chart: CHART,
+          },
+        ]}
+        isStripLoading
+      />,
+    )
+
+    const [visitors, pageviews] = document.querySelectorAll("button")
+    expect(visitors?.querySelector(".animate-pulse")).not.toBeNull()
+    expect(document.querySelector(".chart-marker")).not.toBeNull()
+    // A folded hint stays in the tree but no longer describes the item.
+    expect(pageviews?.textContent).toContain("Hint marker")
+    expect(pageviews?.getAttribute("aria-describedby")).toBeNull()
+
+    await view.unmount()
+
+    const loaded = await render(
+      <PerformanceCard series={only(CHART)} isLoading isStripLoading={false} />,
+    )
+    expect(document.body.textContent).toContain("120")
+    expect(document.querySelector(CHART_SKELETON)).not.toBeNull()
+    await loaded.unmount()
+  })
+
+  test("a tooltip describes its item to a screen reader, pressable or not", async () => {
+    const { PerformanceCard } = await import("./performance-card")
+
+    const view = await render(
+      <PerformanceCard
+        series={[
+          { id: "visitors", label: "Visitors", value: 120, chart: CHART, tooltip: "Pressable" },
+          { id: "pageviews", label: "Pageviews", value: 340, chart: CHART },
+          { id: "share", label: "Share", value: "12%", tooltip: "Figure only" },
+        ]}
+      />,
+    )
+
+    function describe(element: Element | null | undefined) {
+      return (element?.getAttribute("aria-describedby") ?? "")
+        .split(" ")
+        .map(id => document.getElementById(id)?.textContent)
+        .join(" ")
+    }
+
+    const [visitors] = document.querySelectorAll("button")
+    const share = [...document.querySelectorAll("[data-row] > div")].find(item =>
+      item.textContent?.includes("Share"),
+    )
+    expect(describe(visitors)).toContain("Pressable")
+    expect(describe(share)).toBe("Figure only")
+    expect(document.querySelector(".sr-only")?.textContent).toBe("Pressable")
 
     await view.unmount()
   })

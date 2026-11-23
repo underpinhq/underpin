@@ -38,7 +38,6 @@ import {
 } from "@underpin/ui/shell"
 import { Skeleton } from "@underpin/ui/skeleton"
 import { Stack } from "@underpin/ui/stack"
-import { StatStrip, StatStripItem } from "@underpin/ui/stat-strip"
 import { Steps } from "@underpin/ui/steps"
 import { Switch } from "@underpin/ui/switch"
 import { TextLink } from "@underpin/ui/text-link"
@@ -156,20 +155,25 @@ export default function Home() {
       </Shell>
 
       <PerformanceCard
-        strip={
-          <StatStrip variant="track">
-            <StatStripItem
-              label="Performance marker"
-              value={12}
-              trend={<Trend id="trend-marker" change={0.06} />}
-            />
-          </StatStrip>
-        }
-        isLoading
+        series={[
+          {
+            id: "visitors",
+            label: "Performance marker",
+            value: 12,
+            tooltip: "Visitors in the range",
+            trend: <Trend id="trend-marker" change={0.06} />,
+          },
+          { id: "pageviews", label: "Views", value: 40 },
+        ]}
       />
       <PerformanceCard
         series={[
-          { id: "visitors", label: "Series marker", value: 34, trend: <Trend change={-0.02} /> },
+          {
+            id: "visitors",
+            label: "Series marker",
+            value: 34,
+            trend: <Trend change={-0.02} />,
+          },
         ]}
         isLoading
       />

@@ -177,6 +177,11 @@ type StatStripItemProps = Omit<useRender.ComponentProps<"div">, "children" | "on
   /** Folds the hint line away; keep passing the hint so the line has its text as it closes. */
   hintHidden?: boolean
   /**
+   * What the figure counts, for a screen reader alone: the text of a tooltip around the item,
+   * which a reader that never hovers or focuses the item would otherwise miss.
+   */
+  description?: ReactNode
+  /**
    * Rendered at the end of the label row, e.g. a change against a previous period.
    */
   trend?: ReactNode
@@ -201,6 +206,7 @@ function StatStripItem({
   format,
   hint,
   hintHidden,
+  description,
   trend: loadedTrend,
   loading,
   selected,
@@ -211,6 +217,7 @@ function StatStripItem({
 }: StatStripItemProps) {
   const id = useId()
   const trend = loading ? undefined : loadedTrend
+  const descriptionId = description ? `${id}-description` : undefined
   // Named by the label and the figure alone ("Visitors 1,234"), so the change and the hint
   // read after them as its description rather than running into the number.
   const button = onSelect && (
@@ -221,6 +228,7 @@ function StatStripItem({
       aria-describedby={formatIdList(
         !!trend && `${id}-trend`,
         !!hint && !hintHidden && `${id}-hint`,
+        descriptionId,
       )}
       onClick={() => onSelect()}
     />
@@ -230,6 +238,8 @@ function StatStripItem({
     render: render ?? button,
     defaultTagName: "div",
     props: {
+      // A button names its whole description above; a plain item has only this one.
+      ...(!onSelect && descriptionId && { "aria-describedby": descriptionId }),
       "data-selected": selected ? true : undefined,
       className: cn(
         // The inset scales with the strip like the figure does, so a cell keeps its proportions
@@ -292,6 +302,12 @@ function StatStripItem({
               </span>
             )}
           </p>
+
+          {description && (
+            <span id={descriptionId} className="sr-only">
+              {description}
+            </span>
+          )}
 
           <p id={`${id}-value`} data-value className={valueClasses}>
             <span data-figure>
