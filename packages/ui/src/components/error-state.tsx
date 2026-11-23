@@ -83,6 +83,8 @@ export function ErrorState({
 
 export interface TableErrorStateProps {
   title?: ReactNode
+  /** What failed, under the title. */
+  description?: ReactNode
   retryLabel?: ReactNode
   onRetry: () => void
 }
@@ -90,8 +92,17 @@ export interface TableErrorStateProps {
 /** What a table shows in place of the rows it could not load, under its column names. */
 export function TableErrorState({
   title = LOAD_ERROR_TITLE,
+  description,
   retryLabel = RETRY_LABEL,
   onRetry,
 }: TableErrorStateProps) {
-  return <TableMessage kind="error" title={title} retryLabel={retryLabel} onRetry={onRetry} />
+  return (
+    <TableMessage
+      kind="error"
+      title={title}
+      description={description}
+      retryLabel={retryLabel}
+      onRetry={onRetry}
+    />
+  )
 }

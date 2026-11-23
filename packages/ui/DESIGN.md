@@ -353,10 +353,42 @@ description naming its code part.
   a param with `undefined`, which TanStack Router drops. nuqs skips `undefined` and clears only on
   `null`, so a Next.js app on nuqs passes `clearValue: null`, hands `useQueryStates`'s values to
   `read`, and `write`'s result to its setter. On TanStack Router, `@underpin/ui/router` (which
-  needs `@tanstack/react-router` and zod) adds `useDataTableRoute(table, search)` and
-  `RouterRowLink` for `renderRowLink`, which opens a row in place and preloads it. The router
-  parses search params as JSON, so hand-typed text such as `1e3` can come back changed; the links
-  the table writes come back exact.
+  needs `@tanstack/react-router`, `@tanstack/react-table` and zod) adds
+  `useDataTableRoute(table, search)` and `RouterRowLink` for `renderRowLink`, which opens a row in
+  place and preloads it. The router parses search params as JSON, so hand-typed text such as
+  `1e3` can come back changed; the links the table writes come back exact.
+- **A paged list.** `PagedDataTable` (`@underpin/ui/paged-data-table`) is the recipe above in one
+  part, for a list the API pages. It takes the `createDataTableSearch` result as `table`, the
+  route's `search` and `onSearchChange`, and the page's `query` (a TanStack Query result whose
+  data is `{ items, total }`; another shape maps onto it with the query's `select`). It shows
+  skeleton rows on the first load, dims the old rows on placeholder data, and builds the paged
+  footer from `total`. With no rows it says why: the page failed (`error`, with "Try again" that
+  refetches), a search, filter or view matches nothing (`filtered`, with "Clear filters"), or the
+  list is `empty`. `views` adds the view tabs above the `toolbar`, each with its count, their
+  value in the search param `param`. The first view is the default and stays out of the URL, and a
+  new view goes back to page 1. A view's `narrows` says what it is. A view that narrows is a
+  filter over the first ("Staff" within "All"): its empty list reads as filtered, and "Clear
+  filters" returns to the first view. A view that does not narrow is a list of its own ("Churned"
+  beside "Active"): its empty list shows the `empty` message, with the view's own `empty` parts
+  over the table's, and "Clear filters" clears the search and filters but keeps the view. Left
+  out, `narrows` is true for a view with no `empty` of its own. `DataTableViews` is the tabs
+  alone. On TanStack Router, `RouterPagedDataTable` from `@underpin/ui/router` fills in
+  `onSearchChange` and opens rows through `RouterRowLink`:
+
+  ```tsx
+  <RouterPagedDataTable
+    aria-label="Users"
+    columns={COLUMNS}
+    table={USER_TABLE_SEARCH}
+    search={Route.useSearch()}
+    query={users}
+    getRowId={user => user.id}
+    views={{ param: "status", label: "Account views", options: VIEWS, counts: users.data?.counts }}
+    empty={{ icon: <UsersIcon />, title: "No accounts yet" }}
+    filtered={{ title: "No account matches", hint: "Try a name, an email or an id." }}
+    toolbar={({ state, setState }) => <TableToolbar search={<SearchInput … />} />}
+  />
+  ```
 
 ## Icons
 

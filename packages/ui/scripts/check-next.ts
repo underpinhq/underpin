@@ -47,6 +47,8 @@ const MARKERS = [
   'aria-label="Favicon marker"',
   "Paged data table marker",
   "Infinite data table marker",
+  "Query table marker",
+  "View marker",
   "Showing",
   "End of list",
 ]

@@ -125,6 +125,8 @@ function isDescending(order: "asc" | "desc" | undefined, sort: DataTableSort | u
  * - `getProps` returns a `DataTable`'s `state` and `onStateChange`. A new page, page size, sort
  *   or filter adds a history entry, so Back returns to it. A page the table corrected past the
  *   end, and a search typed a key at a time, replace the entry instead.
+ * - `clearValue` is what a write puts in a param to remove it, for a param of the page's own
+ *   (a view) written beside the table's.
  */
 export function createDataTableSearch<const Keys extends DataTableSearchKeys = {}>({
   keys,
@@ -208,7 +210,7 @@ export function createDataTableSearch<const Keys extends DataTableSearchKeys = {
     }
   }
 
-  return { schema, read, write, hasUnreadablePage, getProps }
+  return { schema, read, write, hasUnreadablePage, getProps, clearValue }
 }
 
 /** What `createDataTableSearch` returns for a table whose params go under `Keys`. */

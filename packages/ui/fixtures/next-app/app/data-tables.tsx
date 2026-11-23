@@ -1,7 +1,9 @@
 "use client"
 
 import { DataTable, DataTableRowLink } from "@underpin/ui/data-table"
+import { createDataTableSearch } from "@underpin/ui/data-table-search"
 import { createDataTableColumnHelper, type DataTableState } from "@underpin/ui/data-table-state"
+import { PagedDataTable } from "@underpin/ui/paged-data-table"
 import { TableCell, TableIdentityCell, TableNumberCell } from "@underpin/ui/table"
 import { useState } from "react"
 
@@ -20,6 +22,18 @@ const SITES: Site[] = [
 const EVENTS: Site[] = [
   { id: "event_1", name: "Infinite data table marker", visitors: 3, plan: "Free" },
 ]
+
+const QUERY_SITES: Site[] = [
+  { id: "site_3", name: "Query table marker", visitors: 12, plan: "Pro" },
+]
+
+// The params a Next.js app keeps with nuqs, which clears a param on `null`.
+const SITE_TABLE_SEARCH = createDataTableSearch({ perPage: 25, clearValue: null })
+
+const SITE_VIEWS = [
+  { value: "all", label: "View marker" },
+  { value: "paid", label: "Paid" },
+] as const
 
 const helper = createDataTableColumnHelper<Site>()
 
@@ -53,6 +67,7 @@ function loadMore() {}
 // A client component across the server boundary: one `DataTable` in each footer mode.
 export function DataTables() {
   const [state, setState] = useState<DataTableState>({ page: 1, perPage: 25 })
+  const [search, setSearch] = useState<Record<string, unknown>>({})
 
   return (
     <>
@@ -81,6 +96,23 @@ export function DataTables() {
           onLoadMore: loadMore,
         }}
         onStateChange={() => {}}
+      />
+      <PagedDataTable
+        aria-label="Queried sites"
+        columns={COLUMNS}
+        getRowId={getSiteId}
+        table={SITE_TABLE_SEARCH}
+        search={search}
+        query={{
+          data: { items: QUERY_SITES, total: 1 },
+          error: null,
+          isPending: false,
+          isPlaceholderData: false,
+          refetch: () => {},
+        }}
+        views={{ param: "plan", label: "Site views", options: SITE_VIEWS, counts: { all: 1 } }}
+        empty={{ icon: null, title: "No sites yet" }}
+        onSearchChange={next => setSearch(previous => ({ ...previous, ...next }))}
       />
     </>
   )
