@@ -1,5 +1,19 @@
 # @underpin/ui
 
+## 2.12.0
+
+### Minor Changes
+
+- `Page width="narrow"` centers itself in the content column, so a settings or form page no longer needs `mx-auto` beside it. A narrow page meant to sit against the left edge takes `className="mx-0"`.
+- `@underpin/ui/sortable-data-table` ships `SortableDataTable`, a `DataTable` whose rows the reader drags into their own order. It keeps the table's head, columns and row links, takes `noun`, `activator` (`box` picks up the whole row, `handle` only the grip), `disabled` and `onMove`, and draws the lifted copy as a one-row table of the same columns while the row's own box waits as a blank slot. `DataTableDragHandle` places the grip in a column's cell, above the row link. In a `box` table it shows on hover and focus. `DataTable` takes `skeletonRows`, the number of skeleton rows on a first load (5 by default).
+- `@underpin/ui/table-columns` ships five grid tracks for a column's `width`:
+
+  - `figureColumn(floor)` sizes a figure, a date or a short state: at least `floor` wide and as wide as its widest cell past that, so it never wraps or truncates.
+  - `labelColumn(cap)` sizes a short label: as wide as its longest value up to `cap` (12rem by default), where it truncates, so the name column gets the room it leaves.
+  - `shareColumn(share)` sizes a figure in a wide table: as wide as its widest cell plus `share` parts of the spare width (1 by default), so the columns spread out instead of packing against the table's end.
+  - `labelShareColumn(floor, share)` sizes a short label in a wide table: `floor` wide plus `share` parts of the spare width, truncating past that. It ignores its content, so the column holds still when data replaces the skeleton rows.
+  - `nameColumn(share)` sizes the name column beside `shareColumn` ones: `share` parts of the spare width (3 by default), so the name stays the widest column without taking all of it.
+
 ## 2.11.0
 
 ### Minor Changes
