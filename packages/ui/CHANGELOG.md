@@ -1,5 +1,11 @@
 # @underpin/ui
 
+## 2.10.0
+
+### Minor Changes
+
+- `AuthCardSkeleton` takes `mark={false}` to leave out the 40px circle over the title, for a card that loads with no mark or icon, so the content stays put when it loads.
+
 ## 2.9.0
 
 ### Minor Changes
