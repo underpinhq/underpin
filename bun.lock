@@ -190,7 +190,7 @@
     },
     "packages/utils": {
       "name": "@underpin/utils",
-      "version": "3.5.0",
+      "version": "3.6.0",
       "dependencies": {
         "@sindresorhus/slugify": "^3.0.1",
       },

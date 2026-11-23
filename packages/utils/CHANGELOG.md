@@ -1,5 +1,11 @@
 # @underpin/utils
 
+## 3.6.0
+
+### Minor Changes
+
+- Add `formatDisplayUrl`, which turns a URL into the short form a reader expects: `https://www.example.com/ai/?utm_source=x&ref=y` becomes `example.com/ai?ref=y`. It drops the protocol, a leading `www.`, every `utm_*` param, common ad click ids such as `fbclid` and `gclid`, and a trailing slash. Other query params and the hash stay. Input that is not a full URL, such as `example.com/a/`, is cleaned the same way. ([548c698](https://github.com/underpinhq/underpin/commit/548c698becdb684e5a8a5e94378ad47cd28a130a))
+
 ## 3.5.0
 
 ### Minor Changes
