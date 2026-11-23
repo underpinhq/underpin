@@ -328,6 +328,10 @@ describe("DataTable", () => {
     await view.rerenderWith({ data: [] })
     expect(getRows()).toHaveLength(5)
     for (const row of getRows()) expect(row.getAttribute("aria-hidden")).toBe("true")
+
+    // A table that knows how many rows are coming draws that many.
+    await view.rerenderWith({ data: [], skeletonRows: 2 })
+    expect(getRows()).toHaveLength(2)
   })
 
   test("shows its message in place of the rows once nothing matches", async () => {

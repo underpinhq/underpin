@@ -84,6 +84,10 @@
       "types": "./src/lib/data-table-state.ts",
       "default": "./src/lib/data-table-state.ts"
     },
+    "./table-columns": {
+      "types": "./src/lib/table-columns.ts",
+      "default": "./src/lib/table-columns.ts"
+    },
     "./data-table-search": {
       "types": "./src/lib/data-table-search.ts",
       "default": "./src/lib/data-table-search.ts"

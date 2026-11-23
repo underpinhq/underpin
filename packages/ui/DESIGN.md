@@ -341,7 +341,13 @@ description naming its code part.
   `createDataTableColumnHelper` from `@underpin/ui/data-table-state`: each column's `meta` holds
   its `align`, `width`, `priority` and `sortable` (`true` sorts ascending first, `"descending"`
   descending first), and its `cell` returns one of the cell parts, which reads the align and
-  priority from the meta. The state (page, page size, sort, search, filters) is controlled: the
+  priority from the meta. `@underpin/ui/table-columns` sizes a column to its content:
+  `figureColumn(floor)` for a figure, a date or a short state, which never wraps, and
+  `labelColumn(cap)` for a short label, which truncates past the cap and leaves the rest of
+  its room to the name column but changes width as the rows load. In a wide table whose figures
+  should spread out, they take `shareColumn()`, short labels `labelShareColumn(floor)`, and the
+  name column `nameColumn()`, which split the spare width 1 to 3. The state (page, page size,
+  sort, search, filters) is controlled: the
   package never reads the URL, and each app keeps it in its router's search params.
   `changeDataTableState` applies the paging rules (a new sort, search, filter or page size goes
   back to page 1), and the table moves a page past the end to the last page, with
@@ -354,6 +360,13 @@ description naming its code part.
   (Shift selects a range, a function disables rows), `bulkActions` fills the bar and
   `isRowInactive` fades archived records. With a `storageKey`, the column picker the toolbar
   receives remembers its choice in `localStorage`. Every label is a prop with an English default.
+- **Rows in the reader's order.** `SortableDataTable` from `@underpin/ui/sortable-data-table` is a
+  `DataTable` whose rows drag into a new order, with the same head, columns and row links. The
+  name cell places the grip with `DataTableDragHandle`: in the cell's left gutter for a `box`
+  table, where the pointer picks up the whole row and the grip shows on hover for the keyboard,
+  or before the leading mark for a `handle` table, where only the grip picks a row up. The
+  lifted copy is a one-row table of the same columns. It lives apart from `DataTable` so a table
+  that never sorts never loads the drag library.
 - **State in the URL.** `@underpin/ui/data-table-search` keeps a table's state in search params
   with no router. One `createDataTableSearch` call per table takes the param names (`keys`, which
   may not repeat), the page sizes (`perPageOptions`), the default `perPage` and `sort`,

@@ -29,6 +29,7 @@ import {
   useRef,
   useState,
 } from "react"
+import { DataTableRowWrapperContext } from "../lib/data-table-row"
 import {
   changeDataTableState,
   clampPage,
@@ -66,8 +67,7 @@ import {
 /** The id of the checkbox column a table with selection opens with. */
 const SELECT_COLUMN_ID = "select"
 
-/** Skeleton rows on a first load, and at the end of the list while the next batch loads. */
-const FIRST_LOAD_ROWS = 5
+/** Skeleton rows at the end of the list while the next batch loads. */
 const MORE_ROWS = 3
 
 /** The words of a `DataTable`, each a prop with an English default. */
@@ -171,6 +171,11 @@ export interface DataTableProps<TData extends RowData> extends Pick<
    * them and dims them until the new ones land.
    */
   loading?: boolean
+  /**
+   * Skeleton rows on a first load, 5 by default. A table whose row count is known before the
+   * rows arrive passes it, so the page holds still when they land.
+   */
+  skeletonRows?: number
   /** Stands in for the rows when there are none: a `TableMessage` (empty, filtered, error). */
   message?: ReactNode
   /** The row's link. A row with one opens from anywhere on it, through `DataTableRowLink`. */
@@ -344,6 +349,7 @@ function DataTableCell<TData extends RowData>({ cell }: CellProps<TData>) {
 
 interface DataTableRowProps<TData extends RowData> {
   row: Row<DataTableFeatures, TData>
+  label: string
   size: TableRowProps["size"]
   inactive?: boolean
   href?: string
@@ -352,20 +358,37 @@ interface DataTableRowProps<TData extends RowData> {
 
 function DataTableRow<TData extends RowData>({
   row,
+  label,
   size,
   inactive,
   href,
   render,
 }: DataTableRowProps<TData>) {
   const link = useMemo(() => ({ href, render }), [href, render])
+  const Wrapper = use(DataTableRowWrapperContext)
 
-  return (
-    <RowLinkContext value={link}>
-      <TableRow size={size} selected={row.getIsSelected()} inactive={inactive}>
+  function drawRow(props?: Partial<TableRowProps>) {
+    return (
+      <TableRow {...props} size={size} selected={row.getIsSelected()} inactive={inactive}>
         {row.getVisibleCells().map(cell => (
           <DataTableCell key={cell.id} cell={cell} />
         ))}
       </TableRow>
+    )
+  }
+
+  return (
+    <RowLinkContext value={link}>
+      {Wrapper ? (
+        // The wrapper is a component declared once at its module's top level and handed down
+        // through context, so it keeps its identity, and its rows their state, between renders.
+        // oxlint-disable-next-line react/static-components
+        <Wrapper rowId={row.id} label={label}>
+          {drawRow}
+        </Wrapper>
+      ) : (
+        drawRow()
+      )}
     </RowLinkContext>
   )
 }
@@ -389,6 +412,7 @@ export function DataTable<TData extends RowData>({
   onStateChange: onStateChangeProp,
   pagination,
   loading = false,
+  skeletonRows = 5,
   message,
   getRowHref,
   renderRowLink,
@@ -610,7 +634,7 @@ export function DataTable<TData extends RowData>({
         </TableHeader>
         <TableBody className={cn("transition-opacity", dimmed && "opacity-50")}>
           {firstLoad
-            ? Array.from({ length: FIRST_LOAD_ROWS }, (_, index) => (
+            ? Array.from({ length: skeletonRows }, (_, index) => (
                 <TableSkeletonRow key={index} size={size} index={index} />
               ))
             : rows.length === 0
@@ -619,6 +643,7 @@ export function DataTable<TData extends RowData>({
                   <DataTableRow
                     key={row.id}
                     row={row}
+                    label={getRowLabel?.(row.original) ?? row.id}
                     size={size}
                     inactive={isRowInactive?.(row.original)}
                     href={getRowHref?.(row.original)}

@@ -7,14 +7,14 @@ const pageVariants = variants({
 
   variants: {
     width: {
-      // Single-column forms and settings. Left off, the page runs full width: dashboards,
-      // lists, detail pages.
-      narrow: "max-w-3xl",
+      // Single-column forms and settings, centred in the content column. Left off, the page
+      // runs full width: dashboards, lists, detail pages.
+      narrow: "mx-auto max-w-3xl",
     },
   },
 })
 
-type PageProps = ComponentProps<"div"> & VariantProps<typeof pageVariants>
+interface PageProps extends ComponentProps<"div">, VariantProps<typeof pageVariants> {}
 
 /**
  * The root of a workspace route: owns the vertical rhythm between the page header and its
