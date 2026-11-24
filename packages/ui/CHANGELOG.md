@@ -1,5 +1,11 @@
 # @underpin/ui
 
+## 2.14.0
+
+### Minor Changes
+
+- Breaking: `SortableDataTable` no longer takes `activator`. Every sortable table now works one way: the pointer picks up the whole row after it moves 6px, a finger picks it up from the grip after 2px of movement or after a 250ms press anywhere else, a tap or click on the grip opens the row like the rest of it, and the arrow keys on the grip move the row one place. The grip always shows, quieter at rest than under the pointer and on focus, in a gutter the table leaves for it: the first column starts 28px in, the head's included, so names still line up with their column. Remove `activator` from each `SortableDataTable`, and remove any position or size classes from `DataTableDragHandle`, which now places itself in the gutter. `SortableList` takes a new `activator="both"` for the same behaviour in a list of your own.
+
 ## 2.13.0
 
 ### Minor Changes
