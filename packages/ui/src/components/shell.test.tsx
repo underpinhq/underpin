@@ -373,3 +373,60 @@ describe("AreaRailSkeleton", () => {
     await view.unmount()
   })
 })
+
+describe("AreaRailGroup", () => {
+  test("leaves its hairline out with `separator={false}`", async () => {
+    const { AreaRailGroup } = await import("./shell")
+    const view = await render(
+      <AreaRailGroup aria-label="Workspace settings" separator={false}>
+        <a href="#members">Members</a>
+      </AreaRailGroup>,
+    )
+
+    const group = document.querySelector('nav[aria-label="Workspace settings"]')
+    expect(group?.previousElementSibling).toBeNull()
+    expect(document.querySelectorAll("hr")).toHaveLength(0)
+
+    await view.unmount()
+  })
+})
+
+describe("RailSearch", () => {
+  test("is a button that shows its label and shortcut and opens on a click", async () => {
+    const { RailSearch } = await import("./shell")
+    let opened = 0
+    const view = await render(
+      <RailSearch label="Search or jump to…" keys="mod+k" onClick={() => opened++} />,
+    )
+
+    const button = document.querySelector("button")
+    expect(button?.getAttribute("type")).toBe("button")
+    expect(button?.getAttribute("aria-haspopup")).toBe("dialog")
+    expect(button?.textContent).toContain("Search or jump to…")
+    expect(
+      button?.querySelector('[data-shortcut="mod+k"]')?.closest("[aria-hidden]"),
+    ).not.toBeNull()
+    expect(button?.getAttribute("aria-keyshortcuts")).toMatch(/^(Meta|Control)\+K$/)
+    expect(document.querySelector("hr")).toBeNull()
+
+    await click(button as HTMLElement)
+    expect(opened).toBe(1)
+
+    await view.unmount()
+  })
+
+  test("draws a hairline above with `separator`", async () => {
+    const { RailSearch } = await import("./shell")
+    const view = await render(<RailSearch label="Search" separator className="custom" />)
+
+    const button = document.querySelector("button")
+    expect(button?.closest("div")?.previousElementSibling?.tagName).toBe("HR")
+    expect(button?.className).toContain("custom")
+    expect(button?.className).toContain("bg-fill")
+    expect(button?.className).not.toContain("bg-field")
+    expect(document.querySelector("kbd")).toBeNull()
+    expect(button?.hasAttribute("aria-keyshortcuts")).toBe(false)
+
+    await view.unmount()
+  })
+})

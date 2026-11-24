@@ -3,6 +3,7 @@ import { registerDom } from "../test-dom"
 import {
   findShortcutRow,
   formatKeys,
+  formatAriaKeys,
   formatSpokenKeys,
   getShortcutList,
   isMacUserAgent,
@@ -246,5 +247,17 @@ describe("findShortcutRow", () => {
 
     expect(findShortcutRow(menu, press("b", rows[0]))).toBeUndefined()
     expect(findShortcutRow(menu, press("x", rows[0]))).toBeUndefined()
+  })
+})
+
+describe("formatAriaKeys", () => {
+  test("writes `mod` as Meta on a mac and Control elsewhere", () => {
+    expect(formatAriaKeys("mod+k", true)).toBe("Meta+K")
+    expect(formatAriaKeys("mod+k", false)).toBe("Control+K")
+  })
+
+  test("names keys the way the attribute spells them", () => {
+    expect(formatAriaKeys("shift+esc", false)).toBe("Shift+Escape")
+    expect(formatAriaKeys("alt+left", true)).toBe("Alt+ArrowLeft")
   })
 })

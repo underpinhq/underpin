@@ -295,6 +295,26 @@ const KEY_LABELS: Record<string, string> = {
   space: "Space",
 }
 
+/** Each modifier as `aria-keyshortcuts` names it: [on a mac, elsewhere]. */
+const ARIA_MODIFIERS: Record<string, [string, string]> = {
+  ctrl: ["Control", "Control"],
+  alt: ["Alt", "Alt"],
+  shift: ["Shift", "Shift"],
+  mod: ["Meta", "Control"],
+}
+
+/** The keys whose `aria-keyshortcuts` name is not the key itself, capitalised. */
+const ARIA_KEYS: Record<string, string> = {
+  left: "ArrowLeft",
+  right: "ArrowRight",
+  up: "ArrowUp",
+  down: "ArrowDown",
+  esc: "Escape",
+  escape: "Escape",
+  enter: "Enter",
+  space: "Space",
+}
+
 /** The keys whose badge is a glyph a screen reader would name by its Unicode name. */
 const SPOKEN_KEYS: Record<string, string> = {
   left: "Left arrow",
@@ -385,4 +405,18 @@ export function formatSpokenKeys(keys: string, mac = readIsMac()) {
     ...modifiers.map(modifier => SPOKEN_MODIFIERS[modifier]?.[mac ? 0 : 1] ?? modifier),
     SPOKEN_KEYS[key] ?? formatKeyName(key),
   ].join(" ")
+}
+
+/**
+ * A key string as the `aria-keyshortcuts` attribute writes it ("Meta+K"), so assistive
+ * technology announces the shortcut without it joining the control's name. Platform injectable
+ * for tests.
+ */
+export function formatAriaKeys(keys: string, mac = readIsMac()) {
+  const { modifiers, key } = parseKeys(keys)
+
+  return [
+    ...modifiers.map(modifier => ARIA_MODIFIERS[modifier]?.[mac ? 0 : 1] ?? modifier),
+    ARIA_KEYS[key] ?? formatKeyName(key),
+  ].join("+")
 }

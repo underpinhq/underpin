@@ -11,12 +11,15 @@ import {
   useEffect,
   useState,
 } from "react"
-import { ChevronLeftIcon, SidebarIcon } from "../lib/icons"
+import { ChevronLeftIcon, SearchIcon, SidebarIcon } from "../lib/icons"
 import { FROM_LG, useMediaQuery } from "../lib/media"
+import { formatAriaKeys, useIsMac } from "../lib/shortcuts"
 import { cn } from "../lib/variants"
 import { Button, buttonVariants } from "./button"
 import { SideDrawer } from "./dialog"
+import { inputVariants } from "./input"
 import { Nav, NavLabel, NavSeparator } from "./nav"
+import { ShortcutKeys } from "./shortcut-keys"
 import { Skeleton } from "./skeleton"
 
 /**
@@ -67,6 +70,67 @@ export function RailTop({ className, ...props }: ComponentProps<typeof Nav>) {
 export function RailBottom({ className, ...props }: ComponentProps<typeof Nav>) {
   return (
     <Nav className={cn("pb-[calc(0.75rem+env(safe-area-inset-bottom))]", className)} {...props} />
+  )
+}
+
+export interface RailSearchProps extends Omit<ComponentProps<"button">, "children"> {
+  /** The words the field shows, such as "Search or jump to…". */
+  label: string
+
+  /** The shortcut that opens the same search, such as "mod+k", shown at the field's end. */
+  keys?: string
+
+  /** Whether a hairline parts the row from the one above. */
+  separator?: boolean
+}
+
+/**
+ * The rail's search row, under `RailTop`: a button drawn as a borderless search field that opens
+ * the product's command menu from `onClick`. It is never a field to type in, so it holds no value.
+ * Pass it inside the Shell's `top`, which the phone drawer leaves out: the phone bar puts search
+ * in its `header`.
+ */
+export function RailSearch({
+  label,
+  keys,
+  separator = false,
+  className,
+  ...props
+}: RailSearchProps) {
+  const mac = useIsMac()
+
+  return (
+    <>
+      {separator && <NavSeparator />}
+
+      <div className="px-3 py-2">
+        {/* The field's transparent border is 1px of each side's inset, so the icon lands 9px in
+            and the key cap 7px from the end. */}
+        <button
+          type="button"
+          aria-haspopup="dialog"
+          aria-keyshortcuts={keys && formatAriaKeys(keys, mac)}
+          className={inputVariants({
+            interactive: true,
+            bordered: false,
+            className: cn(
+              "flex items-center gap-2.25 bg-fill pr-1.5 pl-2 text-left text-ink-muted hover:not-disabled:not-aria-disabled:bg-fill-strong",
+              className,
+            ),
+          })}
+          {...props}
+        >
+          <SearchIcon className="size-3.5 shrink-0" />
+          <span className="min-w-0 flex-1 truncate">{label}</span>
+          {/* The name is the label alone; `aria-keyshortcuts` announces the shortcut. */}
+          {keys && (
+            <span aria-hidden className="contents">
+              <ShortcutKeys keys={keys} variant="soft" />
+            </span>
+          )}
+        </button>
+      </div>
+    </>
   )
 }
 
@@ -133,16 +197,23 @@ export interface AreaRailGroupProps extends ComponentProps<"nav"> {
 
   /** The heading over the rows. An area with one group needs none. */
   label?: ReactNode
+
+  /**
+   * Whether a hairline parts the group from the back row or the group above. Leave it on
+   * unless the row above draws its own edge.
+   */
+  separator?: boolean
 }
 
 /**
  * One group of an area's `NavLink` rows, after a hairline that parts it from the back row or
- * the group above. Each group draws its own line, so a group left out leaves no double line.
+ * the group above. Each group draws its own line, so a group left out leaves no double line;
+ * `separator={false}` drops it.
  */
-export function AreaRailGroup({ label, children, ...props }: AreaRailGroupProps) {
+export function AreaRailGroup({ label, separator = true, children, ...props }: AreaRailGroupProps) {
   return (
     <>
-      <NavSeparator />
+      {separator && <NavSeparator />}
 
       <Nav {...props}>
         {label && <NavLabel>{label}</NavLabel>}

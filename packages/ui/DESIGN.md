@@ -172,8 +172,9 @@ a table where the frame has prose), and only as part of design work on that scre
 
 - **Shell**: every signed-in screen sits in `Shell` from `@underpin/ui/shell`. On a large screen
   the 224px rail runs down the left edge: the switcher on top (`RailTop` holding a `NavButton`),
-  then groups of `NavLink` rows, each group a `Nav` with an optional `NavLabel` and a
-  `NavSeparator` between groups, then the user menu's trigger at the bottom (`RailBottom`). A
+  optionally a `RailSearch` under it (a button drawn as a borderless search field with its
+  shortcut, which opens the command menu), then groups of `NavLink` rows, each group a `Nav`
+  with an optional `NavLabel` and a `NavSeparator` between groups, then the user menu's trigger at the bottom (`RailBottom`). A
   notice sits between the rows and the user row, and only the rows scroll. Under `lg` the rail
   becomes a 48px bar: the drawer toggle, the switcher, then one optional reading at the end (a
   live count). The toggle opens the rows and the bottom row in a drawer under the bar, and any
@@ -185,7 +186,8 @@ a table where the frame has prose), and only as part of design work on that scre
   row: the area's name after a 24px muted chip holding a chevron, the whole row a link (`back`,
   with the router's link as the element, `activeOptions={{ exact: true }}` on a TanStack link
   to `/` so the row never reads as the current page) whose accessible name says where it goes:
-  "Leave" and the area's name, or a `backLabel` that contains the name. Each `AreaRailGroup` follows a hairline, with a `NavLabel` heading when the area
+  "Leave" and the area's name, or a `backLabel` that contains the name. Each `AreaRailGroup`
+  follows a hairline (`separator={false}` drops it), with a `NavLabel` heading when the area
   has more than one. The phone drawer shows the same rail. While the groups load,
   `AreaRailSkeleton` draws the back row's outline and each group's heading over its rows'
   outlines. Entering or leaving the area steps the rail on a wide screen: the old body drifts
