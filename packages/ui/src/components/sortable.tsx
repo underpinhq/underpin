@@ -10,6 +10,7 @@ import {
   KeyboardSensor,
   type Modifier,
   MouseSensor,
+  type PointerSensorProps,
   TouchSensor,
   type UniqueIdentifier,
   useSensor,
@@ -29,6 +30,7 @@ import {
   createContext,
   type KeyboardEvent,
   type MouseEvent,
+  type MouseEventHandler,
   type ReactNode,
   type TouchEvent,
   use,
@@ -42,16 +44,18 @@ import { cn } from "../lib/variants"
  * still reaches its links, and the grip for the keyboard, which then drags it with the arrow
  * keys. `handle`: only the grip, for an item full of fields the pointer has to keep. The arrow
  * keys on that grip move the item one place at once, with no pick-up: a dialog stops arrow keys
- * at its popup, short of the document a keyboard drag listens on.
+ * at its popup, short of the document a keyboard drag listens on. `both`: the whole item as in
+ * `box`, except that a finger on the grip lifts it after 2px of movement rather than a long
+ * press, and the arrow keys on the grip move it one place, as in `handle`.
  */
-export type SortableActivator = "box" | "handle"
+export type SortableActivator = "box" | "handle" | "both"
 
 /** What a `SortableList` tells the items inside it. */
 interface SortableListSettings {
   activator: SortableActivator
   /** Whether a lifted copy follows the pointer while the item stays behind as its slot. */
   lifted: boolean
-  /** Moves the item one place up (-1) or down (1), for the arrow keys on a `handle` grip. */
+  /** Moves the item one place up (-1) or down (1), for the arrow keys on a stepping grip. */
   step: (id: string, offset: -1 | 1) => void
 }
 
@@ -69,6 +73,26 @@ const DROP_ANIMATION: DropAnimation = {
   duration: 250,
   easing: "cubic-bezier(0.2, 0, 0, 1)",
   sideEffects: defaultDropAnimationSideEffects({ styles: { active: { opacity: "0" } } }),
+}
+
+/** Marks the grip, so a finger that starts on it skips the long press the whole item waits for. */
+const GRIP_ATTRIBUTE = "data-sortable-grip"
+
+function isOnGrip(event: Event) {
+  return event.target instanceof Element && event.target.closest(`[${GRIP_ATTRIBUTE}]`) !== null
+}
+
+/**
+ * The finger for a `both` list. On the grip it lifts the item after 2px of movement, so a tap
+ * stays a tap; anywhere else it waits for the long press, so a swipe still scrolls.
+ */
+class GripTouchSensor extends TouchSensor {
+  constructor(props: PointerSensorProps) {
+    const options = isOnGrip(props.event)
+      ? { ...props.options, activationConstraint: { distance: 2 } }
+      : props.options
+    super({ ...props, options })
+  }
 }
 
 /**
@@ -116,9 +140,10 @@ interface SortableListProps {
 /**
  * Lets the reader drag a list into their own order. A pointer that picks up a whole item does so
  * once it moves 6px, so a click still reaches the item's links, and a finger after a 250ms
- * press, so a swipe still scrolls. A grip picks its item up at once, since it does nothing else.
- * The keyboard always starts from the grip: it drags a whole item, and moves a grip's item one
- * place per arrow key. Each item reads its part through `useSortableItem`.
+ * press, so a swipe still scrolls. A grip in a `handle` list, and a finger on the grip in a
+ * `both` list, picks its item up after 2px, since the grip does nothing else.
+ * The keyboard always starts from the grip: in a `box` list it drags the item, in the others it
+ * moves the item one place per arrow key. Each item reads its part through `useSortableItem`.
  */
 export function SortableList({
   ids,
@@ -134,14 +159,16 @@ export function SortableList({
   const [activeId, setActiveId] = useState<string>()
   // What the screen reader hears after an arrow key moves a grip's item.
   const [stepped, setStepped] = useState("")
-  const box = activator === "box"
+  // Whether the whole item takes a pointer, and whether the arrow keys drag it rather than step.
+  const box = activator !== "handle"
+  const keyboardDrags = activator === "box"
   const keyboard = useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   const sensors = useSensors(
     useSensor(MouseSensor, { activationConstraint: { distance: box ? 6 : 2 } }),
-    useSensor(TouchSensor, {
+    useSensor(activator === "both" ? GripTouchSensor : TouchSensor, {
       activationConstraint: box ? { delay: 250, tolerance: 5 } : { distance: 2 },
     }),
-    box ? keyboard : undefined,
+    keyboardDrags ? keyboard : undefined,
   )
 
   function at(id: UniqueIdentifier) {
@@ -157,7 +184,7 @@ export function SortableList({
     onDragCancel: () => "Move cancelled.",
   }
 
-  const instructions = box
+  const instructions = keyboardDrags
     ? [
         `To pick up a ${noun}, press Space or Enter.`,
         "Use the arrow keys to move it, then press Space or Enter to drop it, or Escape to cancel.",
@@ -207,7 +234,7 @@ export function SortableList({
         </SortableContext>
       </SortableListContext>
 
-      {!box && (
+      {!keyboardDrags && (
         <span aria-live="assertive" className="sr-only">
           {stepped}
         </span>
@@ -251,12 +278,13 @@ export function useSortableItem(id: string) {
     box: {
       ref: setNodeRef,
       style: { transform: CSS.Translate.toString(transform), transition },
-      ...(activator === "box" && pointer),
+      ...(activator !== "handle" && pointer),
     },
     handle: {
       ref: setActivatorNodeRef,
       ...attributes,
       ...(activator === "handle" && pointer),
+      [GRIP_ATTRIBUTE]: "",
       onKeyDown: (event: KeyboardEvent) => {
         if (activator === "box") {
           listeners?.onKeyDown?.(event)
@@ -279,14 +307,18 @@ interface DragHandleProps {
   /** The item's part from `useSortableItem`; without one the grip draws but does nothing. */
   sortable: SortableItem | undefined
   className?: string
+  /** A press that ends without a drag, by pointer, finger or key. */
+  onClick?: MouseEventHandler<HTMLButtonElement>
+  /** A press with another button than the main one, such as a middle click. */
+  onAuxClick?: MouseEventHandler<HTMLButtonElement>
 }
 
 /**
- * The grip that moves its item, by the keyboard always and by the pointer in a list whose
- * `activator` is `handle`. A phone sheet leaves a drag that starts on it alone, rather than
- * taking it as a swipe to close.
+ * The grip that moves its item, by the keyboard always, by the pointer in a list whose
+ * `activator` is `handle`, and by the finger in a `handle` or `both` list. A phone sheet leaves
+ * a drag that starts on it alone, rather than taking it as a swipe to close.
  */
-export function DragHandle({ label, sortable, className }: DragHandleProps) {
+export function DragHandle({ label, sortable, className, onClick, onAuxClick }: DragHandleProps) {
   return (
     <button
       type="button"
@@ -297,6 +329,8 @@ export function DragHandle({ label, sortable, className }: DragHandleProps) {
         "flex shrink-0 cursor-grab touch-none items-center justify-center rounded-sm text-ink-muted active:cursor-grabbing",
         className,
       )}
+      onClick={onClick}
+      onAuxClick={onAuxClick}
     >
       <GripIcon className="size-4" />
     </button>

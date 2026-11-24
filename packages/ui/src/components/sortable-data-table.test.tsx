@@ -1,6 +1,5 @@
 import { afterEach, describe, expect, test } from "bun:test"
 import { click, listAxeViolations, press, registerDom, render } from "../test-dom"
-import type { SortableActivator } from "./sortable"
 import type { SortableDataTableProps } from "./sortable-data-table"
 
 registerDom()
@@ -52,7 +51,7 @@ async function getColumns() {
 
 type ExampleProps = Partial<Omit<SortableDataTableProps<Field>, "columns">>
 
-async function renderExample(activator: SortableActivator, props: ExampleProps = {}) {
+async function renderExample(props: ExampleProps = {}) {
   const { SortableDataTable } = await import("./sortable-data-table")
   const columns = await getColumns()
   const moves: [number, number][] = []
@@ -66,7 +65,6 @@ async function renderExample(activator: SortableActivator, props: ExampleProps =
       getRowLabel={field => field.name}
       getRowHref={field => `/fields/${field.id}`}
       noun="field"
-      activator={activator}
       onMove={(from, to) => moves.push([from, to])}
       {...props}
     />,
@@ -76,14 +74,73 @@ async function renderExample(activator: SortableActivator, props: ExampleProps =
   return { moves }
 }
 
-/** Presses a key with its `code` too, which the keyboard drag reads: Space, the arrows, Escape. */
-async function pressCode(element: Element, code: string) {
+/** Lets time pass inside `act`, so timers that fire in it settle. */
+async function wait(ms: number) {
   const { act } = await import("react")
-  const key = code === "Space" ? " " : code
+  await act(() => new Promise(resolve => setTimeout(resolve, ms)))
+}
+
+/** Dispatches an event inside `act`, then waits, so timers and renders it starts settle. */
+async function dispatch(target: EventTarget, event: Event, wait = 20) {
+  const { act } = await import("react")
 
   await act(async () => {
-    element.dispatchEvent(new KeyboardEvent("keydown", { key, code, bubbles: true }))
-    await new Promise(resolve => setTimeout(resolve, 20))
+    target.dispatchEvent(event)
+    await new Promise(resolve => setTimeout(resolve, wait))
+  })
+}
+
+/** A finger on an element at a point, starting (`touchstart`) or moving (`touchmove`). */
+function createTouchEvent(type: string, element: Element, clientY: number) {
+  const point = new Touch({ identifier: 0, target: element, clientX: 10, clientY })
+  return new TouchEvent(type, { bubbles: true, cancelable: true, touches: [point] })
+}
+
+function createMouseEvent(type: string, clientY: number) {
+  return new MouseEvent(type, { bubbles: true, cancelable: true, button: 0, clientX: 10, clientY })
+}
+
+/** Counts the clicks that reach the row link of a row. */
+function countClicks(name: string) {
+  const link = [...document.querySelectorAll<HTMLElement>("[data-row-link]")].find(
+    element => element.textContent === name,
+  )
+  if (!link) throw new Error(`No row link for ${name}`)
+  const clicks = { count: 0, events: [] as MouseEvent[] }
+  link.addEventListener("click", event => {
+    event.preventDefault()
+    clicks.count += 1
+    clicks.events.push(event)
+  })
+  return { link, clicks }
+}
+
+function findCopy(name: string) {
+  return document.querySelector(`[role="list"][aria-label="${name}"]`)
+}
+
+/**
+ * The cells the table's gutter classes reach, found with the selectors Tailwind writes for them:
+ * `[&_<selector>]:pl-7` becomes `<table> <selector>`.
+ */
+function getGutterCells(table: Element): (Element | null)[] {
+  const selectors = [...table.classList]
+    .map(name => /^\[&_(.+)\]:pl-7$/.exec(name)?.[1])
+    .filter(selector => selector !== undefined)
+    .map(selector => `:scope ${selector.replaceAll("_", " ")}`)
+  return selectors.flatMap(selector => [...table.querySelectorAll(selector)])
+}
+
+/**
+ * Presses Escape on the document, where a drag in progress listens for it. The drag blocks clicks
+ * on the document until 50ms after it ends, so the wait keeps it from eating the next test's.
+ */
+async function cancelDrag() {
+  const { act } = await import("react")
+
+  await act(async () => {
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", code: "Escape" }))
+    await new Promise(resolve => setTimeout(resolve, 60))
   })
 }
 
@@ -93,7 +150,7 @@ function findHandle(name: string) {
 
 describe("SortableDataTable", () => {
   test("keeps the table's head, columns and row links", async () => {
-    await renderExample("handle")
+    await renderExample()
 
     const heads = [...document.querySelectorAll('[role="columnheader"]')]
     expect(heads.map(head => head.textContent)).toEqual(["Field", "Key"])
@@ -102,8 +159,8 @@ describe("SortableDataTable", () => {
     expect(await listAxeViolations()).toEqual([])
   })
 
-  test("a handle grip moves its row one place per arrow key", async () => {
-    const { moves } = await renderExample("handle")
+  test("a grip moves its row one place per arrow key", async () => {
+    const { moves } = await renderExample()
 
     const handle = findHandle("Logo")
     if (!handle) throw new Error("No grip for Logo")
@@ -115,41 +172,108 @@ describe("SortableDataTable", () => {
     )
   })
 
-  test("a box row lifts as a one-row copy of the same columns and leaves a blank slot", async () => {
-    const { moves } = await renderExample("box")
+  test("a finger that moves 2px on the grip lifts the row as a one-row copy, leaving a slot", async () => {
+    const { moves } = await renderExample()
 
     const handle = findHandle("Logo")
     if (!handle) throw new Error("No grip for Logo")
-    handle.focus()
-    await pressCode(handle, "Space")
+    await dispatch(handle, createTouchEvent("touchstart", handle, 10))
+    expect(findCopy("Logo")).toBeNull()
+    await dispatch(handle, createTouchEvent("touchmove", handle, 14))
 
-    const copy = document.querySelector('[role="list"][aria-label="Logo"]')
+    const copy = findCopy("Logo")
     expect(copy?.querySelectorAll('[role="listitem"]')).toHaveLength(1)
     expect(copy?.querySelectorAll('[role="listitem"] > *')).toHaveLength(2)
     expect(copy?.querySelector('[role="columnheader"]')).toBeNull()
     expect(handle.closest('[role="row"]')?.className).toContain("*:invisible")
 
-    await pressCode(handle, "Escape")
+    await cancelDrag()
 
-    expect(document.querySelector('[role="list"][aria-label="Logo"]')).toBeNull()
+    expect(findCopy("Logo")).toBeNull()
     expect(moves).toEqual([])
   })
 
+  test("a tap or a click on the grip opens the row, and a key press on it does not", async () => {
+    await renderExample()
+    const { clicks } = countClicks("Logo")
+
+    const handle = findHandle("Logo")
+    if (!handle) throw new Error("No grip for Logo")
+    await dispatch(handle, createTouchEvent("touchstart", handle, 10))
+    await dispatch(handle, new TouchEvent("touchend", { bubbles: true, cancelable: true }))
+    await dispatch(handle, new MouseEvent("click", { bubbles: true, detail: 1 }))
+
+    expect(findCopy("Logo")).toBeNull()
+    expect(clicks.count).toBe(1)
+
+    await dispatch(handle, new MouseEvent("click", { bubbles: true, detail: 0 }))
+    expect(clicks.count).toBe(1)
+  })
+
+  test("a click on the grip reaches the row link with its button and modifier keys", async () => {
+    await renderExample()
+    const { clicks } = countClicks("Logo")
+
+    const handle = findHandle("Logo")
+    if (!handle) throw new Error("No grip for Logo")
+    await dispatch(handle, new MouseEvent("click", { bubbles: true, detail: 1, metaKey: true }))
+    await dispatch(handle, new MouseEvent("auxclick", { bubbles: true, detail: 1, button: 1 }))
+    await dispatch(handle, new MouseEvent("auxclick", { bubbles: true, detail: 1, button: 2 }))
+
+    expect(clicks.events.map(event => [event.button, event.metaKey])).toEqual([
+      [0, true],
+      [1, false],
+    ])
+  })
+
+  test("a finger elsewhere on the row lifts it after a 250ms press, not before", async () => {
+    await renderExample()
+
+    const { link } = countClicks("Logo")
+    await dispatch(link, createTouchEvent("touchstart", link, 10), 100)
+    expect(findCopy("Logo")).toBeNull()
+
+    await wait(250)
+    expect(findCopy("Logo")).not.toBeNull()
+    await cancelDrag()
+  })
+
+  test("a pointer that moves under 6px clicks the row, and one that moves further drags it", async () => {
+    await renderExample()
+    const { link, clicks } = countClicks("Logo")
+
+    await dispatch(link, createMouseEvent("mousedown", 10))
+    await dispatch(document, createMouseEvent("mousemove", 14))
+    expect(findCopy("Logo")).toBeNull()
+    await dispatch(document, createMouseEvent("mouseup", 14))
+    await dispatch(link, new MouseEvent("click", { bubbles: true, detail: 1 }), 60)
+    expect(clicks.count).toBe(1)
+
+    await dispatch(link, createMouseEvent("mousedown", 10))
+    await dispatch(document, createMouseEvent("mousemove", 20))
+    expect(findCopy("Logo")).not.toBeNull()
+    await dispatch(document, new KeyboardEvent("keydown", { key: "Escape", code: "Escape" }), 0)
+    await dispatch(link, new MouseEvent("click", { bubbles: true, detail: 1 }), 60)
+
+    // The click that ends a drag opens nothing.
+    expect(clicks.count).toBe(1)
+  })
+
   test("names the lifted copy by the row's id when its label is blank", async () => {
-    await renderExample("box", { getRowLabel: field => (field.id === "field_2" ? "" : field.name) })
+    await renderExample({ getRowLabel: field => (field.id === "field_2" ? "" : field.name) })
 
     const handle = findHandle("")
     if (!handle) throw new Error("No grip for the blank row")
-    handle.focus()
-    await pressCode(handle, "Space")
+    await dispatch(handle, createTouchEvent("touchstart", handle, 10))
+    await dispatch(handle, createTouchEvent("touchmove", handle, 14))
 
-    expect(document.querySelector('[role="list"][aria-label="field_2"]')).not.toBeNull()
-    await pressCode(handle, "Escape")
+    expect(findCopy("field_2")).not.toBeNull()
+    await cancelDrag()
   })
 
   test("still sorts by a column's head", async () => {
     const sorts: unknown[] = []
-    await renderExample("handle", {
+    await renderExample({
       state: {},
       onStateChange: state => sorts.push(state.sort),
     })
@@ -164,24 +288,50 @@ describe("SortableDataTable", () => {
   })
 
   test("names each grip through the labels", async () => {
-    await renderExample("handle", { labels: { reorder: name => `Move ${name}` } })
+    await renderExample({ labels: { reorder: name => `Move ${name}` } })
 
     expect(document.querySelector('button[aria-label="Move Headline"]')).not.toBeNull()
   })
 
-  test("a box table's grip waits for hover or focus, and goes while disabled", async () => {
-    await renderExample("box")
+  test("puts a grip in every row, and its gutter in the head and the rows", async () => {
+    await renderExample()
 
-    expect(findHandle("Headline")?.className).toContain("opacity-0")
-
-    for (const view of mounted.splice(0)) await view.unmount()
-    await renderExample("box", { disabled: true })
-
-    expect(findHandle("Headline")).toBeNull()
+    const table = document.querySelector('[role="table"]')
+    if (!table) throw new Error("No table")
+    const rows = [...table.querySelectorAll('tbody [role="row"]')]
+    expect(rows.map(row => row.querySelector('button[aria-label^="Reorder"]') !== null)).toEqual([
+      true,
+      true,
+      true,
+    ])
+    expect(getGutterCells(table)).toEqual([
+      table.querySelector('[role="columnheader"]'),
+      ...rows.map(row => row.firstElementChild),
+    ])
   })
 
-  test("a handle table keeps its grips while disabled, and they move nothing", async () => {
-    const { moves } = await renderExample("handle", { disabled: true })
+  test("leaves the gutter out of a message across the whole table", async () => {
+    const { TableMessage } = await import("./table")
+    await renderExample({ data: [], message: <TableMessage kind="filtered" title="No fields" /> })
+
+    const table = document.querySelector('[role="table"]')
+    if (!table) throw new Error("No table")
+    expect(getGutterCells(table)).toEqual([table.querySelector('[role="columnheader"]')])
+  })
+
+  test("a finger on a disabled grip lifts nothing", async () => {
+    await renderExample({ disabled: true })
+
+    const handle = findHandle("Logo")
+    if (!handle) throw new Error("No grip for Logo")
+    await dispatch(handle, createTouchEvent("touchstart", handle, 10))
+    await dispatch(handle, createTouchEvent("touchmove", handle, 40), 300)
+
+    expect(findCopy("Logo")).toBeNull()
+  })
+
+  test("keeps its grips while disabled, and they move nothing", async () => {
+    const { moves } = await renderExample({ disabled: true })
 
     const handle = findHandle("Logo")
     if (!handle) throw new Error("No grip for Logo")

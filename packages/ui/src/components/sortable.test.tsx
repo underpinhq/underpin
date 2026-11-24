@@ -92,6 +92,21 @@ describe("SortableList", () => {
     await view.unmount()
   })
 
+  test("a list the whole item and the grip both lift steps by arrow key", async () => {
+    const moves: [number, number][] = []
+    const view = await renderList("both", moves)
+
+    await press(findHandle("Docs"), "ArrowDown")
+
+    expect(moves).toEqual([[1, 2]])
+    expect(document.querySelector('[aria-live="assertive"]')?.textContent).toBe(
+      "Moved Docs to position 3 of 3.",
+    )
+    expect(findHandle("Docs")?.hasAttribute("data-sortable-grip")).toBe(true)
+
+    await view.unmount()
+  })
+
   test("a disabled list moves nothing from the keyboard and marks its grips", async () => {
     const moves: [number, number][] = []
     const view = await renderList("handle", moves, true)
