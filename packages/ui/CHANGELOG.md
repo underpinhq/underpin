@@ -1,5 +1,11 @@
 # @underpin/ui
 
+## 2.13.0
+
+### Minor Changes
+
+- `RailSearch` adds a search row to the rail: a button drawn as a search field, with a label, an optional shortcut (`keys`) and an optional hairline above (`separator`), that opens your command menu from `onClick`. `AreaRailGroup` takes `separator={false}` to leave out the hairline above the group.
+
 ## 2.12.0
 
 ### Minor Changes
