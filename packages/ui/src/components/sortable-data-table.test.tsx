@@ -132,6 +132,16 @@ function getGutterCells(table: Element): (Element | null)[] {
 }
 
 /**
+ * The state a row must be in for its grip to hide, read from the class Tailwind compiles to
+ * `.group/row:<state> <grip>` on a screen that hovers. Undefined when the grip never hides.
+ */
+function findHiddenRowState(handle: Element) {
+  return [...handle.classList]
+    .map(name => /^\[@media\(hover:hover\)\]:group-\[(.+)\]\/row:opacity-0$/.exec(name)?.[1])
+    .find(state => state !== undefined)
+}
+
+/**
  * Presses Escape on the document, where a drag in progress listens for it. The drag blocks clicks
  * on the document until 50ms after it ends, so the wait keeps it from eating the next test's.
  */
@@ -339,6 +349,54 @@ describe("SortableDataTable", () => {
 
     expect(moves).toEqual([])
     expect(handle.getAttribute("aria-disabled")).toBe("true")
+  })
+
+  test("shows every grip by default", async () => {
+    await renderExample()
+
+    const handles = document.querySelectorAll('button[aria-label^="Reorder"]')
+    expect([...handles].map(findHiddenRowState)).toEqual([undefined, undefined, undefined])
+  })
+
+  test("on hover, hides a grip while its row is neither hovered nor focused", async () => {
+    await renderExample({ handleVisibility: "hover" })
+
+    const handle = findHandle("Logo")
+    if (!handle) throw new Error("No grip for Logo")
+    const row = handle.closest('[role="row"]')
+    if (!row) throw new Error("No row for Logo")
+    // happy-dom matches no `:hover` or `:focus-within`, so the test reads the selector itself.
+    expect(row.classList.contains("group/row")).toBe(true)
+    expect(findHiddenRowState(handle)).toBe(":not(:hover,:focus-within)")
+  })
+
+  test("on hover, keeps every grip in the tab order and named", async () => {
+    const { moves } = await renderExample({ handleVisibility: "hover" })
+
+    const handles = [...document.querySelectorAll<HTMLElement>('button[aria-label^="Reorder"]')]
+    expect(handles.map(handle => handle.tabIndex)).toEqual([0, 0, 0])
+    expect(handles.some(handle => handle.closest('[aria-hidden="true"]'))).toBe(false)
+    expect(await listAxeViolations()).toEqual([])
+
+    const handle = findHandle("Logo")
+    if (!handle) throw new Error("No grip for Logo")
+    await press(handle, "ArrowDown")
+    expect(moves).toEqual([[1, 2]])
+  })
+
+  test("on hover, keeps the lifted copy's grip in view", async () => {
+    await renderExample({ handleVisibility: "hover" })
+
+    const handle = findHandle("Logo")
+    if (!handle) throw new Error("No grip for Logo")
+    await dispatch(handle, createTouchEvent("touchstart", handle, 10))
+    await dispatch(handle, createTouchEvent("touchmove", handle, 14))
+
+    const copyHandle = findCopy("Logo")?.querySelector('button[aria-label="Reorder Logo"]')
+    if (!copyHandle) throw new Error("No grip on the lifted copy")
+    expect(findHiddenRowState(copyHandle)).toBeUndefined()
+
+    await cancelDrag()
   })
 })
 

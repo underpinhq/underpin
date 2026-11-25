@@ -13,9 +13,13 @@ export interface SortableDataTableLabels extends DataTableLabels {
   reorder: (name: string) => string
 }
 
+/** When the grips show: on every row, or only on the row under the pointer or holding focus. */
+type HandleVisibility = "always" | "hover"
+
 /** What every row of a `SortableDataTable` shares. */
 interface SortableSettings {
   disabled: boolean
+  handleVisibility: HandleVisibility
   reorder: SortableDataTableLabels["reorder"]
 }
 
@@ -25,6 +29,7 @@ function formatReorderLabel(name: string) {
 
 const SortableSettingsContext = createContext<SortableSettings>({
   disabled: false,
+  handleVisibility: "always",
   reorder: formatReorderLabel,
 })
 
@@ -57,6 +62,15 @@ const GRIP_HIT_AREA_CLASSES = [
   "after:absolute after:-inset-y-2.5 after:-left-1 after:w-7",
   "pointer-coarse:after:-inset-y-3 pointer-coarse:after:w-11",
 ].join(" ")
+
+/**
+ * Hides a grip while its row is neither under the pointer nor holding focus, on a screen with a
+ * pointer that hovers. A touch screen has no hover, so its grips stay quiet but visible: there
+ * the grip is what the finger presses. Opacity alone hides it, so it stays in the tab order and
+ * the screen reader still names it, and the gutter keeps its width.
+ */
+const HIDDEN_AT_REST_CLASSES =
+  "[@media(hover:hover)]:group-[:not(:hover,:focus-within)]/row:opacity-0"
 
 /** A row's own box while it is dragged: a blank slot of its height, where the lifted copy lands. */
 const DRAGGED_ROW_CLASSES = "bg-fill hover:bg-fill *:invisible"
@@ -120,11 +134,12 @@ function openRowInNewTab(event: ReactMouseEvent<HTMLButtonElement>) {
 /**
  * The grip that moves its row, placed by a column's cell, usually in the name cell's `leading`.
  * It takes itself out of the cell into the row's gutter, above the row link, which covers the
- * row and would otherwise take the press. It always shows, on touch screens too, so every row
- * says the list can be reordered: quiet at rest, full under the pointer and on focus, and on the
- * lifted copy. A press that does not drag opens the row. While the table is disabled it stays
- * quiet, drops its hit area and lets a finger scroll the page. Outside a `SortableDataTable` it
- * draws nothing.
+ * row and would otherwise take the press. By default it shows on every row, on touch screens
+ * too, so every row says the list can be reordered: quiet at rest, full under the pointer and on
+ * focus, and on the lifted copy. With `handleVisibility="hover"`, a screen that hovers shows it
+ * only on the row under the pointer or holding focus. A press that does not drag opens the row.
+ * While the table is disabled it stays quiet, drops its hit area and lets a finger scroll the
+ * page. Outside a `SortableDataTable` it draws nothing.
  */
 export function DataTableDragHandle({ className }: DataTableDragHandleProps) {
   const handle = use(DragHandleContext)
@@ -138,12 +153,15 @@ export function DataTableDragHandle({ className }: DataTableDragHandleProps) {
         "absolute top-1/2 left-1 z-10 size-5 -translate-y-1/2 transition-opacity duration-150 ease-out",
         !handle.sortable
           ? "opacity-100"
-          : handle.disabled
-            ? "cursor-default touch-auto opacity-45 active:cursor-default"
-            : [
-                GRIP_HIT_AREA_CLASSES,
-                "opacity-45 group-hover/row:opacity-100 focus-visible:opacity-100",
-              ],
+          : [
+              handle.disabled
+                ? "cursor-default touch-auto opacity-45 active:cursor-default"
+                : [
+                    GRIP_HIT_AREA_CLASSES,
+                    "opacity-45 group-hover/row:opacity-100 focus-visible:opacity-100",
+                  ],
+              handle.handleVisibility === "hover" && HIDDEN_AT_REST_CLASSES,
+            ],
         className,
       )}
       onClick={handle.sortable ? openRow : undefined}
@@ -160,6 +178,12 @@ export interface SortableDataTableProps<TData extends RowData> extends Omit<
   noun: string
   /** No row moves while true: a save in flight, a search that leaves gaps in the order. */
   disabled?: boolean
+  /**
+   * When the grips show. `always` draws one on every row. `hover` shows a row's grip only while
+   * the pointer is over the row or something in it has focus, for a list where reordering is
+   * rare; a touch screen, which cannot hover, still shows every grip.
+   */
+  handleVisibility?: HandleVisibility
   /** Moves the row at `from` to `to`, both indexes in `data`. */
   onMove: (from: number, to: number) => void
   labels?: Partial<SortableDataTableLabels>
@@ -178,6 +202,7 @@ export interface SortableDataTableProps<TData extends RowData> extends Omit<
 export function SortableDataTable<TData extends RowData>({
   noun,
   disabled = false,
+  handleVisibility = "always",
   onMove,
   labels,
   className,
@@ -187,6 +212,7 @@ export function SortableDataTable<TData extends RowData>({
   const { data, getRowId, getRowLabel } = props
   const settings: SortableSettings = {
     disabled,
+    handleVisibility,
     reorder: labels?.reorder ?? formatReorderLabel,
   }
 
