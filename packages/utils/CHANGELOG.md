@@ -1,5 +1,11 @@
 # @underpin/utils
 
+## 3.7.0
+
+### Minor Changes
+
+- Add `escapeXml`, which escapes `&`, `<`, `>`, `"` and `'` as XML entities. Use it for any text you write into XML or HTML by hand, such as the URLs in a sitemap. ([8b7dd19](https://github.com/underpinhq/underpin/commit/8b7dd19732bac597a0d1d7d4b3e3007b027dbb24))
+
 ## 3.6.0
 
 ### Minor Changes
