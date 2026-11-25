@@ -101,7 +101,7 @@
     },
     "packages/email": {
       "name": "@underpin/email",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "dependencies": {
         "@aws-sdk/client-sesv2": "^3.1177.0",
       },
