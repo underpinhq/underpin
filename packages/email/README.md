@@ -21,7 +21,7 @@ const result = await email.send({
 })
 ```
 
-Reuse the transport across sends. The transport uses the AWS SDK's default credential chain unless you pass `credentials`.
+Reuse the transport across sends. The transport uses the Amazon Web Services (AWS) SDK's default credential chain unless you pass `credentials`.
 
 Each recipient field (`to`, `cc`, `bcc`, and `replyTo`) accepts one address or an array. Supply `html`, `text`, or both. Use `headers` for custom headers with string values.
 
