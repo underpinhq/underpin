@@ -12,6 +12,7 @@ The source of the `@underpin` npm packages, shared by the products built on them
 | [`@underpin/analytics-react`](packages/analytics-react) | React icons for analytics values: browser logos, OS marks, device glyphs, flags and favicons |
 | [`@underpin/fetch`](packages/fetch) | A server-side download that refuses private addresses, redirects included |
 | [`@underpin/favicon`](packages/favicon) | A server-side favicon lookup: the site's own icon, Google's service or logo.dev |
+| [`@underpin/email`](packages/email) | A server-side Amazon SES transport for rendered email |
 | [`@underpin/config`](packages/config) | Shared lint, format and commit configs, and the `underpin` release CLI and workflows, renamed from `@dirstack/kodeks` ([npm](https://www.npmjs.com/package/@underpin/config)) |
 
 Upgrading from `@dirstack/ui` 1.x: [`packages/ui/MIGRATION.md`](packages/ui/MIGRATION.md).
