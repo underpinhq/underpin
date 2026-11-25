@@ -1,5 +1,11 @@
 # @underpin/ui
 
+## 2.15.0
+
+### Minor Changes
+
+- `SortableDataTable` takes a new `handleVisibility` prop. The default, `"always"`, keeps a grip on every row. With `"hover"`, a row's grip shows only while the pointer is over the row or something in it has keyboard focus, and the gutter keeps its 28px so the columns stay put. A touch screen, which cannot hover, still shows every grip. The hidden grip stays in the tab order and keeps its name for screen readers.
+
 ## 2.14.0
 
 ### Minor Changes
