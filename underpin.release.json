@@ -1,4 +1,13 @@
 {
-  "packages": ["ui", "utils", "config", "fetch", "favicon", "analytics", "analytics-react"],
+  "packages": [
+    "ui",
+    "utils",
+    "config",
+    "fetch",
+    "favicon",
+    "analytics",
+    "analytics-react",
+    "email"
+  ],
   "releaseTag": "package"
 }
