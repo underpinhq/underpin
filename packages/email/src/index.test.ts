@@ -1,6 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it } from "bun:test"
 import { createSesTransport, type EmailMessage } from "~/index"
 
+interface CapturedRequest {
+  path: string
+  body: unknown
+  authorization: string | null
+}
+
 const ENDPOINT_ENV = "AWS_ENDPOINT_URL_SESV2"
 
 const message: EmailMessage = {
@@ -13,7 +19,7 @@ const message: EmailMessage = {
 describe("createSesTransport", () => {
   let server: Bun.Server<undefined>
   let previousEndpoint: string | undefined
-  let requests: { path: string; body: unknown; authorization: string | null }[]
+  let requests: CapturedRequest[]
   let respond: () => Response
 
   function createTransport(configurationSet?: string) {

@@ -58,8 +58,8 @@ export interface SesTransport {
   send(message: EmailMessage): Promise<EmailSendResult>
 }
 
-// Keep raw provider messages and unrecognized error names out of the result.
-const SES_ERROR_CODES = new Set([
+// Only known SES error codes are safe to expose in the result.
+const SAFE_SES_ERROR_CODES = new Set([
   "AccessDenied",
   "AccessDeniedException",
   "AccountSuspendedException",
@@ -92,7 +92,7 @@ function toContent(data: string | undefined): { Charset: string; Data: string } 
   return data === undefined ? undefined : { Charset: "UTF-8", Data: data }
 }
 
-function getSendFailure(error: unknown): EmailSendResult {
+function classifySendFailure(error: unknown): EmailSendResult {
   if (error instanceof Error && error.name === "CredentialsProviderError") {
     return {
       status: "rejected",
@@ -100,19 +100,19 @@ function getSendFailure(error: unknown): EmailSendResult {
     }
   }
 
-  const serviceError = error instanceof SESv2ServiceException ? error : undefined
-  const httpStatusCode = serviceError?.$metadata.httpStatusCode
+  const { name, $metadata } = error instanceof SESv2ServiceException ? error : {}
+  const httpStatusCode = $metadata?.httpStatusCode
 
   if (
-    serviceError &&
+    name !== undefined &&
     httpStatusCode !== undefined &&
     httpStatusCode >= 400 &&
     httpStatusCode < 500 &&
     httpStatusCode !== 408 &&
-    serviceError.name !== "RequestTimeout" &&
-    serviceError.name !== "RequestTimeoutException"
+    name !== "RequestTimeout" &&
+    name !== "RequestTimeoutException"
   ) {
-    const throttled = httpStatusCode === 429 || serviceError.name === "ThrottlingException"
+    const throttled = httpStatusCode === 429 || name === "ThrottlingException"
 
     return {
       status: "rejected",
@@ -120,7 +120,7 @@ function getSendFailure(error: unknown): EmailSendResult {
         code: throttled ? "throttled" : "ses-rejected",
         message: throttled ? "Amazon SES throttled the send." : "Amazon SES refused the email.",
         httpStatusCode,
-        ...(SES_ERROR_CODES.has(serviceError.name) && { providerCode: serviceError.name }),
+        ...(SAFE_SES_ERROR_CODES.has(name) && { providerCode: name }),
       },
     }
   }
@@ -196,7 +196,7 @@ export function createSesTransport({
         },
       }
     } catch (error) {
-      return getSendFailure(error)
+      return classifySendFailure(error)
     }
   }
 
