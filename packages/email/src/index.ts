@@ -6,6 +6,15 @@ import {
   type SESv2ClientConfig,
 } from "@aws-sdk/client-sesv2"
 
+export { createMailer, isSent } from "./mailer.js"
+export type {
+  Mailer,
+  MailerLogger,
+  MailerMessage,
+  MailerOptions,
+  MailerSendResult,
+} from "./mailer.js"
+
 export interface SesTransportOptions {
   region: string
   configurationSet?: string
@@ -54,9 +63,11 @@ export type EmailSendResult =
   | { status: "accepted"; messageId: string }
   | { status: "rejected" | "ambiguous"; error: EmailSendError }
 
-export interface SesTransport {
+export interface EmailTransport {
   send(message: EmailMessage): Promise<EmailSendResult>
 }
+
+export type SesTransport = EmailTransport
 
 // Only known SES error codes are safe to expose in the result.
 const SAFE_SES_ERROR_CODES = new Set([

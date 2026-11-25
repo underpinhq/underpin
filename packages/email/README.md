@@ -35,4 +35,37 @@ The transport makes one send attempt. A resend after an ambiguous result can del
 
 Errors expose a transport error code and, when available, an HTTP status and a recognized provider code. These fields are safe to log.
 
+## Mailer
+
+`createMailer` wraps a transport with the sender defaults an app sends with, so each send only names the recipient and content.
+
+```ts
+import { createMailer, createSesTransport, isSent } from "@underpin/email"
+
+const mailer = createMailer({
+  transport: createSesTransport({ region: "eu-central-1" }),
+  from: "Example <mail@example.com>",
+  replyTo: "support@example.com",
+  dryRun: process.env.NODE_ENV !== "production",
+})
+
+const result = await mailer.send({
+  to: "reader@example.net",
+  subject: "Your sign-in link",
+  html: "<p>Sign in to Example.</p>",
+})
+
+if (!isSent(result)) {
+  throw new Error("We couldn't send your sign-in link.")
+}
+```
+
+A message can set its own `replyTo` to override the default. The mailer makes one send attempt through the transport.
+
+With `dryRun` set, the mailer logs the full message with `logger.info` and resolves `{ status: "skipped" }` without calling the transport. Use it outside production.
+
+When a send is not accepted, the mailer logs the status, error code, HTTP status and provider code with `logger.warn`. Recipients and bodies stay out of that log. The logger defaults to `console`, and any object with `info` and `warn` methods works.
+
+`isSent` returns `true` for an accepted send or a dry run. Use it in flows that must fail when the email does not go out, such as sign-in links.
+
 [SES SendEmail API](https://docs.aws.amazon.com/ses/latest/APIReference-V2/API_SendEmail.html)
