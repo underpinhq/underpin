@@ -1,5 +1,13 @@
 import { describe, expect, it, test } from "vitest"
-import { getInitials, joinAsSentence, lcFirst, slugify, truncate, ucFirst } from "./string"
+import {
+  escapeXml,
+  getInitials,
+  joinAsSentence,
+  lcFirst,
+  slugify,
+  truncate,
+  ucFirst,
+} from "./string"
 
 describe("ucFirst", () => {
   test("should uppercase the first character of a string", () => {
@@ -270,5 +278,24 @@ describe("joinAsSentence", () => {
   it("accepts a readonly array", () => {
     const fruits = ["apple", "banana"] as const
     expect(joinAsSentence(fruits)).toBe("apple and banana")
+  })
+})
+
+describe("escapeXml", () => {
+  test("should escape the five XML special characters", () => {
+    expect(escapeXml(`https://example.com/tom&jerry's<x>"y"`)).toBe(
+      "https://example.com/tom&amp;jerry&apos;s&lt;x&gt;&quot;y&quot;",
+    )
+  })
+
+  test("should escape an ampersand that already starts an entity", () => {
+    expect(escapeXml("&amp;")).toBe("&amp;amp;")
+  })
+
+  test("should leave text without special characters unchanged", () => {
+    expect(escapeXml("https://example.com/categories/dev-tools")).toBe(
+      "https://example.com/categories/dev-tools",
+    )
+    expect(escapeXml("")).toBe("")
   })
 })

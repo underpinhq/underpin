@@ -185,3 +185,25 @@ export function joinAsSentence(
 
   return formatter.format([...items.slice(0, shown), formatRest(hidden)])
 }
+
+const xmlEntities: Record<string, string> = {
+  "&": "&amp;",
+  "<": "&lt;",
+  ">": "&gt;",
+  '"': "&quot;",
+  "'": "&apos;",
+}
+
+/**
+ * Escapes the five XML special characters (`&`, `<`, `>`, `"` and `'`) as entities.
+ * The result is safe in an XML or HTML text node and in a quoted attribute value,
+ * and a parser reads it back as the original string.
+ * @param value - The raw text, such as a URL in a sitemap.
+ * @returns The text with each special character replaced by its entity.
+ * @example
+ * escapeXml("https://example.com/?a=1&b=2") // "https://example.com/?a=1&amp;b=2"
+ * escapeXml(`<a title="Tom's">`) // "&lt;a title=&quot;Tom&apos;s&quot;&gt;"
+ */
+export function escapeXml(value: string): string {
+  return value.replace(/[&<>"']/g, character => xmlEntities[character] ?? character)
+}
