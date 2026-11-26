@@ -6,17 +6,21 @@ import {
   type SESv2ClientConfig,
 } from "@aws-sdk/client-sesv2"
 
-export { createMailer, isSent } from "./mailer.js"
+export { createMailer, EmailSendError, isSent } from "./mailer.js"
 export type {
   Mailer,
+  MailerFailedResult,
   MailerLogger,
   MailerMessage,
   MailerOptions,
   MailerSendResult,
+  MailerSentResult,
 } from "./mailer.js"
 
 export interface SesTransportOptions {
-  region: string
+  // When omitted, the AWS SDK resolves the region from `AWS_REGION` or the shared AWS config.
+  region?: string
+  // When omitted, SES applies the sending identity's default configuration set, if it has one.
   configurationSet?: string
   credentials?: SESv2ClientConfig["credentials"]
 }
@@ -46,9 +50,10 @@ interface TextEmail extends EmailEnvelope {
 
 export type EmailMessage = HtmlEmail | TextEmail
 
-export interface EmailSendError {
+export interface EmailErrorDetails {
   code:
     | "invalid-message"
+    | "region-unavailable"
     | "credentials-unavailable"
     | "throttled"
     | "ses-rejected"
@@ -61,7 +66,7 @@ export interface EmailSendError {
 
 export type EmailSendResult =
   | { status: "accepted"; messageId: string }
-  | { status: "rejected" | "ambiguous"; error: EmailSendError }
+  | { status: "rejected" | "ambiguous"; error: EmailErrorDetails }
 
 export interface EmailTransport {
   send(message: EmailMessage): Promise<EmailSendResult>
@@ -150,7 +155,7 @@ export function createSesTransport({
   region,
   configurationSet,
   credentials,
-}: SesTransportOptions): SesTransport {
+}: SesTransportOptions = {}): SesTransport {
   const client = new SESv2Client({ region, credentials, maxAttempts: 1 })
 
   async function send(message: EmailMessage): Promise<EmailSendResult> {
@@ -190,6 +195,18 @@ export function createSesTransport({
           Headers: toNameValueList(message.headers),
         },
       },
+    }
+
+    try {
+      await client.config.region()
+    } catch {
+      return {
+        status: "rejected",
+        error: {
+          code: "region-unavailable",
+          message: "AWS region could not be resolved. Set AWS_REGION or pass a region.",
+        },
+      }
     }
 
     try {
