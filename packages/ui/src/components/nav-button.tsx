@@ -12,7 +12,10 @@ type NavButtonShellProps = Omit<ComponentProps<typeof Button>, "variant"> & {
   variant?: NavButtonVariant
 }
 
-/** The nav trigger's frame around any leading mark, for a row that is not an entity. */
+/**
+ * The nav trigger's frame around any leading mark, for a row that is not an entity. The mark
+ * sits in a 20px box, so a 16px glyph and a 20px avatar start the label on the same line.
+ */
 function NavButtonShell({
   leading,
   variant = "flat",
@@ -25,7 +28,9 @@ function NavButtonShell({
       size={variant === "outline" ? "md" : "sm"}
       variant="ghost"
       bordered={variant === "outline"}
-      prefix={leading}
+      prefix={
+        <span className="flex size-5 items-center justify-center [&>svg]:size-4">{leading}</span>
+      }
       className={navItem({ variant, className })}
       {...props}
     >
