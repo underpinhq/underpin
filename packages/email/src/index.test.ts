@@ -8,6 +8,16 @@ interface CapturedRequest {
 }
 
 const ENDPOINT_ENV = "AWS_ENDPOINT_URL_SESV2"
+const credentials = { accessKeyId: "test-access-key", secretAccessKey: "test-secret-key" }
+
+// Each test controls where the SDK can find a region, so the machine's AWS setup never leaks in.
+const REGION_ENV: Record<string, string | undefined> = {
+  AWS_REGION: undefined,
+  AWS_DEFAULT_REGION: undefined,
+  AWS_PROFILE: undefined,
+  AWS_CONFIG_FILE: "/nonexistent/aws-config",
+  AWS_SHARED_CREDENTIALS_FILE: "/nonexistent/aws-credentials",
+}
 
 const message: EmailMessage = {
   from: "Reports <reports@example.com>",
@@ -16,9 +26,19 @@ const message: EmailMessage = {
   text: "Your report is ready.",
 }
 
+function setEnv(values: Record<string, string | undefined>) {
+  for (const [name, value] of Object.entries(values)) {
+    if (value === undefined) {
+      delete process.env[name]
+    } else {
+      process.env[name] = value
+    }
+  }
+}
+
 describe("createSesTransport", () => {
   let server: Bun.Server<undefined>
-  let previousEndpoint: string | undefined
+  let previousEnv: Record<string, string | undefined>
   let requests: CapturedRequest[]
   let respond: () => Response
 
@@ -26,7 +46,7 @@ describe("createSesTransport", () => {
     return createSesTransport({
       region: "eu-central-1",
       configurationSet,
-      credentials: { accessKeyId: "test-access-key", secretAccessKey: "test-secret-key" },
+      credentials,
     })
   }
 
@@ -45,16 +65,13 @@ describe("createSesTransport", () => {
         return respond()
       },
     })
-    previousEndpoint = process.env[ENDPOINT_ENV]
-    process.env[ENDPOINT_ENV] = server.url.href
+    const testEnv = { ...REGION_ENV, [ENDPOINT_ENV]: server.url.href }
+    previousEnv = Object.fromEntries(Object.keys(testEnv).map(name => [name, process.env[name]]))
+    setEnv(testEnv)
   })
 
   afterEach(async () => {
-    if (previousEndpoint === undefined) {
-      delete process.env[ENDPOINT_ENV]
-    } else {
-      process.env[ENDPOINT_ENV] = previousEndpoint
-    }
+    setEnv(previousEnv)
     await server.stop(true)
   })
 
@@ -129,6 +146,30 @@ describe("createSesTransport", () => {
           },
         },
       })
+    })
+  })
+
+  describe("region resolution", () => {
+    it("resolves the region from AWS_REGION when none is passed", async () => {
+      process.env.AWS_REGION = "eu-west-1"
+
+      const result = await createSesTransport({ credentials }).send(message)
+
+      expect(result).toEqual({ status: "accepted", messageId: "ses-message-id" })
+      expect(requests[0]?.authorization).toContain("/eu-west-1/ses/aws4_request")
+    })
+
+    it("rejects before making a request when no region resolves", async () => {
+      const result = await createSesTransport({ credentials }).send(message)
+
+      expect(result).toEqual({
+        status: "rejected",
+        error: {
+          code: "region-unavailable",
+          message: "AWS region could not be resolved. Set AWS_REGION or pass a region.",
+        },
+      })
+      expect(requests).toHaveLength(0)
     })
   })
 

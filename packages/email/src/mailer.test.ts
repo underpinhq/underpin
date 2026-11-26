@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from "bun:test"
 import {
   createMailer,
   type EmailMessage,
+  EmailSendError,
   type EmailSendResult,
   type EmailTransport,
   isSent,
@@ -71,6 +72,13 @@ describe("createMailer", () => {
   })
 
   describe("sends", () => {
+    it("resolves the accepted result from trySend", async () => {
+      expect(await createTestMailer().trySend(message)).toEqual({
+        status: "accepted",
+        messageId: "ses-message-id",
+      })
+    })
+
     it("applies the default sender and reply-to address", async () => {
       expect(await createTestMailer().send(message)).toEqual({
         status: "accepted",
@@ -96,33 +104,87 @@ describe("createMailer", () => {
   })
 
   describe("failed sends", () => {
-    it.each([rejected, ambiguous])("returns a $status result unchanged", async failure => {
+    it.each([rejected, ambiguous])(
+      "throws an EmailSendError for a $status result",
+      async failure => {
+        result = failure
+
+        const error = await createTestMailer()
+          .send(message)
+          .catch((caught: unknown) => caught)
+
+        expect(error).toBeInstanceOf(EmailSendError)
+        expect(error).toMatchObject({
+          name: "EmailSendError",
+          status: failure.status,
+          result: failure,
+        })
+        expect(sent).toHaveLength(1)
+      },
+    )
+
+    it("exposes the safe error fields on the thrown error", async () => {
+      result = rejected
+
+      await expect(createTestMailer().send(message)).rejects.toMatchObject({
+        message: "Amazon SES refused the email.",
+        status: "rejected",
+        code: "ses-rejected",
+        httpStatusCode: 400,
+        providerCode: "MessageRejected",
+      })
+    })
+
+    it("keeps recipients and bodies out of the thrown error", async () => {
+      result = rejected
+
+      const error = await createTestMailer()
+        .send(message)
+        .catch((caught: unknown) => caught)
+
+      expect(JSON.stringify(error)).not.toContain("reader@example.net")
+      expect(JSON.stringify(error)).not.toContain("Sign in to Reports.")
+    })
+
+    it.each([rejected, ambiguous])("returns a $status result from trySend", async failure => {
       result = failure
 
-      expect(await createTestMailer().send(message)).toBe(failure)
+      expect(await createTestMailer().trySend(message)).toBe(failure)
       expect(sent).toHaveLength(1)
     })
 
-    it("logs only the safe error fields", async () => {
-      result = rejected
-      await createTestMailer().send(message)
+    it.each(["send", "trySend"] as const)(
+      "logs only the safe error fields from %s",
+      async method => {
+        result = rejected
+        await createTestMailer()
+          [method](message)
+          .catch(() => {})
 
-      expect(logs).toEqual([
-        {
-          level: "warn",
-          message: "Email send failed",
-          details: {
-            status: "rejected",
-            code: "ses-rejected",
-            httpStatusCode: 400,
-            providerCode: "MessageRejected",
+        expect(logs).toEqual([
+          {
+            level: "warn",
+            message: "Email send failed",
+            details: {
+              status: "rejected",
+              code: "ses-rejected",
+              httpStatusCode: 400,
+              providerCode: "MessageRejected",
+            },
           },
-        },
-      ])
-    })
+        ])
+      },
+    )
   })
 
   describe("dry runs", () => {
+    it("resolves from trySend without calling the transport", async () => {
+      expect(await createTestMailer({ dryRun: true }).trySend(message)).toEqual({
+        status: "skipped",
+      })
+      expect(sent).toEqual([])
+    })
+
     it("logs the payload and skips the transport", async () => {
       expect(await createTestMailer({ dryRun: true }).send(message)).toEqual({ status: "skipped" })
       expect(sent).toEqual([])
