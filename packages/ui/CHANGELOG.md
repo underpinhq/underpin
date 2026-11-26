@@ -1,5 +1,11 @@
 # @underpin/ui
 
+## 2.15.1
+
+### Patch Changes
+
+- Rail rows now line up with the Underpin UI Figma library. A `NavLink` draws its icon at 16px, 8px in from the row's outer edge, and its label 32px in, border included (it was a 20px box 9px in, with the label 37px in). `NavButton` and `NavButtonShell` start their 20px mark 6px in, so it sits centred on the same icon column, and put the label 32px in as well, in both the `flat` and `outline` variants. A `NavButtonShell` mark now sits in a 20px box, so a 16px icon and a 20px avatar start the label on the same line.
+
 ## 2.15.0
 
 ### Minor Changes
